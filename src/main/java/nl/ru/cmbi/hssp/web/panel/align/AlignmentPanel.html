@@ -21,8 +21,8 @@ function onScrollAlignment(alignment) {
 
 		<h2 wicket:id="showing"></h2>
 
-		<div style="height: 400px">
-			<table class="alignment_frame" cellpadding="0" cellspacing="0">
+		<div style="height: 400px;width:100%">
+			<table class="alignment_frame">
 				<tr>
 					<th></th>
 					<th>
@@ -55,6 +55,9 @@ function onScrollAlignment(alignment) {
 							</div>
 						</div>
 					</td>
+					<!-- 
+						The alignment needs some padding to fit in the scroll bars.
+					 -->
 					<td>					
 						<div id="alignment-contents" style="overflow:scroll;padding-right:15px;padding-bottom:15px" onscroll="onScrollAlignment(this);">
 

@@ -8,7 +8,6 @@ import java.util.Map;
 import nl.ru.cmbi.hssp.data.Alignment;
 import nl.ru.cmbi.hssp.data.ResidueInfo;
 import nl.ru.cmbi.hssp.web.Utils;
-import nl.ru.cmbi.hssp.web.panel.ScrollableTableRowPanel;
 
 import org.apache.wicket.AttributeModifier;
 import org.apache.wicket.Component;
@@ -36,20 +35,20 @@ public class EntropyTablePanel extends Panel {
 			final List<Integer> variabilityValues) {
 		super(id);
 		
-		final int cellWidth = 160;
-		
-		Component header = new ScrollableTableRowPanel("header",
-				Arrays.asList(new String[] {
+		add( new ListView<String>("header-cell",Arrays.asList(new String[] {
 						"Alignment Position",
 						"PDB Residue",
 						"Entropy",
 						"Variability",
 						"Weight"
-						}));
-		
-		header.add(new AttributeModifier("class","entropytable_header"));
-		
-		add(header);
+						}) ) {
+
+			@Override
+			protected void populateItem(ListItem<String> item) {
+				
+				item.add(new Label("header-cell-text",item.getModelObject()));
+			}
+		});
 		
 		add(new ListView("rows",Utils.listRange(0,alignmentPanel.getAlignment().countColumns())){
 
@@ -68,24 +67,29 @@ public class EntropyTablePanel extends Panel {
 					weightString = String.format("%.2f",residue.getWeight());
 				}
 				
-				List<String> cellContents = new ArrayList<String>();
+				final List<String> cellContents = new ArrayList<String>();
 				
 				cellContents.add(String.valueOf(index+1));
 				cellContents.add(alignmentPanel.getPDBRepresentation(index));
 				cellContents.add(String.format("%.2f",entropy));
 				cellContents.add(String.valueOf(variability));
 				cellContents.add(weightString);
-				
-				Component row = new ScrollableTableRowPanel("row",cellContents);
-				
-				item.add(row);
-				
-				row.add(new AttributeModifier("onclick",String.format("toggleColumn('%s');",
+						
+				item.add(new AttributeModifier("onclick",String.format("toggleColumn('%s');",
 						alignmentPanel.getPositionClassRepresentation(index))));
 				
-				row.add(new AttributeModifier("class",
-						"entropy_row " + alignmentPanel.getColumnClassRepresentation(index)));
-
+				item.add(new AttributeAppender("class",
+						new Model( alignmentPanel.getColumnClassRepresentation(index) )
+						," "));
+				
+				item.add(new ListView<String>("cells", cellContents){
+					
+					@Override
+					protected void populateItem(ListItem<String> item) {
+						
+						item.add(new Label("cell-text",item.getModelObject()));
+					}
+				});
 			}
 			
 		});
