@@ -1,0 +1,153 @@
+<html>
+<head>
+<title>The source code</title>
+<link href="../resources/prettify/prettify.css" type="text/css"
+	rel="stylesheet" />
+<script type="text/javascript" src="../resources/prettify/prettify.js"></script>
+</head>
+<body onload="prettyPrint();">
+	<pre class="prettyprint lang-js">/* $Id:$
+ * vim:sw=2:ts=8:sts=2:et:ft=javascript
+ * Released under the MIT license or Ext Open Source License by NCS, December 2008
+ */
+
+<div id="cls-Ext.ux.CsvFlot"></div>/**
+ * @class Ext.ux.CsvFlot
+ * @extends Ext.ux.Flot
+ * CSV �򥰥��ɽ������� Flot �Ǥ���<br>
+ *
+ * <li>data �� String �ξ��
+ *  CSV �Υѡ�������ʸ������Ȥߤʤ���CSV �Ȥ��ƥѡ�����Ԥ��ޤ�
+ *  �ѡ�����ϲ����� Array �����Ʊ�ͤ˰����ޤ�
+ * </li>
+ *
+ * <li>data �� Array �ξ��
+ *  CSV �Υѡ������ array ���Ȥߤʤ��ޤ���
+ *  [[0, 1, 2, 3], [4, 5, 6], [7, 8, 9],...]
+ * </li>
+ *
+ * <li>data �� Object �ξ��
+ * ���ꤪ��� CSV �ǡ�����ޤ४�֥������Ȥ��Ȥߤʤ���ޤ���
+ * �����Υ��Ф� this ���Ф���ͥ��Ū���Ѥ����ޤ���
+ *   <ul>
+ *   <li>header
+ *   
+				
+				<li>xColumn
+ *   
+				
+				<li>type
+ *   
+				
+				<li>sortType
+ *   
+				
+				<li>data
+ *   
+			
+			</ul>
+ * </li>
+ */
+Ext.ux.CsvFlot = Ext.extend(Ext.ux.Flot, {
+  <div id="cfg-Ext.ux.CsvFlot-data"></div>/**
+   * @cfg {String/Array/Object} data
+   * ���饹�������򻲾Ȥ��Ƥ���������
+   */
+  <div id="cfg-Ext.ux.CsvFlot-header"></div>/**
+   * @cfg {Bool/String/Array} header
+   * ����θ��Ȥʤ�إå��ԤǤ���
+   * <li>true �ξ�硢Ϳ����줿 data �� 1����(0) ���إå��ԤȤߤʤ���ޤ�</li>
+   * <li>String �ξ�� CSV �ԤȤ��Ʋ�ᤵ�졢�嵭 1 ���ܤ�Ʊ�������Ȥʤ�ޤ�</li>
+   * <li>Array �ξ��إå� array ��ľ�ܻ��ꤷ�ޤ�</li>
+   */
+  header: true,
+  <div id="cfg-Ext.ux.CsvFlot-xColumn"></div>/**
+   * @cfg {Number} xColumn x �������ꤹ�륫���
+   * header �Υ���̾���⤷���ϥ����Υ���ǥå����ǻ��ꤷ�ޤ�
+   */
+  xColumn: 0,
+
+	// private
+	initComponent: function() {
+		Ext.ux.CsvFlot.superclass.initComponent.call(this);
+	},
+
+  // private
+  setupData: function(data, series) {
+    var header   = this.header;
+    var xColumn  = this.xColumn;
+    var type     = this.type;
+    var sortType = this.sortType;
+    if (!data || typeof data.length == 'undefined') {
+      header   = data.header   || header;
+      xColumn  = data.xColumn  || xColumn;
+      type     = data.type     || type;
+      sortType = data.sortType || sortType;
+      data     = data.data;
+    }
+    if (typeof data == 'string') { data = Csv.parse(data); }
+    var i, len, j, dlen, slen, idx;
+
+    // ���󤬤ʤ����� CSV �ι�Ƭ��إå��Ԥ��Ȥ���
+    if (typeof header == 'boolean') {
+      if (header) {header = data.shift();}
+    } else if (typeof header == 'string') {
+      header = Csv.parse(header)[0];
+    }
+
+    // TODO Ext.ux.data.CsvReader ���뤳��
+    var store = new Ext.data.JsonStore({});
+    var store_data = [], fields = [];
+    for (i = 0, len = header.length; i < len; i++) {
+      fields.push({
+        name: header[i],
+        type: type,
+        sortType: sortType
+      });
+    }
+    for (i = 0, len = data.length; i < len; i++) {
+      var d = {};
+      for (j = 0, dlen = data[i].length; j < dlen; j++) {
+        idx = header[j] || j;
+        d[idx] = data[i][j];
+      }
+      store_data.push(d);
+    }
+    store.loadData({
+      metaData: {
+        root: 'data',
+        totalProperty: 'total',
+        successProperty: 'success',
+        fields: fields
+      },
+      data:  store_data,
+      total: store_data.length,
+      success: true
+    });
+    store.sort(xColumn, 'ASC');
+
+    // Flot series ���Ѵ�
+    var _series = this.createSeries(store, xColumn);
+    if (!series) {
+      series = _series;
+    } else {
+      for (i = 0, len = series.length; i < len; i++) {
+        for (j = 0, slen = _series.length; j < slen; j++) {
+          idx = series[i].dataIndex || series[i].label;
+          if (idx == _series[j].dataIndex) {
+            series[i].data = _series[j].data;
+            break;
+          }
+        }
+      }
+    }
+    this.header  = header;
+    this.xColumn = xColumn;
+    //this.data    = data;
+    return series;
+  }
+});
+Ext.reg('csvflot', Ext.ux.CsvFlot);
+</pre>
+</body>
+</html>

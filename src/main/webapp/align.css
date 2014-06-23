@@ -1,0 +1,33 @@
+@CHARSET "UTF-8";
+
+pre.alignpre {
+	margin: 0;
+	padding: 0;
+}
+
+.entropytable_header {
+	font-weight:bold;
+}
+
+.entropy_row:hover {
+	background-color: #FFDDDD
+}
+
+.entropytable_cell {
+	width:132px;
+}
+
+.alignment_highlighted {
+	background-color: red
+}
+
+.alignment_highlighted:hover {
+	background-color: #DD0000
+}
+
+circle.alignment_highlighted {
+	fill: red
+}
+#structure {
+	float:right
+}

@@ -1,0 +1,71 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+</head>
+<body>
+	<wicket:panel>
+	
+<script type="text/javascript">
+
+function onScrollAlignment(alignment) {
+
+	var header = document.getElementById ("alignment-header");
+	header.scrollLeft = alignment.scrollLeft;
+	
+	var labels = document.getElementById ("alignment-labels");
+	labels.scrollTop = alignment.scrollTop;
+}
+
+</script>
+
+		<h2 wicket:id="showing"></h2>
+
+		<div style="height: 400px">
+			<table class="alignment_frame" cellpadding="0" cellspacing="0">
+				<tr>
+					<th></th>
+					<th>
+						<div id="alignment-header" style="overflow-x:hidden">
+						
+							<!--
+								Here, some extra space needs to be occupied inside the scrolled area.
+								It must be larger than the scrolled area in the alignment-contents.
+								We realize this by wrapping it in a padded div element.
+							 -->
+							<div class="hscroll-spacer" style="padding-right:20px">
+<pre class="alignpre"><span wicket:id="positions"><span wicket:id="position" class="" /></span></pre>
+							</div>
+						</div>
+					</th>
+				</tr>
+				<tr>
+					<td style="padding-right: 30px;">
+						<div id="alignment-labels" style="overflow-y:hidden">
+						
+							<!--
+								Here, some extra space needs to be occupied inside the scrolled area.
+								It must be larger than the scrolled area in the alignment-contents.
+								We realize this, by wrapping it in a padded div element.
+							-->
+							<div class="vscroll-spacer" style="padding-bottom:20px">
+								<div wicket:id="labels">
+<pre class="alignpre"><a href="#" wicket:id="ref"><span wicket:id="label" /></a></pre>
+								</div>
+							</div>
+						</div>
+					</td>
+					<td>					
+						<div id="alignment-contents" style="overflow:scroll;padding-right:15px;padding-bottom:15px" onscroll="onScrollAlignment(this);">
+
+							<div wicket:id="seqs">
+<pre class="alignpre"><span class="alignedseq" wicket:id="seq"></span></pre>
+							</div>
+						</div>
+					</td>
+				</tr>
+			</table>
+		</div>
+	</wicket:panel>
+</body>
+</html>

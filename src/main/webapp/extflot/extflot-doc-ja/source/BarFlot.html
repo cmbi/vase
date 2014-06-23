@@ -1,0 +1,122 @@
+<html>
+<head>
+<title>The source code</title>
+<link href="../resources/prettify/prettify.css" type="text/css"
+	rel="stylesheet" />
+<script type="text/javascript" src="../resources/prettify/prettify.js"></script>
+</head>
+<body onload="prettyPrint();">
+	<pre class="prettyprint lang-js">/* $Id:$
+ * vim:sw=2:ts=8:sts=2:et:ft=javascript
+ * Released under the MIT license or Ext Open Source License by NCS, December 2008
+ */
+
+<div id="cls-Ext.ux.BarFlot"></div>/**
+ * @class Ext.ux.BarFlot
+ * @extends Ext.ux.Flot
+ * ����������Ѥ� Flot �Ǥ���<br>
+ * ʣ���η����ҤȤޤȤ�ˤ��ơ��ǡ������Ȥ��ͤ�ޤȤ��Ϳ���뤳�Ȥ��Ǥ��ޤ���
+<pre>
+data: [{
+  name:  <String>,
+  label: <String>,
+  total: <Number>,
+  rect:  <Number>,
+  xtrap: <Number>,
+  ytrap: <Number>
+},{
+...
+}]
+
+		
+		</pre>
+ *
+ * data �ˤ� name �ޤ��� label �Ȥ������Ф�ɬ�פǤ���
+ * ���줬 X ����ɽ�������������٥� (tick) �ˤʤ�ޤ���
+ * 
+<pre>
+series: [
+ { name: 'total', label: 'Total',        dataIndex: 0 },
+ { name: 'rect',  label: 'Rectangles',   dataIndex: 1 },
+ { name: 'xtrap', label: 'X-Trapezoids', dataIndex: 2 },
+ { name: 'ytrap', label: 'Y-Trapezoids', dataIndex: 3 },
+],
+</pre>
+ * ��������ˤ� dataIndex �Ȥ�����ĥ���Ф�Ϳ���Ƥ���������
+ * �оݤΥǡ�����ΥС����¤ӽ�����ꤷ�ޤ���
+ * ���꤬�ʤ��ä����ϡ�series array �� index �ˤʤ�ޤ���
+ */
+Ext.ux.BarFlot = Ext.extend(Ext.ux.Flot, {
+  <div id="cfg-Ext.ux.BarFlot-data"></div>/**
+   * @cfg {Array} data
+   * ���饹�������򻲾Ȥ��Ƥ���������
+   */
+  <div id="cfg-Ext.ux.BarFlot-baseSeries"></div>/**
+   * @cfg {Object} baseSeries
+   */
+  baseSeries: {bars:{ show: true, align: 'center' }},
+
+  <div id="cfg-Ext.ux.BarFlot-tooltip"></div>/**
+   * @cfg {Bool/String/Object} tooltip
+   * <pre>'<div id="{tipId}">{label}={1}</div>'</pre> �ˤʤäƤ��ޤ�
+   */
+  tooltip: '<div id="{tipId}">{label}={1}</div>',
+
+	// private
+	initComponent: function() {
+		this.setupFlotOptions();
+		Ext.ux.BarFlot.superclass.initComponent.call(this);
+	},
+
+	// private
+	setupData: function(data, series) {
+		// �С���������
+		var bw = 1.0 / series.length * 0.6;
+		var center = series.length / 2;
+    this.baseSeries.bars.barWidth = bw;
+
+		for (var i = 0, len = data.length; i < len; i++) {
+			var d = data[i], _d = [], key;
+			for (key in d) {
+				for (var j = 0, n = series.length; j < n; j++) {
+					var s = series[j];
+					if (s.name == key) {
+            var idx = series[j].dataIndex;
+            if (typeof idx == 'undefined') { idx = j; }
+						var pos = i + bw * (idx - center + 0.5);
+						s.data = s.data || [];
+						s.data.push([pos, d[key]]);
+					}
+          s.label = s.label || d.label || d.name || d.dataIndex;
+				}
+			}
+		}
+    return series;
+	},
+
+  // private
+	setupFlotOptions: function() {
+		var xticks = [];
+		for (var i = 0, len = this.data.length; i < len; i++) {
+			var d = this.data[i];
+			xticks.push([i, d.label || d.name || d.dataIndex]);
+		}
+    Ext.applyIf(this, {
+			xaxis: {
+				ticks: xticks,
+				min: -0.5,
+				max: i-0.5
+			},
+			yaxis: {
+				ticks: 10,
+				min: 0
+				//max: ????
+			}
+		});
+	}
+});
+Ext.reg('barflot', Ext.ux.BarFlot);
+
+</pre>
+</body>
+</html>

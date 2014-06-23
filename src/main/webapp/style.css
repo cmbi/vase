@@ -1,0 +1,562 @@
+/**************************************
+	General
+**************************************/
+a.help {
+	cursor: help;
+}
+
+/**************************************
+	Feedback
+**************************************/
+.feedback ul {
+	list-style-type: none;
+	margin: 0;
+	padding: 0;
+	background: none;
+}
+
+.feedback li {
+	-moz-border-radius: 4px;
+	-webkit-border-radius: 4px;
+	margin: 1px;
+	padding-left: 5px;
+}
+
+.feedback li.feedbackPanelFATAL {
+	border: 1px solid #cd0a0a;
+	background: #c81900;
+	color: #ffffff;
+}
+
+.feedback li.feedbackPanelFATAL:before {
+	content: url(img/icons/exclamation.png);
+	vertical-align: middle;
+}
+
+.feedback li.feedbackPanelERROR {
+	border: 1px solid #cd6a0a;
+	background: #c86920;
+	color: #ffffff;
+}
+
+.feedback li.feedbackPanelERROR:before {
+	content: url(img/icons/error.png);
+	vertical-align: middle;
+}
+
+.feedback li.feedbackPanelINFO {
+	border: 1px solid #fed22f;
+	background: #ffe45c;
+	color: #363636;
+}
+
+.feedback li.feedbackPanelINFO:before {
+	content: url(img/icons/information.png);
+	vertical-align: middle;
+}
+
+/**************************************
+	Sequence
+**************************************/
+textarea {
+	font-family: Courier, monospace;
+	font-size: medium;
+	width: 100%;
+}
+
+button.sequence {
+	float: right;
+}
+
+/***************************************
+   TABS
+***************************************/
+.tabpanel {
+	margin-top: 20px;
+}
+
+.tabpanel .tab-row ul {
+	height: 20px;
+	margin: 0;
+	padding-left: 0px;
+	background: url( img/tab_bottom.gif ) repeat-x bottom;
+}
+
+.tabpanel .tab-row li {
+	margin: 0;
+	padding: 0;
+	display: inline;
+	list-style-type: none;
+}
+
+.tabpanel .tab-row a:link,.tabpanel .tab-row a:visited {
+	float: left;
+	background: #f3f3f3;
+	font-size: 12px;
+	line-height: 14px;
+	font-weight: bold;
+	padding: 2px 10px 2px 10px;
+	margin-right: 4px;
+	border: 1px solid #ccc;
+	text-decoration: none;
+	color: #666;
+}
+
+.tabpanel .tab-row li.selected a:link,.tabpanel .tab-row a:visited.active
+	{
+	border-bottom: 1px solid #fff;
+	background: #fff;
+	color: #000;
+}
+
+.tabpanel .tab-row a:hover {
+	background: #fff;
+}
+
+/*****************************
+   BLAST results
+*****************************/
+.list table {
+	padding: 0px;
+	margin: 0px;
+	vertical-align: top;
+	table-layout: auto;
+	width: 100%;
+	/*font-size: 10pt;*/
+}
+
+.list caption {
+	background-color: #55a;
+	color: white;
+	border: solid 1px #227;
+	text-align: left;
+	padding: 2px 4px 2px 4px;
+}
+
+.list td {
+	padding: 4px;
+	padding-left: 10px;
+	margin: 0px;
+	border: solid 0px #99e;
+	border-bottom-width: 1px;
+	vertical-align: top;
+	width: auto;
+}
+
+.list td.nr {
+	font-weight: bold;
+	text-align: right;
+}
+
+.list th {
+	background-color: #9966CC;
+	color: white;
+	text-align: left;
+	text-decoration: none;
+	font-weight: normal;
+	padding: 1px 4px 6px 4px;
+	border-width: 0px 0px 1px 1px;
+	border-style: solid;
+	border-color: #227;
+	width: auto;
+}
+
+.list th a {
+	color: white;
+	text-decoration: underline;
+}
+
+.list tr.clickable:hover {
+	background-color: #eef;
+	/*cursor: pointer;*/
+}
+
+.list a img {
+	border: none 0px;
+}
+
+.alignment {
+	width: 106px;
+}
+
+.alignment img {
+	border: none;
+	clear: none;
+	float: none;
+	margin: 0px 0px 0px 0px;
+	padding: 0px 0px 0px 0px;
+}
+
+span.wicket-ajax-indicator img {
+	position: fixed;
+	bottom: 0px;
+	left: 0px;
+}
+
+/**************************************
+	Residue
+**************************************/
+table.residues {
+	font-family: monospace;
+	border: 1px solid lightgrey;
+	border-collapse: collapse;
+	empty-cells: hide;
+	width: 85%;
+	table-layout: fixed;
+	margin: 10px 0 10px 0;
+}
+
+table.residues td {
+	font-size: 1.5em;
+	vertical-align: top;
+}
+
+table.residues td sub {
+	font-size: 1em;
+	float: right;
+	vertical-align: bottom;
+}
+
+table.residues td a {
+	color: black;
+	text-decoration: none;
+	float: left;
+	padding: 5px 0 5px 0;
+}
+
+table.residues td a:hover {
+	background-color: #dff4ff;
+	text-decoration: underline;
+}
+
+table.sequence {
+	font-family: monospace;
+	border: 1px solid lightgrey;
+	border-collapse: collapse;
+	empty-cells: hide;
+	width: 100%;
+	table-layout: fixed;
+	margin: 10px 0 10px 0;
+	font-size: 6pt;
+	float: left;
+}
+
+table.sequence td {
+	border: 1px solid lightgrey;
+	font-size: 1.5em;
+	vertical-align: top;
+}
+
+table.sequence td sub {
+	font-size: 1em;
+	float: right;
+	vertical-align: bottom;
+}
+
+table.sequence td a {
+	color: black;
+	text-decoration: none;
+	float: left;
+	padding: 0px 0 0px 0;
+}
+
+table.sequence td a:hover {
+	background-color: #dff4ff;
+	text-decoration: underline;
+}
+
+.hoverletter {
+	display: none;
+}
+
+table.sequence td a:hover .hoverletter {
+	display: block;
+	/*	position: absolute;
+	top: 145px;
+	left: 10px;
+	width: 125px; */
+	z-index: 100;
+	color: black;
+	background-color: #fff99d;
+	padding: 5px;
+	font: 1em Verdana, sans-serif;
+	border: 1px solid black;
+	/* Above: how the <span>text la-la-la text</span> is handled when
+hovering over the visible link-text (the 'pop-up') */
+}
+
+/*table.residues td a.acidic {background:#F5A2C6;}
+table.residues td a.basic {background:#A6ABD6;}
+table.residues td a.hydrophobic {background:#FFD900;}
+table.residues td a.polar {background:#94D0A7;}*/
+table.residues td a.selected {
+	color: purple;
+	background-color: #e4cfef;
+	text-decoration: underline;
+}
+
+/**************************************
+	Mutation
+**************************************/
+.buttons button.mutate {
+	width: 14.28%;
+	height: 70px;
+	float: left;
+}
+
+button.mutate span.letter {
+	text-align: center;
+	font-size: xx-large;
+	font-weight: bold;
+}
+
+button.mutate span.name {
+	font-size: smaller;
+}
+
+.selectedResidue {
+	width: auto;
+	overflow: visible;
+	line-height: 17px;
+	padding: 5px 10px 5px 7px;
+	text-align: center;
+	margin: 0 0 30px 0;
+	cursor: default;
+}
+
+.selectedResidue span.name {
+	font-size: smaller;
+}
+
+.selectedResidue span.letter {
+	font-size: xx-large;
+	font-weight: bold;
+}
+
+.selectedResidue span.number {
+	font-size: smaller;
+	font-style: italic;
+}
+
+.familyTree .wicket-tree,.speciesTree .wicket-tree {
+	float: left;
+	clear: both;
+	max-height: 400px;
+	width: 30em;
+	margin: 0px 0px 20px 0px;
+	padding: 0;
+}
+
+a.help img {
+	border: none;
+	clear: none;
+	float: none;
+	margin: 0px 0px 0px 0px;
+}
+
+a.help:hover img {
+	border: none;
+}
+
+.slist {
+	float: right;
+}
+
+.table-yui table {
+	width: 100%;
+	border: 1px solid lightgray;
+	font-family: arial;
+	font-size: 1.1em;
+	font-size-adjust: none;
+	font-style: normal;
+	font-variant: normal;
+	font-weight: normal;
+	text-align: left;
+	line-height: 1.231;
+	margin: 0 0 20px 0;
+	padding: 0;
+	clear: both;
+	/*float: left;*/
+}
+
+.table-yui table th {
+	color: #000000;
+	background: #D8D8DA url(img/sprite.png) repeat-x scroll 0 0;
+	border-spacing: 0px;
+	/*border-collapse: separate;*/ /*border-style: none solid none none;*/
+	/*border-width: medium 1px medium medium;*/
+	font-style: normal;
+	font-family: arial;
+	font-size: inherit;
+	font-size-adjust: none;
+	font-variant: normal;
+	font-weight: normal;
+	line-height: 1.231;
+	text-align: left;
+	text-decoration: none;
+	vertical-align: bottom;
+	white-space: nowrap;
+	margin: 0;
+	padding: 4px 10px;
+}
+
+.table-yui table td {
+	border-top: 1px solid lightgray;
+	/*border-style: none solid none none;*/
+	/*border-width: medium 1px medium medium;*/
+	margin: 0;
+	padding: 0;
+	text-align: left;
+	/*border-collapse: separate;*/
+	border-spacing: 0;
+	font-family: arial;
+	font-size: inherit;
+	font-size-adjust: none;
+	font-style: normal;
+	font-variant: normal;
+	font-weight: normal;
+	line-height: 1.231;
+	color: #333333;
+	padding: 6px 12px;
+	vertical-align: top;
+	margin: 0;
+}
+
+.table-yui table .navigation td {
+	font-size: 1em;
+	border: none;
+}
+
+.center {
+	display: block;
+	margin-left: auto;
+	margin-right: auto;
+}
+
+.invisible {
+	display: none;
+}
+
+#left {
+	width: 275px;
+	float: left;
+}
+
+#right {
+	width: 550px;
+	float: right;
+}
+
+.floatRight {
+	float: right;
+	clear: none;
+}
+
+.floatLeft {
+	float: left;
+	clear: none;
+}
+
+.searchPanel {
+	padding: 10px;
+	border-left: 1px solid lightgray;
+	border-right: 1px solid lightgray;
+	border-bottom: 1px solid lightgray;
+}
+
+.tabPanelContent {
+	padding: 10px;
+	border-left: 1px solid lightgray;
+	border-right: 1px solid lightgray;
+	border-bottom: 1px solid lightgray;
+}
+
+.tabPanelContentFlex {
+	padding: 10px;
+	border-left: 1px solid lightgray;
+	border-right: 1px solid lightgray;
+	border-bottom: 1px solid lightgray;
+}
+
+.tab-panel {
+	height: 70%;
+}
+
+.proteinPagePanel h2 {
+	border-bottom: 1px solid;
+}
+
+.sequence {
+	font-family: Courier, monospace;
+}
+
+.proteinSelectionPanel {
+	margin-bottom: 80px;
+}
+
+.residueSelectionPanel {
+	margin-bottom: 35px;
+}
+
+.mutantPredictionSubmitPanel {
+	margin-top: 245px;
+}
+
+.update {
+	border: 1px dashed grey;
+	padding: 5px;
+	margin-bottom: 20px;
+}
+
+.searchform {
+	width: 285px;
+	padding: 0 17px 10px 0px !important /*Non-IE6*/;
+	padding: 0 12px 0px 0px /*IE6*/;
+}
+
+.searchform form fieldset {
+	border: none;
+}
+
+.searchform input.field {
+	width: 10.0em;
+	padding: 0.2em 0 0.2em 0;
+	border: 1px solid rgb(200, 200, 200);
+	font-family: verdana, arial, sans-serif;
+	font-size: 120%;
+}
+
+.searchform input.button {
+	width: 4.0em;
+	padding: 1px !important /*Non-IE6*/;
+	padding: 0 /*IE6*/;
+	background: rgb(230, 230, 230);
+	border: solid 1px rgb(150, 150, 150);
+	text-align: center;
+	font-family: verdana, arial, sans-serif;
+	color: rgb(150, 150, 150);
+	font-size: 120%;
+}
+
+.searchform input.button:hover {
+	cursor: pointer;
+	border: solid 1px rgb(80, 80, 80);
+	background: rgb(220, 220, 220);
+	color: rgb(80, 80, 80);
+}
+
+.residueNumberField {
+	width: 400px;
+	height: 200px;
+}
+
+.proteinField {
+	width: 400px;
+	height: 200px;
+}
+
+.mutationAnnotationPanel {
+	border: 1px dashed;
+	padding: 10px;
+	margin-bottom: 10px;
+}

@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html xmlns:wicket="http://wicket.apache.org">
+<head>
+<meta charset="utf-8">
+</head>
+<body>
+
+<a href="#" wicket:id="alignment">to alignment page</a>
+
+<div id="structure">
+
+<script type="text/javascript" src="jsmol/JSmol.min.js"></script>
+<script type="text/javascript">
+
+var initScene = "background white;load http://www.rcsb.org/pdb/files/1CRN.pdb;select *;color atoms lightgrey structure";
+
+function pickCallBack(a,b,c) {
+    var aa = "" + a
+    var bb = "" + b
+    var cc = "" + c
+    // example of b '[SER]427:A.CA #548 37.611996 29.933 -9.89'
+    // we want '[SER]427:A'
+
+    b=b.replace(/\..*$/,'');
+    
+    document.getElementById("demo").innerHTML = "selected "+b;
+
+    Jmol.script(jmolApplet0,'select ' + b + '; color red;');
+}
+
+var Info = {
+	width: 400,
+	height: 400,
+	use: "HTML5",   // JAVA HTML5 WEBGL are all options
+	j2sPath: "jsmol/j2s", // this needs to point to where the j2s directory is.
+	jarPath: "jsmol/java",// this needs to point to where the java directory is.
+	jarFile: "JmolAppletSigned.jar",
+	console: "jmolApplet0_infodiv",
+	pickCallBack: "pickCallBack",
+	script: initScene
+}
+
+</script>
+
+<script type="text/javascript">
+  jmolApplet0 = Jmol.getApplet("jmolApplet0", Info); 
+</script>
+
+</div>
+
+<p id="demo"></p>
+
+</body>
+</html>

@@ -1,0 +1,57 @@
+@CHARSET "UTF-8";
+
+pre.alignpre {
+	margin: 0;
+	padding: 0;
+}
+
+.alignment_frame td,th {
+	vertical-align:top;
+}
+
+.data_row td {
+	width: 160px;
+}
+
+#alignment-contents, #alignment-header {
+	width: 1380px;
+}
+#alignment-contents, #alignment-labels {
+	height: 375px;
+}
+
+.entropytable_header {
+	font-weight: bold;
+}
+
+.entropy_row:hover {
+	background-color: #FFDDDD
+}
+
+.entropytable_cell {
+	width: 132px;
+}
+
+.alignment_highlighted {
+	background-color: red
+}
+
+.entropy_row.alignment_highlighted:hover {
+	background-color: #DD0000
+}
+
+circle.alignment_highlighted {
+	fill: red
+}
+
+#structure {
+	float: right
+}
+
+.unselectable {
+	-moz-user-select: -moz-none;
+	-khtml-user-select: none;
+	-webkit-user-select: none;
+	-o-user-select: none;
+	user-select: none;
+}
