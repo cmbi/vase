@@ -1,0 +1,57 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+</head>
+
+<body>
+	<wicket:panel>
+	
+<script type="text/javascript">
+
+function onScrollTable(table) {
+
+	var header = document.getElementById ("data-table-header");
+	header.scrollLeft = table.scrollLeft;
+}
+
+</script>
+
+		<div style="padding: 5px; float: left;" class="data_table">
+		
+			<!-- This area moves along when the data table is horizontally scrolled -->
+			<div id="data-table-header" style="overflow: hidden">
+				<!--
+					Here, some extra space needs to be occupied inside the scrolled area.
+					It must be larger than the scrolled area in the table rows.
+					We realize this by wrapping it in a padded div element.
+				 -->
+				<div class="hscroll-spacer" style="padding-right:50px">
+					<table>
+						<tr>
+							<th wicket:id="header-cell">
+								<div class="data-cell" wicket:id="header-title" />
+							</th>
+						</tr>
+					</table>
+				</div>
+			</div>
+			<!-- 
+				The table rows need some padding to fit in the scroll bar.
+			 -->
+			<div id="data-table-body" style="overflow:scroll;height:350px;padding-right:15px" onscroll="onScrollTable(this);">
+				<div wicket:id="rows" class="data_table_row">
+					<table>
+						<tr>
+							<td wicket:id="cells">
+								<div class="data-cell" wicket:id="cell-text" />
+							</td>
+						</tr>
+					</table>
+				</div>
+			</div>
+		</div>
+
+	</wicket:panel>
+</body>
+</html>

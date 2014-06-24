@@ -14,11 +14,11 @@
 
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>nl.ru.cmbi</groupId>
-	<artifactId>hssp-web</artifactId>
+	<artifactId>vase</artifactId>
 	<packaging>war</packaging>
 	<version>0.0.1-SNAPSHOT</version>
 	<!-- TODO project name -->
-	<name>HSSP web Interface</name>
+	<name>Visualization of Alignment, Structure and Entropy</name>
 	<description></description>
 	<!-- <organization> <name>company name</name> <url>company url</url> </organization> -->
 	<licenses>
