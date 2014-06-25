@@ -10,8 +10,10 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.zip.GZIPInputStream;
 
+import nl.ru.cmbi.vase.data.VASEDataObject;
 import nl.ru.cmbi.vase.job.HsspJob;
 import nl.ru.cmbi.vase.job.HsspQueue;
+import nl.ru.cmbi.vase.parse.VASEXMLParser;
 import nl.ru.cmbi.vase.tools.util.Config;
 import nl.ru.cmbi.vase.web.WicketApplication;
 import nl.ru.cmbi.vase.web.page.AlignmentPage;
@@ -21,6 +23,7 @@ import org.apache.wicket.injection.Injector;
 import org.apache.wicket.request.IRequestParameters;
 import org.apache.wicket.request.Url;
 import org.apache.wicket.request.cycle.RequestCycle;
+import org.apache.wicket.request.http.flow.AbortWithHttpErrorCodeException;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.util.string.StringValue;
 import org.slf4j.Logger;
@@ -28,6 +31,7 @@ import org.slf4j.LoggerFactory;
 import org.wicketstuff.rest.annotations.MethodMapping;
 import org.wicketstuff.rest.annotations.parameters.RequestBody;
 import org.wicketstuff.rest.annotations.parameters.RequestParam;
+import org.wicketstuff.rest.contenthandling.RestMimeTypes;
 import org.wicketstuff.rest.resource.gson.GsonRestResource;
 import org.wicketstuff.rest.utils.http.HttpMethod;
 
@@ -62,20 +66,22 @@ public class JobRestResource extends GsonRestResource {
 		return queue.getStatus(jobid).toString();
 	}
 	
-	@MethodMapping(value = "/structure/{id}", httpMethod=HttpMethod.GET)
+	@MethodMapping(value = "/structure/{id}", httpMethod=HttpMethod.GET, produces = RestMimeTypes.TEXT_PLAIN)
 	public String structure(String id) {
 		
+		File xmlFile = new File(Config.getCacheDir(),id+".xml.gz");
+		
 		try {
-			return IOUtils.toString(
-				new GZIPInputStream(
-					new FileInputStream(
-						new File(Config.properties.getProperty("cache"),id+".pdb.gz")
-					)
-				)
-			);
-		} catch (IOException e) {
 			
-			return "";
+			VASEDataObject data = VASEXMLParser.parse( new GZIPInputStream( new FileInputStream(xmlFile) ) );
+			
+			return data.getPdbContents();
+			
+		} catch (Exception e) {
+			
+			log.error("structure "+id+": "+e.getMessage());
+			
+			throw new AbortWithHttpErrorCodeException(404);
 		}
 	}
 }

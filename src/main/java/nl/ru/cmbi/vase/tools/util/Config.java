@@ -1,11 +1,17 @@
 package nl.ru.cmbi.vase.tools.util;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.Properties;
 
 public class Config {
 	
-	public static Properties properties = getProperties();
+	public final static Properties properties = getProperties();
+	
+	public static File getCacheDir() {
+		
+		return new File(properties.getProperty("cache"));
+	}
 	
 	private static Properties getProperties() {
 		

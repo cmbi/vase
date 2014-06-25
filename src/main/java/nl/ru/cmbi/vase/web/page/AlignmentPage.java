@@ -1,11 +1,14 @@
 package nl.ru.cmbi.vase.web.page;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.zip.GZIPInputStream;
 
 import nl.ru.cmbi.vase.analysis.Calculator;
 import nl.ru.cmbi.vase.analysis.MutationDataObject;
@@ -16,6 +19,8 @@ import nl.ru.cmbi.vase.data.ResidueInfoSet;
 import nl.ru.cmbi.vase.data.VASEDataObject;
 import nl.ru.cmbi.vase.data.VASEDataObject.PlotDescription;
 import nl.ru.cmbi.vase.parse.StockholmParser;
+import nl.ru.cmbi.vase.parse.VASEXMLParser;
+import nl.ru.cmbi.vase.tools.util.Config;
 import nl.ru.cmbi.vase.web.panel.align.AlignmentPanel;
 import nl.ru.cmbi.vase.web.panel.align.AlignmentLinkedPlotPanel;
 import nl.ru.cmbi.vase.web.panel.align.EntropyTablePanel;
@@ -66,11 +71,22 @@ public class AlignmentPage extends WebPage {
 	
 			try {
 				
-				URL stockholmURL = new URL(String.format("ftp://ftp.cmbi.ru.nl/pub/molbio/data/hssp3/%s.hssp.bz2",PDBID)),
-					pdbURL = new URL(String.format("http://www.rcsb.org/pdb/files/%s.pdb",PDBID));
+				File xmlFile = new File(Config.getCacheDir(), PDBID+".xml.gz");
+				if(xmlFile.isFile()) {
+					
+					dataPerChain = new HashMap<Character,VASEDataObject>(); // just a wrapper
+					
+					dataPerChain.put('-', 
+						VASEXMLParser.parse( new GZIPInputStream( new FileInputStream(xmlFile) ) )
+					);
+				}
+				else {
 				
-				dataPerChain  = StockholmParser.parseStockHolm ( new BZip2CompressorInputStream(stockholmURL.openStream()), pdbURL);
+					URL stockholmURL = new URL(String.format("ftp://ftp.cmbi.ru.nl/pub/molbio/data/hssp3/%s.hssp.bz2",PDBID)),
+							pdbURL = new URL(String.format("http://www.rcsb.org/pdb/files/%s.pdb",PDBID));
 				
+					dataPerChain  = StockholmParser.parseStockHolm ( new BZip2CompressorInputStream(stockholmURL.openStream()), pdbURL);
+				}
 			} catch (Exception e) {
 							
 				log.error("Error getting alignments for " + pdbIDString + " : " + e.getMessage(),e);
@@ -161,7 +177,7 @@ public class AlignmentPage extends WebPage {
 		
 		String structurePath =
 			RequestCycle.get().urlFor(HomePage.class, new PageParameters()).toString()
-			+ "/rest/structure/" + PDBID;
+			+ "rest/structure/" + PDBID;
 		
 		if(data.getPdbURL()!=null) {
 			

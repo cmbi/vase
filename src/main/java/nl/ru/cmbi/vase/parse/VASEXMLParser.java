@@ -71,7 +71,6 @@ public class VASEXMLParser {
 		}
 		List<ColumnInfo> columns=new ArrayList<ColumnInfo>();
 		
-		boolean bResidueNumber=false, bPDBResidue=false;
 		for(Element column : (List<Element>)table.elements("column")) {
 			
 			if(column.attribute("id")==null) {
@@ -80,10 +79,6 @@ public class VASEXMLParser {
 			
 			ColumnInfo ci = new ColumnInfo();
 			ci.setId(column.attribute("id").getValue());
-			if(ci.getId().equals(TableData.residueNumberID) && ci.isNumber())
-				bResidueNumber=true;
-			if(ci.getId().equals(TableData.pdbResidueID))
-				bPDBResidue=true;
 			
 			if(column.attribute("title")!=null) {
 				ci.setTitle(column.attribute("title").getValue());
@@ -95,10 +90,6 @@ public class VASEXMLParser {
 				ci.setMouseOver(Boolean.parseBoolean(column.attribute("mouseover").getValue()));
 			}
 			columns.add(ci);
-		}
-		if(!bResidueNumber || !bPDBResidue) {
-			
-			throw new Exception("data table must at least have the columns: \'residue_number\' (numerical) and \'pdb_residue\'");
 		}
 		
 		TableData tableData = new TableData(columns);
@@ -116,6 +107,20 @@ public class VASEXMLParser {
 				tableData.setValue(columns.get(i).getId(), rowIndex, values.get(i).getText());
 			}
 			rowIndex++;
+		}
+		
+		ColumnInfo columnResidueNumber = tableData.getColumnByID(TableData.residueNumberID);
+		if(columnResidueNumber==null) {
+			
+			throw new Exception("missing column: "+TableData.residueNumberID);
+		}
+		else if(!columnResidueNumber.isNumber()) {
+
+			throw new Exception("not numerical: "+TableData.residueNumberID);
+		}
+		if(tableData.getColumnByID(TableData.pdbResidueID)==null) {
+			
+			throw new Exception("missing column: "+TableData.pdbResidueID);
 		}
 		
 		return tableData;

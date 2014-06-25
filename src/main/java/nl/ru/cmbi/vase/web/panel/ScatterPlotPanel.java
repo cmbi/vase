@@ -75,11 +75,14 @@ public class ScatterPlotPanel extends Panel {
 		transformGroup.add(new AttributeModifier("transform", String.format("translate(%.1f %.1f)", pixMargeLeft, -pixMargeDown)));
 		svg.add(transformGroup);
 		
+		double	yAxisXpos = pixOriginXPos,
+				xAxisYpos = pixOriginYPos;
+		
 		Component xAxis = new Label("x-axis");
 		xAxis.add(new AttributeModifier("x1","0"));
-		xAxis.add(new AttributeModifier("x2",	String.valueOf(plotPixWidth)));
-		xAxis.add(new AttributeModifier("y1",	String.valueOf(pixOriginYPos)));
-		xAxis.add(new AttributeModifier("y2",	String.valueOf(pixOriginYPos)));
+		xAxis.add(new AttributeModifier("x2", String.valueOf(plotPixWidth)));
+		xAxis.add(new AttributeModifier("y1", String.valueOf(xAxisYpos)));
+		xAxis.add(new AttributeModifier("y2", String.valueOf(xAxisYpos)));
 		transformGroup.add(xAxis);
 		
 		WebMarkupContainer xTitle = new WebMarkupContainer("x-title");
@@ -88,10 +91,10 @@ public class ScatterPlotPanel extends Panel {
 		transformGroup.add(xTitle);
 		
 		Component yAxis = new Label("y-axis");
-		yAxis.add(new AttributeModifier("x1", String.valueOf(pixOriginXPos)));
-		yAxis.add(new AttributeModifier("x2",	String.valueOf(pixOriginXPos)));
+		yAxis.add(new AttributeModifier("x1", String.valueOf(yAxisXpos)));
+		yAxis.add(new AttributeModifier("x2", String.valueOf(yAxisXpos)));
 		yAxis.add(new AttributeModifier("y1", String.valueOf(pixOriginYPos - plotPixHeight)));
-		yAxis.add(new AttributeModifier("y2",	String.valueOf(pixOriginYPos)));
+		yAxis.add(new AttributeModifier("y2", String.valueOf(pixOriginYPos)));
 		transformGroup.add(yAxis);
 		
 		WebMarkupContainer yTitle = new WebMarkupContainer("y-title");
