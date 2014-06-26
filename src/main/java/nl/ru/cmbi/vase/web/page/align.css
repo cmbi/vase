@@ -31,12 +31,16 @@ pre.alignpre {
 	width:100%;
 }
 
-.data-cell {
+.data_table_cell, .data_table_title {
 	width: 160px;
 }
 
 .data_table th {
 	font-weight: bold;
+}
+
+.data_table_title:hover {
+	background-color: #DDDDFF
 }
 
 .data_table_row:hover {
@@ -45,6 +49,13 @@ pre.alignpre {
 
 .data_table_row.alignment_highlighted:hover {
 	background-color: #DD0000
+}
+
+.data_table_column_image {
+	display: none
+}
+.data_table_column_image.toggled {
+	display: inline
 }
 
 /* it is important that both have the same width: */

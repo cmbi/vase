@@ -20,6 +20,24 @@ public class TableData {
 	public static String residueNumberID="residue_number",
 							pdbResidueID="pdb_residue";
 	
+	/**
+	 * 
+	 * @return the rowIndex or -1 if the given number is not in the table
+	 */
+	public int getRowIndexForResidueNumber(int residueNumber) {
+		
+		return getRowIndex(residueNumberID, new Integer(residueNumber));
+	}
+	
+	public String getPDBResidueForResidueNumber(int residueNumber) {
+		
+		int rowIndex = getRowIndexForResidueNumber( residueNumber );
+		if(rowIndex==-1)
+			return "";
+		else
+			return getPDBResidue( rowIndex );
+	}
+	
 	public int getResidueNumber(int row) {
 		
 		return (Integer) getRowValues(row).get(residueNumberID);
@@ -35,7 +53,7 @@ public class TableData {
 		
 		public final String regexp;
 		
-		public boolean matchesWithClass(Object obj) {
+		public boolean matchesByClass(Object obj) {
 			
 			switch(this) {
 			case INTEGER:
@@ -81,14 +99,33 @@ public class TableData {
 		private String title="", id;
 
 		private boolean hidden = false, mouseOver = false;
-
-		@Setter(AccessLevel.PROTECTED)
-		private ColumnDataType type = ColumnDataType.STRING; // set internally by the tabledata object
+	}
+	
+	public boolean columnIsOfType(String columnID, ColumnDataType type) {
 		
-		public boolean isNumber() {
+		int columnIndex = this.getColumnIndexByID(columnID);
+		for(int rowIndex =0; rowIndex<matrix.size(); rowIndex++) {
 			
-			return type==ColumnDataType.DOUBLE || type==ColumnDataType.INTEGER;
+			if( !type.matchesByClass( matrix.get(rowIndex).get(columnIndex) ) ) {
+				
+				return false;
+			}
 		}
+		return true;
+	}
+	
+	public boolean columnIsNumber(String columnID) {
+		
+		int columnIndex = this.getColumnIndexByID(columnID);
+		for(int rowIndex =0; rowIndex<matrix.size(); rowIndex++) {
+			
+			if( !ColumnDataType.DOUBLE.matchesByClass( matrix.get(rowIndex).get(columnIndex) )
+				&& !ColumnDataType.INTEGER.matchesByClass( matrix.get(rowIndex).get(columnIndex) ) ) {
+				
+				return false;
+			}
+		}
+		return true;
 	}
 
 	private List<List<Object>> matrix = new ArrayList<List<Object>>();
@@ -152,23 +189,79 @@ public class TableData {
 		}
 		return -1;
 	}
+
+	/**
+	 * @return the list of duplicate values in the column, or null if the column doesn't exist
+	 */
+	public List<Object> listDuplicateValues(String columnID) {
+
+		int columnIndex = getColumnIndexByID(columnID);
+		if(columnIndex==-1) {
+			
+			return null;
+		}
+		
+		Map<Object,Integer> valueOccurence = new HashMap<Object,Integer>();
+		List<Object> duplicates = new ArrayList<Object>();
+		for(List<Object> row : matrix) {
+			
+			Object value = row.get(columnIndex);
+			if(!valueOccurence.containsKey(value)) {
+				valueOccurence.put(value,0);
+			}
+			
+			valueOccurence.put(value,valueOccurence.get(value) + 1);
+			
+			if(valueOccurence.get(value)>1) {
+				
+				duplicates.add(value);
+			}
+		}
+		
+		return duplicates;
+	}
 	
-	public List<Object> getColumnValues(int i) {
+	/**
+	 * @return the list of values in the column, or null if the column doesn't exist
+	 */
+	public List<Object> getColumnValues(String columnID) {
+		
+		int columnIndex = getColumnIndexByID(columnID);
+		if(columnIndex==-1) {
+			
+			return null;
+		}
+		else return getColumnValues (columnIndex);
+	}
+	
+	public List<Object> getColumnValues(int columnIndex) {
 		
 		List<Object> columnValues = new ArrayList<Object>();
 		
 		for(List<Object> row : matrix) {
 			
-			if(columns.get(i).getType().equals(ColumnDataType.STRING)) {
-
-				columnValues.add(row.get(i).toString());
-			}
-			else {
-				columnValues.add(row.get(i));
-			}
+			columnValues.add(row.get(columnIndex));
 		}
 		
 		return columnValues;
+	}
+
+	/**
+	 * 
+	 * @return the rowIndex or -1 if the given value is not in the column
+	 */
+	public int getRowIndex(String columnID, Object value) {
+		
+		int columnIndex = getColumnIndexByID(columnID);
+		for(int rowIndex=0; rowIndex<matrix.size();rowIndex++) {
+			
+			if( matrix.get(rowIndex).get(columnIndex).equals(value) ) {
+				
+				return rowIndex;
+			}
+		}
+		
+		return -1;
 	}
 	
 	/**
@@ -181,14 +274,9 @@ public class TableData {
 		
 		for(int j=0; j<columns.size(); j++) {
 			
-			if(columns.get(j).getType().equals(ColumnDataType.STRING)) {
-				
-				row.put(columns.get(j).getId(), matrix.get(i).get(j).toString());
-			}
-			else {
-				row.put(columns.get(j).getId(), matrix.get(i).get(j));
-			}
+			row.put(columns.get(j).getId(), matrix.get(i).get(j));
 		}
+		
 		return row;
 	}
 	
@@ -197,20 +285,62 @@ public class TableData {
 		return matrix.size();
 	}
 	
+	public boolean columnHasValue(int columnIndex, Object value) {
+		
+		for(int rowIndex =0; rowIndex<matrix.size(); rowIndex++) {
+			
+			if(matrix.get(rowIndex).get(columnIndex).equals(value))
+				return true;
+		}
+		return false;
+	}
+	public boolean columnHasValue(String columnID, Object value) {
+		
+		int columnIndex = getColumnIndexByID(columnID);
+		
+		return columnHasValue(columnIndex, value);
+	}
+	
 	public String getValueAsString(String columnID, int rowIndex) {
 
 		int columnIndex = getColumnIndexByID(columnID);
 		ColumnInfo ci = columns.get(columnIndex);
 		
-		switch(ci.getType()) {
-		case INTEGER:
-			return String.format("%d", matrix.get(rowIndex).get(columnIndex));
-		case DOUBLE:
+		Object value = matrix.get(rowIndex).get(columnIndex);
+		
+		if(ColumnDataType.INTEGER.matchesByClass(value))
+			
+			return String.format("%d", value);
+		
+		else if(ColumnDataType.DOUBLE.matchesByClass(value))
+			
 			return String.format("%.2f", matrix.get(rowIndex).get(columnIndex));
-		default:
+		else
 			return matrix.get(rowIndex).get(columnIndex).toString();
-		}
 	}
+	
+	/**
+	 * @return the index of the column that was just created
+	 */
+	public int addColumn(ColumnInfo toAdd) {
+		
+		for(ColumnInfo ci : columns) {
+			
+			if(ci.getId().equals(toAdd.getId())) {
+				throw new RuntimeException(ci.getId()+": a column with that ID already exists");
+			}
+		}
+		
+		columns.add(toAdd);
+		for(List<Object> row : matrix) {
+			
+			row.add(null);
+		}
+		
+		return columns.size() - 1;
+	}
+	
+	
 	/**
 	 * Automatically detects doubles and integers
 	 * @param v String value to be parsed, or a number object
@@ -221,36 +351,41 @@ public class TableData {
 			
 			List<Object> emptyRow = new ArrayList<Object>();
 			for(ColumnInfo ci : columns) {
-				emptyRow.add(ci.getType().initialValue());
+				emptyRow.add( "" );
 			}
 			matrix.add(emptyRow);
 		}
 		
 		int columnIndex = getColumnIndexByID(columnID);
+		if(columnIndex == -1) {
+			
+			ColumnInfo nci = new ColumnInfo();
+			nci.setId(columnID);
+			nci.setTitle(columnID);
+			columnIndex = addColumn(nci);
+		}
+		
 		ColumnInfo ci = columns.get(columnIndex);
 
 		Object value = null;
-		for(ColumnDataType type : new ColumnDataType[] { ColumnDataType.INTEGER, ColumnDataType.DOUBLE, ColumnDataType.STRING }) {
+		for(ColumnDataType type : 
+			new ColumnDataType[] {	ColumnDataType.INTEGER, // order matters here !
+									ColumnDataType.DOUBLE,
+									ColumnDataType.STRING }) {
 			
-			if( ci.getType().equals(type) || matrix.size()<=1 ) {
+			if ( type.matchesByClass(v) ) {
+
+				value = v;
+				break;
 				
-				if ( type.matchesWithClass(v) ) {
+			} else if( String.class.isInstance(v) && ((String)v).matches(type.regexp) ) {
 
-					value = v;
-					ci.setType(type);
-					break;
-					
-				} else if( String.class.isInstance(v) && ((String)v).matches(type.regexp) ) {
-
-					value = type.fromString((String)v);
-					ci.setType(type);
-					break;
-				}
+				value = type.fromString((String)v);
+				break;
 			}
 		}
 		if(value==null) {
 			value = v.toString();
-			ci.setType(ColumnDataType.STRING);
 		}
 		
 		matrix.get(rowIndex).set(columnIndex, value);

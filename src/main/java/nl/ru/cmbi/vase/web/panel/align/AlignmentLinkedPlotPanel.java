@@ -3,7 +3,9 @@ package nl.ru.cmbi.vase.web.panel.align;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import nl.ru.cmbi.vase.analysis.MutationDataObject;
 import nl.ru.cmbi.vase.data.TableData;
@@ -29,7 +31,7 @@ import org.apache.wicket.model.Model;
 public class AlignmentLinkedPlotPanel extends Panel {
 
 	public AlignmentLinkedPlotPanel(String id,
-			final AlignmentPanel alignmentPanel,
+			final AlignmentDisplayPanel alignmentPanel,
 			final PlotDescription pd,
 			final TableData tableData) {
 		
@@ -43,10 +45,20 @@ public class AlignmentLinkedPlotPanel extends Panel {
 		final ColumnInfo	xColumnInfo = tableData.getColumnByID( pd.getXAxisColumnID() ),
 							yColumnInfo = tableData.getColumnByID( pd.getYAxisColumnID() );
 		
-		for(int i=0; i<tableData.getNumberOfRows(); i++) {
+		final Map<Integer,Integer> dotIndexToResidueNumber
+			=new HashMap<Integer,Integer>(); // remembers which residue is associated with each dot
+		
+		for(int residueNumber=1; residueNumber<=alignmentPanel.getNumberOfColumns(); residueNumber++) {
 			
-			xValues.add((Number) tableData.getRowValues(i).get( xColumnInfo.getId() ));
-			yValues.add((Number) tableData.getRowValues(i).get( yColumnInfo.getId() ));
+			int rowIndex = tableData.getRowIndexForResidueNumber( residueNumber );
+			if(rowIndex==-1) {
+				throw new RuntimeException("residue number not found in table: "+residueNumber);
+			}
+			
+			dotIndexToResidueNumber.put(xValues.size(),residueNumber);
+			
+			xValues.add((Number) tableData.getRowValues(rowIndex).get( xColumnInfo.getId() ));
+			yValues.add((Number) tableData.getRowValues(rowIndex).get( yColumnInfo.getId() ));
 		}
 		
 		double	smallestX = Utils.min(xValues).doubleValue(),
@@ -65,11 +77,11 @@ public class AlignmentLinkedPlotPanel extends Panel {
 		options.setXStepSize((options.getMaxX() - options.getMinX())/10);
 		options.setYStepSize((options.getMaxY() - options.getMinY())/10);
 		
-		if(xColumnInfo.getType().equals(ColumnDataType.INTEGER)) {
+		if(tableData.columnIsOfType(xColumnInfo.getId(),ColumnDataType.INTEGER)) {
 
 			options.setXStepSize((int)options.getXStepSize());
 		}
-		if(yColumnInfo.getType().equals(ColumnDataType.INTEGER)) {
+		if(tableData.columnIsOfType(yColumnInfo.getId(),ColumnDataType.INTEGER)) {
 
 			options.setYStepSize((int)options.getYStepSize());
 		}
@@ -87,7 +99,7 @@ public class AlignmentLinkedPlotPanel extends Panel {
 		{
 			protected String xScaleRepresentation(double x) {
 				
-				if(xColumnInfo.getType().equals(ColumnDataType.INTEGER))
+				if(tableData.columnIsOfType(xColumnInfo.getId(),ColumnDataType.INTEGER))
 				
 					return String.format("%d", (int)x);
 				else
@@ -96,7 +108,7 @@ public class AlignmentLinkedPlotPanel extends Panel {
 			
 			protected String yScaleRepresentation(double y) {
 				
-				if(yColumnInfo.getType().equals(ColumnDataType.INTEGER))
+				if(tableData.columnIsOfType(yColumnInfo.getId(),ColumnDataType.INTEGER))
 				
 					return String.format("%d", (int)y);
 				else
@@ -105,12 +117,13 @@ public class AlignmentLinkedPlotPanel extends Panel {
 			
 			protected Component createDot(final String markupID, final int index) {
 				
-				Component dot = new Label(markupID);;
+				int residueNumber = dotIndexToResidueNumber.get(index);
+				Component dot = new Label(markupID);
 				
 				dot.add(new AttributeModifier("onclick",
-						String.format("toggleColumn('%s');", alignmentPanel.getPositionClassRepresentation(index))));
+						String.format("toggleColumn('%s');", alignmentPanel.getResidueNumberClassRepresentation(residueNumber))));
 				
-				dot.add(new AttributeAppender("class",new Model(alignmentPanel.getColumnClassRepresentation(index)), " "));
+				dot.add(new AttributeAppender("class",new Model(alignmentPanel.getColumnClassRepresentation(residueNumber)), " "));
 								
 				return dot;
 			}

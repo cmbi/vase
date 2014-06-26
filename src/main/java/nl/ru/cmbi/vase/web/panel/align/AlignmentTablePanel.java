@@ -28,12 +28,14 @@ import org.apache.wicket.model.Model;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class EntropyTablePanel extends Panel {
+public class AlignmentTablePanel extends Panel {
 	
-	Logger log = LoggerFactory.getLogger(EntropyTablePanel.class);
+	public static final String tableCellClassPrefix = "tablecell_";
+	
+	Logger log = LoggerFactory.getLogger(AlignmentTablePanel.class);
 
-	public EntropyTablePanel(String id,
-			final AlignmentPanel alignmentPanel,
+	public AlignmentTablePanel(String id,
+			final AlignmentDisplayPanel alignmentPanel,
 			final VASEDataObject data) {
 		super(id);
 		
@@ -47,7 +49,20 @@ public class EntropyTablePanel extends Panel {
 				
 				ColumnInfo ci = item.getModelObject();
 				
-				item.add(new Label("header-title",ci.getTitle()));
+				WebMarkupContainer headerDiv = new WebMarkupContainer("header-div");
+				headerDiv.add( new Label("header-title",ci.getTitle()) );
+				
+				Component svg = new WebMarkupContainer("header-toggle-image");
+				svg.add(new AttributeAppender("class", 
+						new Model(tableCellClassPrefix + ci.getId())," "));
+				
+				headerDiv.add(svg);
+				
+				item.add(headerDiv);
+				
+				headerDiv.add(new AttributeModifier("onclick",
+					String.format("orderTableBy('%s');", ci.getId()))
+				);
 			}
 		});
 		
@@ -56,13 +71,15 @@ public class EntropyTablePanel extends Panel {
 			@Override
 			protected void populateItem(ListItem item) {
 				
-				final Integer rowIndex = (Integer) item.getModelObject();
+				final Integer	rowIndex = (Integer) item.getModelObject(),
+								residueNumber = tableData.getResidueNumber(rowIndex);
 						
 				item.add(new AttributeModifier("onclick",String.format("toggleColumn('%s');",
-						alignmentPanel.getPositionClassRepresentation(rowIndex))));
+						alignmentPanel.getResidueNumberClassRepresentation(residueNumber))));
 				
 				item.add(new AttributeAppender("class",
-						new Model( alignmentPanel.getColumnClassRepresentation(rowIndex) )
+						new Model( 
+							alignmentPanel.getColumnClassRepresentation(residueNumber) )
 						," "));
 				
 				item.add(new ListView<ColumnInfo>("cells", columnInfos){
@@ -71,9 +88,15 @@ public class EntropyTablePanel extends Panel {
 					protected void populateItem(ListItem<ColumnInfo> item) {
 						
 						ColumnInfo ci = item.getModelObject();
+						String value = tableData.getValueAsString(ci.getId(), rowIndex);
 						
-						item.add(new Label("cell-text",
-								tableData.getValueAsString(ci.getId(), rowIndex)));
+						Component cellText = new Label("cell-text", value);
+						
+						cellText.add(new AttributeAppender("class", 
+							new Model(tableCellClassPrefix + ci.getId())," "));
+						
+						
+						item.add(cellText);
 					}
 				});
 			}

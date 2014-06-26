@@ -118,48 +118,6 @@ public class HsspJob implements Runnable {
 		}
 	}
 	
-	private void localBuild() throws IOException {
-		
-		String dbString = "";
-		for(String path : Config.properties.getProperty("databanks").split("\\s+")) {
-			dbString += " -d "+path;
-		}
-		
-		File outputFile = getHsspFile();
-
-		String processString = new String( String.format("%s -o %s -a 1 -m 2500 --fetch-dbrefs %s %s",
-				Config.properties.getProperty("mkhssp"),
-				outputFile.getPath(),
-				dbString,
-				getPdbFile().getPath()) );
-		
-		mkhsspProcess = Runtime.getRuntime().exec(processString);
-
-		try {
-			
-	    	mkhsspProcess.waitFor();
-			
-		} catch (InterruptedException e) {
-			
-			log.error("error waiting for job:"+e.getMessage(),e);
-			onShutdown();
-		}
-	    
-	    if(outputFile.isFile() && outputFile.length()>0)
-	    	
-	    	status = JobStatus.FINISHED;
-	    
-	    else {
-	    	
-	    	status = JobStatus.ERROR;
-	    	
-	    	if(outputFile.isFile())
-	    		outputFile.delete();
-	    	
-	    	toErrorFile(mkhsspProcess.getErrorStream());
-	    }
-	}
-	
 	private void remoteBuild() throws IOException, MalformedURLException {
 		
 		StringWriter pdbStringWriter = new StringWriter();
@@ -191,13 +149,7 @@ public class HsspJob implements Runnable {
 		status = JobStatus.RUNNING;
 		
 		try {
-			
-			if(Config.properties.containsKey("hsspws"))
-				remoteBuild();
-			else if(Config.properties.containsKey("mkhssp"))
-				localBuild();
-			else
-				log.error(uuid.toString() + ": no possibility to build hssp");
+			remoteBuild();
 			
 		} catch (Exception e) {
         	

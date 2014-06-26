@@ -12,6 +12,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import nl.ru.cmbi.vase.data.Alignment;
 import nl.ru.cmbi.vase.data.TableData;
 import nl.ru.cmbi.vase.data.VASEDataObject;
 import nl.ru.cmbi.vase.data.TableData.ColumnInfo;
@@ -63,7 +64,7 @@ public class VASEXMLParser {
 		}
 	}
 	
-	private static TableData parseTable(Element root) throws Exception {
+	private static TableData parseTable(Element root, int alignmentLength) throws Exception {
 		
 		Element table = root.element("data_table");
 		if(table==null) {
@@ -109,16 +110,41 @@ public class VASEXMLParser {
 			rowIndex++;
 		}
 		
-		ColumnInfo columnResidueNumber = tableData.getColumnByID(TableData.residueNumberID);
+		// Do some checks on the contents:
+		
+		ColumnInfo	columnResidueNumber = tableData.getColumnByID(TableData.residueNumberID),
+					columnPDBResidue = tableData.getColumnByID(TableData.pdbResidueID);
+		
 		if(columnResidueNumber==null) {
 			
 			throw new Exception("missing column: "+TableData.residueNumberID);
 		}
-		else if(!columnResidueNumber.isNumber()) {
+		else if(!tableData.columnIsNumber(TableData.residueNumberID)) {
 
 			throw new Exception("not numerical: "+TableData.residueNumberID);
 		}
-		if(tableData.getColumnByID(TableData.pdbResidueID)==null) {
+		
+		List<Object>residueNumberDuplicates = tableData.listDuplicateValues(TableData.residueNumberID);
+		if(residueNumberDuplicates.size()>0) {
+
+			throw new Exception("column "+TableData.residueNumberID + 
+					" contains duplicates: "+residueNumberDuplicates.toString());
+		}
+		
+		// The column must contain all the residue positions in the alignment:
+		List<Integer> missingPositions = new ArrayList<Integer> ();
+		for(int i=1; i<=alignmentLength; i++) {
+			
+			if(!tableData.columnHasValue(TableData.residueNumberID, new Integer(i)))
+				missingPositions.add(i);
+		}
+		if(missingPositions.size()>0) {
+
+			throw new Exception("column " + TableData.pdbResidueID + " has missing values: "
+					+ missingPositions.toString());
+		}
+		
+		if(columnPDBResidue==null) {
 			
 			throw new Exception("missing column: "+TableData.pdbResidueID);
 		}
@@ -136,7 +162,7 @@ public class VASEXMLParser {
 		
 		Element fasta = root.addElement("fasta");
 		ByteArrayOutputStream fastaStream = new ByteArrayOutputStream();
-		FastaParser.toFasta(data.getAlignment(),fastaStream);
+		FastaParser.toFasta(data.getAlignment().getMap(),fastaStream);
 		
 		fasta.add( df.createCDATA ( 
 				new String( fastaStream.toByteArray(),StandardCharsets.UTF_8 ) ) );
@@ -176,19 +202,20 @@ public class VASEXMLParser {
 			throw new Exception("no fasta tag");
 		}
 		Map<String,String> fastaMap = FastaParser.parseFasta(IOUtils.toInputStream(fasta.getText(), "UTF-8")); 
-
+		Alignment alignment = new Alignment(fastaMap);
+		
 		Element pdb = root.element("pdb");
 		if(pdb==null) {
 			throw new Exception("no pdb tag");
 		}
 		
-		TableData tableData = parseTable(root);
+		TableData tableData = parseTable(root, alignment.countColumns() );
 		
 		VASEDataObject data;
 		if(pdb.attribute("url")!=null)
-			data = new VASEDataObject(fastaMap,tableData,new URL(pdb.attributeValue("url")));
+			data = new VASEDataObject(alignment,tableData,new URL(pdb.attributeValue("url")));
 		else
-			data = new VASEDataObject(fastaMap,tableData,pdb.getText());
+			data = new VASEDataObject(alignment,tableData,pdb.getText());
 		
 		for(Element sequenceUrl : (List<Element>)root.elements("sequence-url")) {
 
@@ -229,7 +256,7 @@ public class VASEXMLParser {
 	
 						throw new Exception("There\'s no column with id "+axis.getText()+" (specified in plot)");
 					}
-					else if(!column.isNumber()) {
+					else if(!tableData.columnIsNumber(column.getId())) {
 	
 						throw new Exception("Column with id "+axis.getText()+" cannot be used in plot, since it\'s not numerical");
 					}

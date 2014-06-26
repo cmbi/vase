@@ -177,7 +177,7 @@ public class StockholmParser {
 			Alignment alignment = alignments.getAlignment(chainID);
 			
 			VASEDataObject data = new VASEDataObject(
-					alignment.getMap(),
+					alignment,
 					getTable(alignments,residueInfoSet,chainID),
 					pdbURL);
 			

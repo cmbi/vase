@@ -21,9 +21,9 @@ import nl.ru.cmbi.vase.data.VASEDataObject.PlotDescription;
 import nl.ru.cmbi.vase.parse.StockholmParser;
 import nl.ru.cmbi.vase.parse.VASEXMLParser;
 import nl.ru.cmbi.vase.tools.util.Config;
-import nl.ru.cmbi.vase.web.panel.align.AlignmentPanel;
+import nl.ru.cmbi.vase.web.panel.align.AlignmentDisplayPanel;
 import nl.ru.cmbi.vase.web.panel.align.AlignmentLinkedPlotPanel;
-import nl.ru.cmbi.vase.web.panel.align.EntropyTablePanel;
+import nl.ru.cmbi.vase.web.panel.align.AlignmentTablePanel;
 import nl.ru.cmbi.vase.web.panel.align.StructurePanel;
 
 import org.apache.commons.compress.compressors.bzip2.BZip2CompressorInputStream;
@@ -130,14 +130,13 @@ public class AlignmentPage extends WebPage {
 		
 		final VASEDataObject data = dataPerChain.get(chainID);
 		
-		final AlignmentPanel alignmentPanel = new AlignmentPanel("alignment",data);
+		final AlignmentDisplayPanel alignmentPanel = new AlignmentDisplayPanel("alignment",data);
 		add(alignmentPanel);
 		
-		add(new JSDefinitions("js-definitions",
-				alignmentPanel));
+		add(new JSDefinitions("js-definitions", alignmentPanel));
 		
 		addToTabs( "entropy-table", "Entropy Table", 
-				new EntropyTablePanel("entropy-table",alignmentPanel,data));
+				new AlignmentTablePanel("entropy-table",alignmentPanel,data));
 		
 		add(new ListView<PlotDescription>("plots",data.getPlots()){
 			
@@ -151,7 +150,7 @@ public class AlignmentPage extends WebPage {
 				
 				Component plot = new AlignmentLinkedPlotPanel("plot",alignmentPanel,pd,data.getTable());
 				
-				String id="plot"+plotCount;
+				String id="plot"+plotCount; // must be unique
 				
 				addToTabs( id, pd.getPlotTitle(), plot);
 				
@@ -213,9 +212,9 @@ public class AlignmentPage extends WebPage {
 	
 	private class JSDefinitions extends Component {
 		
-		private AlignmentPanel alignmentPanel;
+		private AlignmentDisplayPanel alignmentPanel;
 		
-		public JSDefinitions(String id, AlignmentPanel a) {
+		public JSDefinitions(String id, AlignmentDisplayPanel a) {
 			super(id);
 			
 			alignmentPanel = a;
@@ -239,12 +238,18 @@ public class AlignmentPage extends WebPage {
 			String urlString = RequestCycle.get().urlFor(HomePage.class, new PageParameters()).toString();
 			getResponse().write(String.format("var baseURL='%s';\n", urlString));
 			
-			getResponse().write("var pPDBresclass=/"+AlignmentPanel.pdbResiduePrefix+"([^\\s]+)/;\n");
+			getResponse().write("var pPDBresclass=/"
+					+ AlignmentDisplayPanel.pdbResiduePrefix+"([^\\s]+)/;\n");
 			
-			getResponse().write("var palignmentposclass=/"+AlignmentPanel.alignmentPositionPrefix+"([0-9]+)/;\n");
+			getResponse().write("var palignmentposclass=/"
+					+ AlignmentDisplayPanel.alignmentPositionPrefix+"([0-9]+)/;\n");
+			
+			getResponse().write("var pTableCellClass=/"
+					+ AlignmentTablePanel.tableCellClassPrefix+"([^\\s]+)/;\n");
 
-			getResponse().write("var alignment_columnheader_classname='"+AlignmentPanel.columnHeaderClassname+"';\n");
-			
+			getResponse().write("var alignment_columnheader_classname='"
+					+ AlignmentDisplayPanel.columnHeaderClassname+"';\n");
+					
 			JavaScriptUtils.writeCloseTag(getResponse());
 		}
 		

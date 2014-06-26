@@ -30,7 +30,17 @@ function onScrollTable(table) {
 					<table>
 						<tr>
 							<th wicket:id="header-cell">
-								<div class="data-cell" wicket:id="header-title" />
+								<div class="data_table_title" wicket:id="header-div">
+									<span wicket:id="header-title"></span>
+								
+									<svg width="12" height="8" class="data_table_column_image" wicket:id="header-toggle-image">
+										<g transform="translate(-5,4)">
+											<path transform=""
+											     style="fill:#000000;fill-opacity:1;stroke:none"
+											     d="M 5,4 17,4 11,-4 z" />
+										</g>
+									</svg>
+								</div>
 							</th>
 						</tr>
 					</table>
@@ -44,7 +54,7 @@ function onScrollTable(table) {
 					<table>
 						<tr>
 							<td wicket:id="cells">
-								<div class="data-cell" wicket:id="cell-text" />
+								<div class="data_table_cell" wicket:id="cell-text" />
 							</td>
 						</tr>
 					</table>

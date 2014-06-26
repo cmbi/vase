@@ -28,20 +28,20 @@ import org.apache.wicket.model.Model;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class AlignmentPanel extends Panel {
+public class AlignmentDisplayPanel extends Panel {
 	
-	private static final Logger log = LoggerFactory.getLogger(AlignmentPanel.class);
+	private static final Logger log = LoggerFactory.getLogger(AlignmentDisplayPanel.class);
 	
 	private static final int maxResult = 100; 
 	
-	public String getColumnClassRepresentation(int columnIndex) {
+	public String getColumnClassRepresentation(int residueNumber) {
 		
-		return getPositionClassRepresentation(columnIndex) + " " + getPDBClassRepresentation(columnIndex);
+		return getResidueNumberClassRepresentation(residueNumber) + " " + getPDBClassRepresentation(residueNumber);
 	}
 	
-	public static String getPositionClassRepresentation(int columnIndex) {
+	public static String getResidueNumberClassRepresentation(int residueNumber) {
 		
-		return alignmentPositionPrefix + columnIndex;
+		return alignmentPositionPrefix + residueNumber;
 	}
 	
 	public final static String alignmentPositionPrefix = "alignmentpos";
@@ -51,9 +51,9 @@ public class AlignmentPanel extends Panel {
 	 * @param columnIndex
 	 * @return a string containing the pdb residue's chain ID, amino acid, pdb number and maybe an insertion code
 	 */
-	public String getPDBClassRepresentation(int columnIndex) {
+	public String getPDBClassRepresentation(int residueNumber) {
 		
-		String pdbRepr = data.getTable().getPDBResidue(columnIndex);
+		String pdbRepr = data.getTable().getPDBResidueForResidueNumber(residueNumber);
 		
 		if(pdbRepr.isEmpty()) {
 			
@@ -64,39 +64,40 @@ public class AlignmentPanel extends Panel {
 	
 	public static final String pdbResiduePrefix = "pdbres";
 	
-	private boolean selectedColumns[];
-	
 	private VASEDataObject data;
+	
 	private Alignment alignment;
 	
-	public Alignment getAlignment() {
-		return new Alignment( data.getAlignment() );
+	public int getNumberOfColumns() {
+		
+		return alignment.countColumns();
 	}
 	
 	public static final String columnHeaderClassname="columnheader";
 	
-	public AlignmentPanel(String id, VASEDataObject data) {
+	public AlignmentDisplayPanel(String id, VASEDataObject data) {
 		super(id);
 		
 		this.data = data;
-		this.alignment = new Alignment( data.getAlignment() );
+		this.alignment = data.getAlignment();
 		
 		final String labelFill = "                  ";
 		
-		add(new ListView("positions",Utils.listRange(0,AlignmentPanel.this.alignment.countColumns())){
+		add(new ListView("positions",Utils.listRange(1,AlignmentDisplayPanel.this.alignment.countColumns() + 1)){
 
 			@Override
 			protected void populateItem(ListItem item) {
 				
-				final Integer index = (Integer) item.getModelObject();
+				final Integer residueNumber = (Integer) item.getModelObject();
 				
 				Label pos = new Label("position","#");
 				item.add(pos);
 				
-				String columnClass = columnHeaderClassname+" "+AlignmentPanel.this.getColumnClassRepresentation(index);
+				String columnClass = columnHeaderClassname + " "
+					+ AlignmentDisplayPanel.this.getColumnClassRepresentation(residueNumber);
 				
 				pos.add(new AttributeModifier("class",columnClass));
-				pos.add(new AttributeModifier("title","position "+index));
+				pos.add(new AttributeModifier("title","position "+residueNumber));
 			}
 		});
 		
@@ -114,7 +115,7 @@ public class AlignmentPanel extends Panel {
 				
 				final Integer row = (Integer) item.getModelObject();
 				
-				final String label = AlignmentPanel.this.alignment.getLabels().get(row);
+				final String label = AlignmentDisplayPanel.this.alignment.getLabels().get(row);
 				
 				String id = label.split("/")[0], ref=null;
 				if(id.length()==4)
@@ -133,8 +134,8 @@ public class AlignmentPanel extends Panel {
 				
 				final Integer row = (Integer) item.getModelObject();
 				
-				final String	label	= AlignmentPanel.this.alignment.getLabels().get(row),
-								seq		= AlignmentPanel.this.alignment.getAlignedSeq(label);
+				final String	label	= AlignmentDisplayPanel.this.alignment.getLabels().get(row),
+								seq		= AlignmentDisplayPanel.this.alignment.getAlignedSeq(label);
 				
 				String numberstring = ""+row + " ";
 				

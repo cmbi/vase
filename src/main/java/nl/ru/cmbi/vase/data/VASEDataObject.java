@@ -24,7 +24,7 @@ public class VASEDataObject {
 	}
 	
 	@Setter(AccessLevel.NONE)
-	private Map<String, String> alignment;
+	private Alignment alignment;
 
 	@Setter(AccessLevel.NONE)
 	private TableData table;
@@ -42,18 +42,18 @@ public class VASEDataObject {
 	private Map<String, URL> sequenceReferenceURLs = new HashMap<String, URL>();
 
 
-	public VASEDataObject(Map<String, String> fastaMap, 
+	public VASEDataObject(Alignment alignment, 
 			TableData tableData, String pdbContents) {
 		
-		this.alignment=fastaMap;
+		this.alignment=alignment;
 		this.table=tableData;
 		this.pdbContents=pdbContents;
 	}
 	
-	public VASEDataObject(Map<String, String> fastaMap, 
+	public VASEDataObject(Alignment alignment, 
 			TableData tableData, URL pdbURL) {
 		
-		this.alignment=fastaMap;
+		this.alignment=alignment;
 		this.table=tableData;
 		this.pdbURL = pdbURL;
 	}
