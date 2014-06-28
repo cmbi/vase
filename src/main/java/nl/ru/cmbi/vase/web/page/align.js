@@ -41,7 +41,7 @@ function toggleColumnImage(varID, up ) {
 			
 			var m = pTableCellClass.exec( classString );
 			
-			classString = classString.replace(toggle_classname,"");
+			classString = classString.replace(toggle_classname,"").trim();
 			
 			if( m && m[1] == varID ) { // it's the one we need to make visible
 				
@@ -115,6 +115,7 @@ function orderTableBy(varID) {
 		}
 		
 		// for some reason, the associative array didn't work with rows as keys
+		// so we use a list of list positions
 		rows.push( e );
 		values.push( value );
 		positions.push( rows.length - 1 );
@@ -125,17 +126,19 @@ function orderTableBy(varID) {
 	
 	positions.sort(
 		function( pos1, pos2 ) {
+
 			return compareTableValues( values[ pos1 ], values[ pos2 ]);
 		}
 	);
 	
 	if(values[ positions[0] ] == values[0] ) {
+
 		// means the smallest one is already on top in the browser
 		
 		positions.reverse();
-		toggleColumnImage(varID, true );
+		toggleColumnImage(varID, true ); // make it point up
 	}
-	else toggleColumnImage(varID, false );
+	else toggleColumnImage(varID, false ); // make it point down
 	
 	for(var i = 0; i<rows.length; i++) {
 		
@@ -163,10 +166,7 @@ function updateSequenceHighlighting () {
 	var highLightedHeaderElements = document.getElementsByClassName(alignment_columnheader_classname+" "+alignment_highlighted_classname);
 	
 	// Make a boolean list that knows which columns (indices) haven been highlighted:
-	var columnsHighlighed = new Array(headerElements.length);
-	for (var i = 0; i < headerElements.length; i++) {
-		columnsHighlighed[i] = false;
-	}
+	var columnsHighlighted= [];
 	for (var i = 0; i < highLightedHeaderElements.length; i++) {
 		
 		var m = palignmentposclass.exec( highLightedHeaderElements[i].getAttribute("class") );
@@ -174,7 +174,7 @@ function updateSequenceHighlighting () {
 			
 			// residue numbers: 1,2,3,4, ..
 			// indices: 0,1,2,3, ..
-			columnsHighlighed[ parseInt(m[1]) - 1 ] = true;
+			columnsHighlighted.push( parseInt(m[1]) - 1 ) ;
 		}
 	}
 	
@@ -182,31 +182,42 @@ function updateSequenceHighlighting () {
 	for (var j = 0; j < sequenceElements.length; j++) {
 		
 		var tagLess = sequenceElements[j].textContent;
-		var tagged = "";
-		
-		for(var i = 0; i < tagLess.length; i++) {
-			
-			if(columnsHighlighed[i]) {
-				
-				// If an opening tag hasn't been placed yet before the highlighted area, place it:
-				if(i==0 || !columnsHighlighed[i-1]) {
-					
-					tagged += "<span class='"+alignment_highlighted_classname+"'>" ;
-				}
-				
-			// Place an end tag if a highlighted area ends here:
-			} else if(i>0 && columnsHighlighed[i-1]) {
-					
-				tagged += "</span>" ;
-			}
-			
-			tagged += tagLess.charAt(i);
+		var tagged;
+		if(columnsHighlighted.length>0) {
+
+			tagged = tagLess.substring(0,columnsHighlighted[0]);
+		} else {
+			tagged = tagLess;
 		}
 		
-		// Place an end tag at the end of the sequence, if necessary.
-		if(columnsHighlighed[tagLess.length-1]) {
+		var i=0;
+		while (i<columnsHighlighted.length) { // iterates over highlighted areas
+
+			// Determine start and end position of highlighted area.
+			var start = columnsHighlighted[i];
+
+			while ( (i+1) < columnsHighlighted.length
+				&& columnsHighlighted[i+1]==(columnsHighlighted[i]+1) ) {
+
+				i+=1;
+			}
+			var end = columnsHighlighted[i] + 1;
+
+			// Write html code for highlighted area.
+			tagged += "<span class='"+alignment_highlighted_classname+"'>"
+				+ tagLess.substring(start, end) + "</span>";
+
+			// Write html code for are between this highlight and the next.
+			if( (i+1) < columnsHighlighted.length ) {
+
+				tagged += tagLess.substring(end,columnsHighlighted[i+1]);
+			}
+			else if( end < tagLess.length ) {
+
+				tagged += tagLess.substring(end);
+			}
 			
-			tagged += "</span>" ;
+			i += 1;
 		}
 		
 		sequenceElements[j].innerHTML = tagged;
