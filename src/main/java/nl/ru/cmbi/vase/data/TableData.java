@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Locale;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -314,7 +315,7 @@ public class TableData {
 		
 		else if(ColumnDataType.DOUBLE.matchesByClass(value))
 			
-			return String.format("%.2f", matrix.get(rowIndex).get(columnIndex));
+			return String.format(Locale.ENGLISH,"%.2f", matrix.get(rowIndex).get(columnIndex));
 		else
 			return matrix.get(rowIndex).get(columnIndex).toString();
 	}
