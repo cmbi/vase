@@ -250,6 +250,7 @@ public class StockholmParser {
 		ColumnInfo colResidueNumber = new ColumnInfo();
 		colResidueNumber.setTitle("Residue Number");
 		colResidueNumber.setId("residue_number");
+		colResidueNumber.setMouseOver(true);
 		columns.add(colResidueNumber);
 		
 		ColumnInfo colPDBResidue = new ColumnInfo();

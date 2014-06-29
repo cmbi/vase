@@ -11,6 +11,8 @@ import nl.ru.cmbi.vase.data.ResidueInfo;
 import nl.ru.cmbi.vase.data.VASEDataObject;
 import nl.ru.cmbi.vase.tools.util.AminoAcid;
 import nl.ru.cmbi.vase.web.Utils;
+import nl.ru.cmbi.vase.data.TableData.ColumnInfo;
+import nl.ru.cmbi.vase.data.TableData;
 
 import org.apache.wicket.AttributeModifier;
 import org.apache.wicket.Component;
@@ -97,7 +99,19 @@ public class AlignmentDisplayPanel extends Panel {
 					+ AlignmentDisplayPanel.this.getColumnClassRepresentation(residueNumber);
 				
 				pos.add(new AttributeModifier("class",columnClass));
-				pos.add(new AttributeModifier("title","position "+residueNumber));
+
+				TableData tableData = AlignmentDisplayPanel.this.data.getTable();
+				int rowIndex = tableData.getRowIndexForResidueNumber(residueNumber);
+				String title="";
+				for(ColumnInfo ci : tableData.getColumnInfos()) {
+
+					if(ci.isMouseOver()) {
+						title += ci.getTitle() + ":"
+							+ tableData.getValueAsString(ci.getId(), rowIndex) + "\n" ;
+					}
+				}
+
+				pos.add(new AttributeModifier("title",title));
 			}
 		});
 		
