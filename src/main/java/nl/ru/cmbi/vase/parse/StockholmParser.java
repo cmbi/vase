@@ -18,6 +18,7 @@ import nl.ru.cmbi.vase.analysis.Calculator;
 import nl.ru.cmbi.vase.analysis.MutationDataObject;
 import nl.ru.cmbi.vase.data.Alignment;
 import nl.ru.cmbi.vase.data.AlignmentSet;
+import nl.ru.cmbi.vase.data.PDBResidueInfo;
 import nl.ru.cmbi.vase.data.ResidueInfo;
 import nl.ru.cmbi.vase.data.ResidueInfoSet;
 import nl.ru.cmbi.vase.data.TableData;
@@ -176,9 +177,13 @@ public class StockholmParser {
 			
 			Alignment alignment = alignments.getAlignment(chainID);
 			
+			InputStream pdbIn = pdbURL.openStream();
+			Map<Character,Map<String,PDBResidueInfo>> pdbResidues = PDBParser.parseResidues(pdbIn);
+			pdbIn.close();
+			
 			VASEDataObject data = new VASEDataObject(
-					alignment,
-					getTable(alignments,residueInfoSet,chainID),
+					alignment, 
+					getTable(alignments,pdbResidues,residueInfoSet,chainID),
 					pdbURL);
 			
 			VASEDataObject.PlotDescription pd = new VASEDataObject.PlotDescription();
@@ -204,7 +209,9 @@ public class StockholmParser {
 		return alignment.getAlignedSeq(alignment.getLabels().get(0));
 	}
 	
-	private static ResidueInfo getResidueInfoFor(Alignment alignment, Map<Integer, ResidueInfo> residueInfoMap, int columnIndex) {
+	private static ResidueInfo getResidueInfoFor(
+			Alignment alignment, 
+			Map<Integer, ResidueInfo> residueInfoMap, int columnIndex) {
 		
 		String alignedPDBSeq = getAlignedPDBSeq(alignment);
 		
@@ -217,8 +224,26 @@ public class StockholmParser {
 		}
 		else return null; // If it's a gap
 	}
+
+	private static String getPDBRepresentation(PDBResidueInfo pdbResInfo) {
+		
+		String pdbno = pdbResInfo.getResidueNumber();
+		
+		char finalPDBnoChar = pdbno.charAt(pdbno.length()-1);
+		if(Character.isLetter(finalPDBnoChar)) {
+			// there's an insertion code, convert it's notation to jmol syntax
+			
+			pdbno = pdbno.substring(0,pdbno.length()-1)+"^"+finalPDBnoChar;
+		}
+		
+		return String.format("[%s]%s:%c",
+								pdbResInfo.getResidueName(),
+								pdbno,
+								pdbResInfo.getChain() );
+	}
 	
-	private static String getPDBRepresentation(Alignment alignment, Map<Integer, ResidueInfo> residueInfoMap, int columnIndex) {
+	private static String getPDBRepresentation(Alignment alignment, 
+			Map<Integer, ResidueInfo> residueInfoMap, List<PDBResidueInfo> pdbResidues, int columnIndex) {
 
 		String alignedPDBSeq = getAlignedPDBSeq(alignment);
 		ResidueInfo res = getResidueInfoFor(alignment,residueInfoMap,columnIndex);
@@ -239,7 +264,10 @@ public class StockholmParser {
 	}
 
 	
-	private static TableData getTable(AlignmentSet alignments, ResidueInfoSet residueInfos, char chainID) throws Exception {
+	private static TableData getTable(
+			AlignmentSet alignments,
+			Map<Character,Map<String,PDBResidueInfo>> pdbResidues, 
+			ResidueInfoSet residueInfos, char chainID) throws Exception {
 		
 		Alignment alignment = alignments.getAlignment(chainID);
 		
@@ -285,10 +313,17 @@ public class StockholmParser {
 			table.setValue(colResidueNumber.getId(), i, new Integer(i+1));
 			table.setValue(colEntropy.getId(), i, new Double(mutationData.getEntropyScores().get(i)));
 			table.setValue(colVariability.getId(), i, new Integer(mutationData.getVariabilityScores().get(i)));
-			
+						
 			if(resInfo!=null) {
 				
-				table.setValue(colPDBResidue.getId(), i, getPDBRepresentation(alignment, chainResInfos, i));
+				PDBResidueInfo pdbResInfo = pdbResidues.get(chainID).get(resInfo.getPdbNumber());
+				if(pdbResInfo!=null) {
+					
+					log.info("set pdb residue "+getPDBRepresentation(pdbResInfo));
+					
+					table.setValue(colPDBResidue.getId(), i, getPDBRepresentation(pdbResInfo));
+				}
+				
 				table.setValue(colWeight.getId(), i, new Double(resInfo.getWeight()));
 			}
 		}
