@@ -79,11 +79,11 @@ public class AlignmentLinkedPlotPanel extends Panel {
 		
 		if(tableData.columnIsOfType(xColumnInfo.getId(),ColumnDataType.INTEGER)) {
 
-			options.setXStepSize((int)options.getXStepSize());
+			options.setXStepSize(Math.max((int)options.getXStepSize(),1));
 		}
 		if(tableData.columnIsOfType(yColumnInfo.getId(),ColumnDataType.INTEGER)) {
 
-			options.setYStepSize((int)options.getYStepSize());
+			options.setYStepSize(Math.max((int)options.getYStepSize(),1));
 		}
 		
 		options.setImagePixWidth(800);
