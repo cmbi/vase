@@ -27,8 +27,38 @@ import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class AlignmentLinkedPlotPanel extends Panel {
+	
+	static Logger log = LoggerFactory.getLogger(AlignmentLinkedPlotPanel.class);
+	
+	private static double determineStepSize(double smallestValue, double largestValue) {
+		
+		double initial = (largestValue - smallestValue) / 10, stepSize = initial, s=1.0 ;
+		
+		// Round the number to appropriate significance
+		if( initial > 1.0 ) {
+			
+			while ( s < initial ) {
+				
+				stepSize = s * ((int) (initial / s));
+				
+				s *= 10.0 ;
+			}
+		} else {
+			
+			while ( s > initial ) {
+				
+				s *= 0.1;
+				
+				stepSize = s * ((int) (initial / s));
+			}
+		}
+		
+		return stepSize;
+	}
 
 	public AlignmentLinkedPlotPanel(String id,
 			final AlignmentDisplayPanel alignmentPanel,
@@ -74,17 +104,8 @@ public class AlignmentLinkedPlotPanel extends Panel {
 		options.setMinY(smallestY * 1.1);
 		options.setMaxY(Utils.max(yValues).doubleValue() * 1.1);
 				
-		options.setXStepSize((options.getMaxX() - options.getMinX())/10);
-		options.setYStepSize((options.getMaxY() - options.getMinY())/10);
-		
-		if(tableData.columnIsOfType(xColumnInfo.getId(),ColumnDataType.INTEGER)) {
-
-			options.setXStepSize(Math.max((int)options.getXStepSize(),1));
-		}
-		if(tableData.columnIsOfType(yColumnInfo.getId(),ColumnDataType.INTEGER)) {
-
-			options.setYStepSize(Math.max((int)options.getYStepSize(),1));
-		}
+		options.setXStepSize(determineStepSize(options.getMinX(),options.getMaxX()));
+		options.setYStepSize(determineStepSize(options.getMinY(),options.getMaxY()));
 		
 		options.setImagePixWidth(800);
 		options.setImagePixHeight(390);
