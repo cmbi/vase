@@ -135,8 +135,8 @@ public class AlignmentPage extends WebPage {
 		
 		add(new JSDefinitions("js-definitions", alignmentPanel));
 		
-		addToTabs( "entropy-table", "Entropy Table", 
-				new AlignmentTablePanel("entropy-table",alignmentPanel,data));
+		addToTabs( "data-table", "Table", 
+				new AlignmentTablePanel("data-table",alignmentPanel,data));
 		
 		add(new ListView<PlotDescription>("plots",data.getPlots()){
 			
@@ -164,6 +164,7 @@ public class AlignmentPage extends WebPage {
 			protected void populateItem(ListItem<String> item) {
 				
 				String tabid = item.getModelObject();
+				item.add(new AttributeModifier("id","switch-"+tabid));
 				
 				WebMarkupContainer link = new WebMarkupContainer("tab-link");
 				

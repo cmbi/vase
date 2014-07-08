@@ -116,11 +116,6 @@ public class AlignmentDisplayPanel extends Panel {
 		});
 		
 		int nseqs=this.alignment.countAlignedSeqs();
-		/*if(nseqs>maxResult)
-			nseqs=maxResult;*/
-		
-		add(new Label("showing",String.format("Showing %d of %d aligned sequences", nseqs, this.alignment.countAlignedSeqs())));
-		
 
 		add(new ListView("labels",Utils.listRange(0,nseqs)) {
 

@@ -19,8 +19,12 @@ import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.Panel;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ScatterPlotPanel extends Panel {
+	
+	static Logger log = LoggerFactory.getLogger(ScatterPlotPanel.class);
 
 	protected Component createDot (final String markupID, final int index) {
 
@@ -161,7 +165,7 @@ public class ScatterPlotPanel extends Panel {
 	}
 
 	private static List<Double> getScalePositions(double start, double end, double step) {
-
+		
 		double pos=start;
 		List<Double> positions = new ArrayList<Double>();
 		positions.add(start);

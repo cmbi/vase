@@ -60,7 +60,7 @@ pre.alignpre {
 
 /* it is important that both have the same width: */
 #alignment-contents, #alignment-header {
-	width: 1380px;
+	/*width: 1380px;*/
 	text-align:left;
 }
 /* it is important that both have the same height: */
@@ -89,4 +89,10 @@ circle.scatter-dot.alignment_highlighted {
 	-webkit-user-select: none;
 	-o-user-select: none;
 	user-select: none;
+}
+
+h1, body {
+	padding:0;
+	border:0;
+	margin:0
 }

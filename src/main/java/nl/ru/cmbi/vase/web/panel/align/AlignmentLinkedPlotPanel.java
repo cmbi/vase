@@ -108,7 +108,7 @@ public class AlignmentLinkedPlotPanel extends Panel {
 		options.setYStepSize(determineStepSize(options.getMinY(),options.getMaxY()));
 		
 		options.setImagePixWidth(800);
-		options.setImagePixHeight(390);
+		options.setImagePixHeight(380);
 		
 		options.setXValues(xValues);
 		options.setYValues(yValues);

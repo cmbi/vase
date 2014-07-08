@@ -319,8 +319,6 @@ public class StockholmParser {
 				PDBResidueInfo pdbResInfo = pdbResidues.get(chainID).get(resInfo.getPdbNumber());
 				if(pdbResInfo!=null) {
 					
-					log.info("set pdb residue "+getPDBRepresentation(pdbResInfo));
-					
 					table.setValue(colPDBResidue.getId(), i, getPDBRepresentation(pdbResInfo));
 				}
 				

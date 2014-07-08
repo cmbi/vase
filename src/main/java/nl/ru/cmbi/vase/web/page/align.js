@@ -1,12 +1,38 @@
-function demo(msg) {
-	
-	document.getElementById("demo").innerHTML = msg;
-}
-
 var data_cell_classname = "data_table_cell",
 	data_row_classname  = "data_table_row",
 	data_toggle_image_classname = "data_table_column_image",
 	toggle_classname = "toggled";
+
+function findElements( tagname, classname ) {
+	
+	var tags = document.getElementsByTagName(tagname);
+	var classtags = [];
+	for (var i = 0; i < tags.length; i++) {
+		
+		var classString = tags[i].getAttribute("class");
+		
+		if(null != classString && classString.indexOf(classname) != -1 ) {
+			
+			classtags.push(tags[i]);
+		}
+	}
+	
+	return classtags
+}
+
+function addClass( element, classname ) {
+	
+	if( element.getAttribute("class").indexOf(classname) == -1 ) {
+		
+		element.setAttribute('class', element.getAttribute("class") +" "+ classname );
+	}
+}
+
+function removeClass( element, classname ) {
+	
+	element.setAttribute('class',element.getAttribute("class")
+			.replace(classname,"").trim() );
+}
 
 function compareTableValues( string1, string2 ) {
 	
@@ -30,9 +56,11 @@ function compareTableValues( string1, string2 ) {
 	}
 }
 
+var upImageClass = "glyphicon-chevron-up", downImageClass = "glyphicon-chevron-down";
+
 function toggleColumnImage(varID, up ) {
 
-	var svgs = document.getElementsByTagName("svg");
+	var svgs = document.getElementsByTagName("span");
 	for (var i = 0; i < svgs.length; i++) {
 		
 		var classString = svgs[i].getAttribute("class");
@@ -41,32 +69,16 @@ function toggleColumnImage(varID, up ) {
 			
 			var m = pTableCellClass.exec( classString );
 			
-			classString = classString.replace(toggle_classname,"").trim();
+			classString = classString.replace(toggle_classname,"")
+									.replace(upImageClass,"")
+									.replace(downImageClass,"")
+									.trim();
 			
 			if( m && m[1] == varID ) { // it's the one we need to make visible
+								
+				var imageclass = up? upImageClass : downImageClass;
 				
-				// We need to flip the 'path' element
-				for(var g=0;g<svgs[i].childNodes.length;g++) {
-					
-					if(svgs[i].childNodes[g].tagName!="g") continue;
-					
-					for(var p=0;p<svgs[i].childNodes[g].childNodes.length; p++) {
-						
-						if(svgs[i].childNodes[g].childNodes[p].tagName!="path") continue;
-						
-						var pathElement = svgs[i].childNodes[g].childNodes[p];
-						
-						if(up)
-							
-							pathElement.setAttribute("transform","scale(1,1)");
-							
-						else // down
-							
-							pathElement.setAttribute("transform","scale(1,-1)");
-					}
-				}
-				
-				svgs[i].setAttribute("class",classString+" "+toggle_classname);
+				svgs[i].setAttribute("class",classString+" "+toggle_classname + " " + imageclass);
 				
 			} else { // it's one of the other's that needs to be hidden
 				
@@ -80,22 +92,19 @@ function toggleColumnImage(varID, up ) {
 function orderTableBy(varID) {
 	
 	/*	Here 'getElementsByClassName' only finds half of the elements in some browsers,
-		so use 'getElementsByTagName' instead.
+		so use the custom function instead.
 	*/
 	
-	var divs = document.getElementsByTagName("div");
+	var divs = findElements("div",data_row_classname);
 	var dataCells = [];
 	for (var i = 0; i < divs.length; i++) {
 		
 		var classString = divs[i].getAttribute("class");
-		
-		if(null != classString && classString.indexOf(data_row_classname) == -1 ) {
 			
-			var m = pTableCellClass.exec( classString );
-			if( m && m[1] == varID ) {
+		var m = pTableCellClass.exec( classString );
+		if( m && m[1] == varID ) {
 
-				dataCells.push(divs[i]);
-			}
+			dataCells.push(divs[i]);
 		}
 	}
 	
@@ -310,12 +319,94 @@ function switchTabVisibility(id) {
 	for (var i=0; i<tabids.length; i++) {
 		
 		var tabElement = document.getElementById(tabids[i]);
+		var switchElement = document.getElementById("switch-"+tabids[i]);
+		
+		console.log("switch-"+tabids[i]+": "+switchElement!=null);
 		
 		if( tabids[i]==id ) {
 			
 			tabElement.style.display = 'block';
+			
+			addClass( switchElement, 'active' );
+			
 		} else {
+			
 			tabElement.style.display = 'none';
+			
+			removeClass( switchElement, 'active' );
 		}
 	}
+	
+	setTablePlotsSizes();
+}
+
+function setSizes() {
+	
+	setTablePlotsSizes();
+	
+	setAlignmentSize();
+}
+
+function setTablePlotsSizes() {
+	
+	var	pageWidth  = window.innerWidth;
+	
+	var tableOrPlotMaxWidth = pageWidth - jsmolInfo.width;
+
+	var	tableAndPlots = document.getElementById("table-and-plots"),
+		tableHeader = document.getElementById("data-table-header"),
+		tableBody = document.getElementById("data-table-body");
+	
+	tableAndPlots.style.width = "" + tableOrPlotMaxWidth + "px";
+
+	var tableClientWidth = tableBody.scrollWidth;
+	if(tableBody.scrollWidth > tableOrPlotMaxWidth) {
+
+		// take off 15px for scroll bar
+		tableClientWidth =  tableOrPlotMaxWidth - 15;
+	}
+	
+	tableHeader  .style.width = "" + tableClientWidth + "px";
+	tableBody    .style.width = "" + tableClientWidth + "px";
+
+	var plots = findElements("div","alignment-linked-plot");
+	for(var i=0; i<plots.length; i++) {
+		
+		plots[i].style.width = tableOrPlotMaxWidth ; 
+	}
+}
+
+function setAlignmentSize() {
+	
+	// Adjusts the size of the alignment's scrollable area to the space left in the top half.
+	// For the bottom half's height is considered fixed.
+	
+	var	pageWidth  = window.innerWidth,
+		pageHeight = window.innerHeight;
+	
+	var pageHeader		= document.getElementById("page-header"),
+		alignmentHeader	= document.getElementById("alignment-header"),
+		alignmentFrame	= document.getElementById("alignment-frame"),
+		bottomHalf		= document.getElementById("bottom-half");
+
+	// apparently 3px need to be taken off here, or it won't fit
+	// (the required amount seems to vary per browser)
+	var	topHeight = pageHeight - bottomHalf.clientHeight - 5;
+	
+	// Space reserved for alignment scrolling panel:
+	// (take off 15 px for the scroll bars)
+	var	alignmentHeight = topHeight - pageHeader.clientHeight - alignmentHeader.clientHeight - 15,
+		alignmentLabelsWidth = 140,
+		alignmentWidth = pageWidth - alignmentLabelsWidth - 15;
+	
+	var	alignmentContents	= document.getElementById("alignment-contents"),
+		alignmentLabels		= document.getElementById("alignment-labels");
+
+	alignmentContents.style.height = "" + alignmentHeight + "px";
+	alignmentLabels  .style.height = "" + alignmentHeight + "px";
+	alignmentHeader  .style.width  = "" + alignmentWidth  + "px";
+	alignmentContents.style.width  = "" + alignmentWidth  + "px";
+
+	alignmentLabels  .style.width  = "" + alignmentLabelsWidth + "px";
+	
 }

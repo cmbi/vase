@@ -51,12 +51,11 @@ public class AlignmentTablePanel extends Panel {
 				
 				WebMarkupContainer headerDiv = new WebMarkupContainer("header-div");
 				headerDiv.add( new Label("header-title",ci.getTitle()) );
-				
-				Component svg = new WebMarkupContainer("header-toggle-image");
-				svg.add(new AttributeAppender("class", 
+
+				Component image = new WebMarkupContainer("header-toggle-image");
+				image.add(new AttributeAppender("class", 
 						new Model(tableCellClassPrefix + ci.getId())," "));
-				
-				headerDiv.add(svg);
+				headerDiv.add(image);
 				
 				item.add(headerDiv);
 				

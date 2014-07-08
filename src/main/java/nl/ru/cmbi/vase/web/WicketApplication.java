@@ -15,6 +15,8 @@ import org.apache.wicket.request.resource.ResourceReference;
 import org.apache.wicket.request.resource.ResourceStreamResource;
 import org.apache.wicket.request.resource.SharedResourceReference;
 
+import de.agilecoders.wicket.core.Bootstrap;
+
 /**
  * Application object for your web application.
  * If you want to run this application without deploying, run the Start class.
@@ -47,6 +49,9 @@ public class WicketApplication extends WebApplication
 	{
 		super.init();
 
+		// Bootstrap
+		Bootstrap.install(this);
+		
 		// add your configuration here
 		
 		mountPage("/align", AlignmentPage.class);

@@ -5,63 +5,36 @@
 </head>
 
 <body>
-	<wicket:panel>
+<wicket:panel>	
+	<script type="text/javascript">
+		function onScrollTable(table) {
+
+		var header = document.getElementById ("data-table-header");
+		header.scrollLeft = table.scrollLeft;
+	}
+	</script>
 	
-<script type="text/javascript">
-
-function onScrollTable(table) {
-
-	var header = document.getElementById ("data-table-header");
-	header.scrollLeft = table.scrollLeft;
-}
-
-</script>
-
-		<div style="padding: 5px; float: left;" class="data_table">
-		
-			<!-- This area moves along when the data table is horizontally scrolled -->
-			<div id="data-table-header" style="overflow: hidden">
-				<!--
-					Here, some extra space needs to be occupied inside the scrolled area.
-					It must be larger than the scrolled area in the table rows.
-					We realize this by wrapping it in a padded div element.
-				 -->
-				<div class="hscroll-spacer" style="padding-right:50px">
-					<table>
-						<tr>
-							<th wicket:id="header-cell">
-								<div class="data_table_title" wicket:id="header-div">
-									<span wicket:id="header-title"></span>
-								
-									<svg width="12" height="8" class="data_table_column_image" wicket:id="header-toggle-image">
-										<g transform="translate(-5,4)">
-											<path transform=""
-											     style="fill:#000000;fill-opacity:1;stroke:none"
-											     d="M 5,4 17,4 11,-4 z" />
-										</g>
-									</svg>
-								</div>
-							</th>
-						</tr>
-					</table>
-				</div>
-			</div>
-			<!-- 
-				The table rows need some padding to fit in the scroll bar.
-			 -->
-			<div id="data-table-body" style="overflow:scroll;height:350px;padding-right:15px" onscroll="onScrollTable(this);">
-				<div wicket:id="rows" class="data_table_row">
-					<table>
-						<tr>
-							<td wicket:id="cells">
-								<div class="data_table_cell" wicket:id="cell-text" />
-							</td>
-						</tr>
-					</table>
-				</div>
-			</div>
-		</div>
-
-	</wicket:panel>
+	<table class="table table-hover">
+		<thead>
+			<tr>
+				<th wicket:id="header-cell">
+					<div class="data_table_title" wicket:id="header-div">
+						<span wicket:id="header-title"></span>
+						<span wicket:id="header-toggle-image"
+							class="data_table_column_image glyphicon glyphicon-chevron-up"></span>
+					</div>
+				</th>
+			</tr>
+		</thead>
+		<tbody style="height: 120px; overflow-y: scroll;">
+			<tr wicket:id="rows" class="data_table_row">
+				<td wicket:id="cells">
+					<div class="data_table_cell" wicket:id="cell-text" />
+				</td>
+			</tr>
+		</tbody>
+	</table>
+	
+</wicket:panel>
 </body>
 </html>
