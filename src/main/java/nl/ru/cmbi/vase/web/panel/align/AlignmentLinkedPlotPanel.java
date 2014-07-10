@@ -142,7 +142,8 @@ public class AlignmentLinkedPlotPanel extends Panel {
 				Component dot = new Label(markupID);
 				
 				dot.add(new AttributeModifier("onclick",
-						String.format("toggleColumn('%s');", alignmentPanel.getResidueNumberClassRepresentation(residueNumber))));
+						String.format("toggleColumn('%s');",
+							alignmentPanel.getResidueNumberClassRepresentation(residueNumber))));
 				
 				dot.add(new AttributeAppender("class",new Model(alignmentPanel.getColumnClassRepresentation(residueNumber)), " "));
 								

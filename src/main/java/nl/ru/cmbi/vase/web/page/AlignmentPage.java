@@ -43,6 +43,7 @@ import org.apache.wicket.util.string.StringValue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.core.util.string.JavaScriptUtils;
 
 public class AlignmentPage extends WebPage {
@@ -171,6 +172,11 @@ public class AlignmentPage extends WebPage {
 				link.add(new AttributeModifier("onclick",String.format("switchTabVisibility('%s');", tabid)));
 				link.add(new Label("tab-title",tabTitles.get(tabid)));
 				
+				if(firstActiveTab.equals(tabid)) {
+					
+					item.add(new AttributeModifier("class","active"));
+				}
+				
 				item.add(link);
 			}
 		});
@@ -198,11 +204,17 @@ public class AlignmentPage extends WebPage {
 		}
 	};
 	
+	private String firstActiveTab = "";
+	
 	private void addToTabs(String id, String tabTitle, Component component) {
 
+		// first added becomes the active tab
 		String display="none";
-		if(tabTitles.size()==0)
+		if(tabTitles.size()==0) {
+			
+			firstActiveTab = id;
 			display="block";
+		}
 		
 		tabTitles.put(id,tabTitle);
 		component.add(new AttributeModifier("id",id));

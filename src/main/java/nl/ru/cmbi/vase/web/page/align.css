@@ -1,71 +1,11 @@
 @CHARSET "UTF-8";
 
-pre.alignpre {
-	margin: 0;
-	padding: 0;
-}
-
-.alignment_frame {
-	border-collapse: collapse;
-	border-spacing: 0;
-	width:inherit;
-}
-.alignment_frame td,th {
-	vertical-align:top;
-	padding:0;
-}
-
-.data_table table {
-	border-collapse: collapse;
-	border-spacing: 0;
-	text-align:left;
-}
-
-.data_table td, .data_table th {
-	width: 160px;
-	padding: 0;
-}
-
-/* it is important that both have the same width: */
-#data-table-header, #data-table-body {
-	width:100%;
-}
-
-.data_table_cell, .data_table_title {
-	width: 160px;
-}
-
-.data_table th {
-	font-weight: bold;
-}
-
-.data_table_title:hover {
-	background-color: #DDDDFF
-}
-
 .data_table_row:hover {
 	background-color: #FFDDDD
 }
 
 .data_table_row.alignment_highlighted:hover {
 	background-color: #DD0000
-}
-
-.data_table_column_image {
-	display: none
-}
-.data_table_column_image.toggled {
-	display: inline
-}
-
-/* it is important that both have the same width: */
-#alignment-contents, #alignment-header {
-	/*width: 1380px;*/
-	text-align:left;
-}
-/* it is important that both have the same height: */
-#alignment-contents, #alignment-labels {
-	height: 375px;
 }
 
 .alignment_highlighted {
@@ -75,24 +15,6 @@ pre.alignpre {
 circle.scatter-dot {
 	fill: green
 }
-circle.scatter-dot.alignment_highlighted {
+circle.scatter-dot.danger {
 	fill: red
-}
-
-#structure {
-	float: right
-}
-
-.unselectable {
-	-moz-user-select: -moz-none;
-	-khtml-user-select: none;
-	-webkit-user-select: none;
-	-o-user-select: none;
-	user-select: none;
-}
-
-h1, body {
-	padding:0;
-	border:0;
-	margin:0
 }
