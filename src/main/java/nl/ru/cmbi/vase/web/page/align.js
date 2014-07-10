@@ -10,7 +10,7 @@ function findElements( tagname, classname ) {
 	for (var i = 0; i < tags.length; i++) {
 		
 		if( hasClass(tags[i], classname) ) {
-			
+
 			classtags.push(tags[i]);
 		}
 	}
@@ -20,11 +20,12 @@ function findElements( tagname, classname ) {
 
 function hasClass( element, classname ) {
 	
-	if(element.getAttribute("class")!=null) {
+	if(element != null && element.getAttribute("class")!=null) {
 
 		var classes = element.getAttribute("class").split(/\s+/);
+
 		for(var i=0; i<classes.length; i++) {
-			
+
 			if( classes[i] == classname ) {
 				
 				return true;
@@ -250,20 +251,52 @@ function updateSequenceHighlighting () {
 	}
 }
 
+function findColumnElement(classname) {
+	
+	var columnElements = findElements( "*", alignment_columnheader_classname ) ;
+	for(var i =0; i<columnElements.length ; i++) {
+		
+		if( hasClass( columnElements[i], classname) ) {
+			
+			return columnElements[i];
+		}
+	}
+	return null;
+}
 
+function findAlignmentPosClassname(classname) {
+	
+	var m = palignmentposclass.exec(classname);
+	if(m)
+		return classname;
+	else {
+		
+		var element = findColumnElement(classname);
+		if(element==null || element.getAttribute("class")==null)
+			return null;
+		
+		m = palignmentposclass.exec(element.getAttribute("class"));
+		if(m)
+			return m[0];
+	}
+	
+	return null;
+}
 
 function updateJmol(classname) {
+	
 	// If the column was highlighted, highlight the residue in the jmol; otherwise
 	// unhighlight it.
 	var columnElement = $('.' + alignment_columnheader_classname + '.' + classname);
 	var columnClass = columnElement.attr('class');
-	var m = pPDBresclass.exec(columnClass);
+	
 	if (columnElement.hasClass(alignment_highlighted_classname)) {
 		var color = 'red';
 	} else {
 		var color = 'lightgrey';
 	}
-	
+
+	var m = pPDBresclass.exec(columnClass);
 	if(m) {
     	Jmol.script(jmolApplet0, 'select ' + m[1] + ';color ' + color + ';');
     }
@@ -272,7 +305,8 @@ function updateJmol(classname) {
 function updateTable(classname) {
 
 	var columnElement = $('.' + alignment_columnheader_classname + '.' + classname);
-	if( columnElement.hasClass(alignment_highlighted_classname) ) {
+	
+	if( columnElement.hasClass( alignment_highlighted_classname) ) {
 
 		$('.' + data_row_classname + '.' + classname).addClass(table_highlighted_classname);
 	} else {
@@ -316,6 +350,12 @@ function clearPlotsHighlighting() {
 }
 
 function toggleColumn(classname) {
+	
+	console.log("toggle column "+classname);
+	
+	// jquery doesn't find the classes with jmol syntax in it,
+	// so find the alignmentpos classname first:
+	var classname = findAlignmentPosClassname(classname);
 	
 	// Always update the column header first as the sequence highlighting and jmol
 	// highlighting depend on it.
