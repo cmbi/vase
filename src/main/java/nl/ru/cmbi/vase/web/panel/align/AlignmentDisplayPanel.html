@@ -18,41 +18,49 @@ function onScrollAlignment(alignment) {
 }
 
 </script>
-<div style="line-height: 100%;">
+<style>
+.alignment-content-height {
+	height:375px
+}
+</style>
+<div class="align-monospace">
   <div style="float: left;">
     <div>
       <span id="nothing">&nbsp;</span>
     </div>
-    <div id="alignment-labels" style="overflow-y: hidden; overflow-x: auto; height: 360px;">  
+    <div id="alignment-labels" style="overflow-y: hidden; overflow-x: auto;" class="alignment-content-height">  
       <!--
       Here, some extra space needs to be occupied inside the scrolled area.
       It must be larger than the scrolled area in the alignment-contents.
       We realize this, by wrapping it in a padded div element.
       -->
-      <div class="vscroll-spacer" style="font-family:Consolas,Monaco,Lucida Console,Liberation Mono,DejaVu Sans Mono,Bitstream Vera Sans Mono,Courier New, monospace;">
-        <div wicket:id="labels">
-          <a href="#" wicket:id="ref"><span wicket:id="label" /></a>
-        </div>
-      </div>
+		<div wicket:id="labels">
+		  <a href="#" wicket:id="ref"><span wicket:id="label" /></a>
+		</div>
+		
+		<!-- space occupier for scrolling -->
+		<span>&nbsp;</span>
     </div>
   </div>
   <div>
-    <div id="alignment-header" style="overflow-x: hidden;">
+    <div id="alignment-header" style="overflow-x: hidden;overflow-y:hidden">
       <!--
         Here, some extra space needs to be occupied inside the scrolled area.
         It must be larger than the scrolled area in the alignment-contents.
         We realize this by wrapping it in a padded div element.
         -->
-      <div class="hscroll-spacer">
-        <div style="white-space:nowrap; font-family: Consolas,Monaco,Lucida Console,Liberation Mono,DejaVu Sans Mono,Bitstream Vera Sans Mono,Courier New, monospace;">
-          <span wicket:id="positions"><a href="#" wicket:id="position" class="" /></span>
-          <span>&nbsp;</span>
-        </div>
-      </div>
+        
+		<div style="white-space:nowrap;">
+		  <span wicket:id="positions"><a href="#" wicket:id="position" class="" /></span>
+		  
+		  <!-- space occupier for scrolling -->
+		  <span>&nbsp;</span>
+		</div>
+        
     </div>
-    <div id="alignment-contents" style="overflow:scroll; height:375px;" onscroll="onScrollAlignment(this);">
+    <div id="alignment-contents" style="overflow:scroll;" class="alignment-content-height" onscroll="onScrollAlignment(this);">
       <div wicket:id="seqs">
-        <div style="white-space: nowrap; font-family:Consolas,Monaco,Lucida Console,Liberation Mono,DejaVu Sans Mono,Bitstream Vera Sans Mono,Courier New, monospace;"> 
+        <div style="white-space: nowrap;"> 
           <span class="alignedseq" wicket:id="seq" />
         </div>
       </div>
