@@ -119,7 +119,8 @@ function orderTableBy(varID) {
 		so use the custom function instead.
 	*/
 	
-	var divs = findElements("div",data_row_classname);
+	var divs = findElements("div",data_cell_classname);
+	
 	var dataCells = [];
 	for (var i = 0; i < divs.length; i++) {
 		
