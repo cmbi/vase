@@ -83,8 +83,6 @@ public class AlignmentDisplayPanel extends Panel {
 		this.data = data;
 		this.alignment = data.getAlignment();
 		
-		final String labelFill = "                  ";
-		
 		add(new ListView("positions",Utils.listRange(1,AlignmentDisplayPanel.this.alignment.countColumns() + 1)){
 
 			@Override

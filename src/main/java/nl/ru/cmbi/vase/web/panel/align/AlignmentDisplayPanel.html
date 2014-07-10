@@ -29,7 +29,7 @@ function onScrollAlignment(alignment) {
       It must be larger than the scrolled area in the alignment-contents.
       We realize this, by wrapping it in a padded div element.
       -->
-      <div class="vscroll-spacer" style="padding-bottom:20px; font-family:Consolas,Monaco,Lucida Console,Liberation Mono,DejaVu Sans Mono,Bitstream Vera Sans Mono,Courier New, monospace;">
+      <div class="vscroll-spacer" style="font-family:Consolas,Monaco,Lucida Console,Liberation Mono,DejaVu Sans Mono,Bitstream Vera Sans Mono,Courier New, monospace;">
         <div wicket:id="labels">
           <a href="#" wicket:id="ref"><span wicket:id="label" /></a>
         </div>
@@ -46,10 +46,11 @@ function onScrollAlignment(alignment) {
       <div class="hscroll-spacer">
         <div style="white-space:nowrap; font-family: Consolas,Monaco,Lucida Console,Liberation Mono,DejaVu Sans Mono,Bitstream Vera Sans Mono,Courier New, monospace;">
           <span wicket:id="positions"><a href="#" wicket:id="position" class="" /></span>
+          <span>&nbsp;</span>
         </div>
       </div>
     </div>
-    <div id="alignment-contents" style="margin-right: -15px;overflow:scroll;height:375px;" onscroll="onScrollAlignment(this);">
+    <div id="alignment-contents" style="overflow:scroll; height:375px;" onscroll="onScrollAlignment(this);">
       <div wicket:id="seqs">
         <div style="white-space: nowrap; font-family:Consolas,Monaco,Lucida Console,Liberation Mono,DejaVu Sans Mono,Bitstream Vera Sans Mono,Courier New, monospace;"> 
           <span class="alignedseq" wicket:id="seq" />
