@@ -5,7 +5,12 @@
 </head>
 
 <body>
-<wicket:panel>	
+<wicket:panel>
+<style>
+.data-column-width {
+	width:160px;
+}
+</style>
 	<script type="text/javascript">
 		function onScrollTable(table) {
 
@@ -16,21 +21,24 @@
 	
 	<div class="table-responsive">
 		<table class="table table-hover">
-			<thead>
+			<thead style="display:block;overflow:hidden; width:60%;" id="data-table-header">
 				<tr>
 					<th wicket:id="header-cell">
-						<div class="data_table_title" wicket:id="header-div">
+						<div class="data_table_title data-column-width" wicket:id="header-div">
 							<span wicket:id="header-title"></span>
 							<span wicket:id="header-toggle-image"
 								class="data_table_column_image glyphicon"></span>
 						</div>
 					</th>
+					<th><!-- occupies additional space for scrolling -->
+						<div style="width:100px"></div>
+					</th>
 				</tr>
 			</thead>
-			<tbody style="height: 120px; overflow-y: scroll;">
+			<tbody style="display:block; height: 300px; width:60%; overflow: auto;" onscroll="onScrollTable(this);">
 				<tr wicket:id="rows" class="data_table_row">
 					<td wicket:id="cells">
-						<div class="data_table_cell" wicket:id="cell-text" />
+						<div class="data_table_cell data-column-width" wicket:id="cell-text" />
 					</td>
 				</tr>
 			</tbody>
