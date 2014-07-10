@@ -5,60 +5,56 @@
 </head>
 <body id="body">
 <wicket:panel>
-	
+  
 <script type="text/javascript">
 
 function onScrollAlignment(alignment) {
 
-	var header = document.getElementById ("alignment-header");
-	header.scrollLeft = alignment.scrollLeft;
-	
-	var labels = document.getElementById ("alignment-labels");
-	labels.scrollTop = alignment.scrollTop;
+  var header = document.getElementById ("alignment-header");
+  header.scrollLeft = alignment.scrollLeft;
+  
+  var labels = document.getElementById ("alignment-labels");
+  labels.scrollTop = alignment.scrollTop;
 }
 
 </script>
-<div class="row">
-	<div class="col-md-2">
-		<div>
-			<span id="nothing">&nbsp;</span>
-		</div>
-		<div id="alignment-labels" style="overflow-y: hidden; overflow-x: auto; height: 360px;">	
-			<!--
-			Here, some extra space needs to be occupied inside the scrolled area.
-			It must be larger than the scrolled area in the alignment-contents.
-			We realize this, by wrapping it in a padded div element.
-			-->
-			<div class="vscroll-spacer" style="padding-bottom:20px; font-family:Consolas,Monaco,Lucida Console,Liberation Mono,DejaVu Sans Mono,Bitstream Vera Sans Mono,Courier New, monospace;">
-				<div wicket:id="labels">
-					<a href="#" wicket:id="ref"><span wicket:id="label" /></a>
-				</div>
-			</div>
-		</div>
-	</div>
-	<div class="col-md-10">
-		<div id="alignment-header" style="overflow: hidden;line-height:100%">
-							
-			<!--
-			Here, some extra space needs to be occupied inside the scrolled area.
-			It must be larger than the scrolled area in the alignment-contents.
-			We realize this by wrapping it in a padded div element.
-		 	-->
-			<span class="hscroll-spacer">
-				<span style="white-space:nowrap;
-					 font-family: Consolas,Monaco,Lucida Console,Liberation Mono,DejaVu Sans Mono,Bitstream Vera Sans Mono,Courier New, monospace;">
-					<span wicket:id="positions"><a href="#" wicket:id="position" class="" /></span>
-				</span>
-			</span>
-		</div>
-		<div id="alignment-contents" style="margin-right: -15px;overflow:scroll;height:375px;line-height:100%" onscroll="onScrollAlignment(this);">
-			<span wicket:id="seqs">
-				<span style="white-space: nowrap; font-family:Consolas,Monaco,Lucida Console,Liberation Mono,DejaVu Sans Mono,Bitstream Vera Sans Mono,Courier New, monospace;"> 
-					<span class="alignedseq" wicket:id="seq" />
-				</span>
-			</span>
-		</div>
-	</div>
+<div style="float: left;">
+    <div>
+      <span id="nothing">&nbsp;</span>
+    </div>
+    <div id="alignment-labels" style="overflow-y: hidden; overflow-x: auto; height: 360px;">  
+      <!--
+      Here, some extra space needs to be occupied inside the scrolled area.
+      It must be larger than the scrolled area in the alignment-contents.
+      We realize this, by wrapping it in a padded div element.
+      -->
+      <div class="vscroll-spacer" style="padding-bottom:20px; font-family:Consolas,Monaco,Lucida Console,Liberation Mono,DejaVu Sans Mono,Bitstream Vera Sans Mono,Courier New, monospace;">
+        <div wicket:id="labels">
+          <a href="#" wicket:id="ref"><span wicket:id="label" /></a>
+        </div>
+      </div>
+    </div>
+</div>
+<div>
+    <div id="alignment-header" style="overflow-x: hidden;">
+      <!--
+      Here, some extra space needs to be occupied inside the scrolled area.
+      It must be larger than the scrolled area in the alignment-contents.
+      We realize this by wrapping it in a padded div element.
+      -->
+      <div class="hscroll-spacer">
+        <div style="white-space:nowrap; font-family: Consolas,Monaco,Lucida Console,Liberation Mono,DejaVu Sans Mono,Bitstream Vera Sans Mono,Courier New, monospace;">
+          <span wicket:id="positions"><a href="#" wicket:id="position" class="" /></span>
+        </div>
+      </div>
+    </div>
+    <div id="alignment-contents" style="margin-right: -15px;overflow:scroll;height:375px;" onscroll="onScrollAlignment(this);">
+      <div wicket:id="seqs">
+        <div style="white-space: nowrap; font-family:Consolas,Monaco,Lucida Console,Liberation Mono,DejaVu Sans Mono,Bitstream Vera Sans Mono,Courier New, monospace;"> 
+          <span class="alignedseq" wicket:id="seq" />
+        </div>
+      </div>
+    </div>
 </div>
 </wicket:panel>
 </body>
