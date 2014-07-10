@@ -112,6 +112,9 @@ public class AlignmentDisplayPanel extends Panel {
 				}
 
 				pos.add(new AttributeModifier("title",title));
+				pos.add(new AttributeModifier("onclick",
+						String.format("toggleColumn('%s');",
+								AlignmentDisplayPanel.this.getResidueNumberClassRepresentation(residueNumber))));
 			}
 		});
 		

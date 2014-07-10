@@ -37,26 +37,26 @@ function onScrollAlignment(alignment) {
 		</div>
 	</div>
 	<div class="col-md-10">
-		<div id="alignment-header" style="overflow-x: hidden">
+		<div id="alignment-header" style="overflow: hidden;line-height:100%">
 							
 			<!--
 			Here, some extra space needs to be occupied inside the scrolled area.
 			It must be larger than the scrolled area in the alignment-contents.
 			We realize this by wrapping it in a padded div element.
 		 	-->
-			<div class="hscroll-spacer">
-				<div style="white-space:nowrap;
+			<span class="hscroll-spacer">
+				<span style="white-space:nowrap;
 					 font-family: Consolas,Monaco,Lucida Console,Liberation Mono,DejaVu Sans Mono,Bitstream Vera Sans Mono,Courier New, monospace;">
-					<span wicket:id="positions"><span wicket:id="position" class="" /></span>
-				</div>
-			</div>
+					<span wicket:id="positions"><a href="#" wicket:id="position" class="" /></span>
+				</span>
+			</span>
 		</div>
-		<div id="alignment-contents" style="margin-right: -15px; overflow: scroll; height: 375px;" onscroll="onScrollAlignment(this);">
-			<div wicket:id="seqs">
-				<div style="white-space: nowrap; font-family:Consolas,Monaco,Lucida Console,Liberation Mono,DejaVu Sans Mono,Bitstream Vera Sans Mono,Courier New, monospace;"> 
+		<div id="alignment-contents" style="margin-right: -15px;overflow:scroll;height:375px;line-height:100%" onscroll="onScrollAlignment(this);">
+			<span wicket:id="seqs">
+				<span style="white-space: nowrap; font-family:Consolas,Monaco,Lucida Console,Liberation Mono,DejaVu Sans Mono,Bitstream Vera Sans Mono,Courier New, monospace;"> 
 					<span class="alignedseq" wicket:id="seq" />
-				</div>
-			</div>
+				</span>
+			</span>
 		</div>
 	</div>
 </div>
