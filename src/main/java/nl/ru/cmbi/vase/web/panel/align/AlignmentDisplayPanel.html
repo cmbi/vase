@@ -18,7 +18,8 @@ function onScrollAlignment(alignment) {
 }
 
 </script>
-<div style="float: left;">
+<div style="line-height: 100%;">
+  <div style="float: left;">
     <div>
       <span id="nothing">&nbsp;</span>
     </div>
@@ -34,14 +35,14 @@ function onScrollAlignment(alignment) {
         </div>
       </div>
     </div>
-</div>
-<div>
+  </div>
+  <div>
     <div id="alignment-header" style="overflow-x: hidden;">
       <!--
-      Here, some extra space needs to be occupied inside the scrolled area.
-      It must be larger than the scrolled area in the alignment-contents.
-      We realize this by wrapping it in a padded div element.
-      -->
+        Here, some extra space needs to be occupied inside the scrolled area.
+        It must be larger than the scrolled area in the alignment-contents.
+        We realize this by wrapping it in a padded div element.
+        -->
       <div class="hscroll-spacer">
         <div style="white-space:nowrap; font-family: Consolas,Monaco,Lucida Console,Liberation Mono,DejaVu Sans Mono,Bitstream Vera Sans Mono,Courier New, monospace;">
           <span wicket:id="positions"><a href="#" wicket:id="position" class="" /></span>
@@ -55,6 +56,7 @@ function onScrollAlignment(alignment) {
         </div>
       </div>
     </div>
+  </div>
 </div>
 </wicket:panel>
 </body>
