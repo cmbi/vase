@@ -26,3 +26,9 @@ circle.scatter-dot.danger {
 				Courier New, monospace;
 	font-size:14px;
 }
+
+th.header-sort-button:hover {
+	
+	background-color: #DDDDFF;
+	cursor:pointer;
+}

@@ -20,10 +20,10 @@
 	</script>
 	
 	<div class="table-responsive">
-		<table class="table table-hover">
-			<thead style="display:block;overflow:hidden; width:60%;" id="data-table-header">
+		<table class="table table-hover" style="width:100%">
+			<thead style="display:block;overflow:hidden" id="data-table-header">
 				<tr>
-					<th wicket:id="header-cell">
+					<th wicket:id="header-cell" class="header-sort-button" >
 						<div class="data_table_title data-column-width" wicket:id="header-div">
 							<span wicket:id="header-title"></span>
 							<span wicket:id="header-toggle-image"
@@ -35,7 +35,7 @@
 					</th>
 				</tr>
 			</thead>
-			<tbody style="display:block; height: 300px; width:60%; overflow: auto;" onscroll="onScrollTable(this);">
+			<tbody style="display:block; height: 300px; overflow: auto;" onscroll="onScrollTable(this);">
 				<tr wicket:id="rows" class="data_table_row">
 					<td wicket:id="cells">
 						<div class="data_table_cell data-column-width" wicket:id="cell-text" />
