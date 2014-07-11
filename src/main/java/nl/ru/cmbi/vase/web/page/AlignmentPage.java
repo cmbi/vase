@@ -46,7 +46,7 @@ import org.slf4j.LoggerFactory;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.core.util.string.JavaScriptUtils;
 
-public class AlignmentPage extends WebPage {
+public class AlignmentPage extends BasePage {
 	
 	private static final Logger log = LoggerFactory.getLogger(AlignmentPage.class);
 	
@@ -126,7 +126,7 @@ public class AlignmentPage extends WebPage {
 		
 		String title=String.format("Alignment of %s chain %c", PDBID,chainID);
 		
-		add(new Label("page-title",title));
+		setPageTitle(title);
 		add(new Label("page-header",title));
 		
 		final VASEDataObject data = dataPerChain.get(chainID);

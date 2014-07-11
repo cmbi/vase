@@ -1,83 +1,56 @@
 <!DOCTYPE html>
 <html lang="en">
-	<head>
+	<body>
+	<wicket:extend>
+	
 		<script type="text/javascript" src="align.js"></script>
 		<script type="text/javascript" wicket:id="js-definitions"></script>
-		<script src="//code.jquery.com/jquery-migrate-1.2.1.min.js"></script>
-
-		<title wicket:id="page-title" />
-		<link rel='stylesheet' type='text/css' href='align.css' />
-	</head>
-	<body>
-		<nav class="navbar navbar-default" role="navigation">
-		  <div class="container-fluid">
-		    <div class="navbar-header">
-		      <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
-		        <span class="sr-only">Toggle navigation</span>
-		        <span class="icon-bar"></span>
-		        <span class="icon-bar"></span>
-		        <span class="icon-bar"></span>
-		      </button>
-		      <a class="navbar-brand" href="#">VASE</a>
-		    </div>
+	
+		<h1 wicket:id="page-header" />
 		
-		    <!-- Collect the nav links, forms, and other content for toggling -->
-		    <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
-		      <ul class="nav navbar-nav">
-		        <li class="active"><a href="#">Input</a></li>
-		        <li><a href="#">About</a></li>
-		      </ul>
-		    </div>
+		<div class="panel panel-default">
+		  <div class="panel-heading">Alignment</div>
+		  <div class="panel-body">
+		    <div wicket:id="alignment" />
 		  </div>
-		</nav>
-
-		<div class="container-fluid">
-			
-			<h1 wicket:id="page-header" />
-			
-			<div class="panel panel-default">
-			  <div class="panel-heading">Alignment</div>
-			  <div class="panel-body">
-			    <div wicket:id="alignment" />
-			  </div>
-			</div>
-			
-			<div class="row">
-				<div class="col-md-8">
-					<div class="panel panel-default">
-						<div class="panel-body">
-					  		<div id="tab-header">
-								<ul class="nav nav-tabs" role="tablist">
-						  			<li wicket:id="tabs">
-						  				<a href="#" wicket:id="tab-link">
-						  					<span class="tab-header-text" wicket:id="tab-title" />
-						  				</a>
-						  			</li>
-						  			<li style="float:right">
-						  				<a href="#" onclick="unHighlightAll();">Clear Selection</a>
-						  			</li>
-								</ul>
-							</div>
-							<div>
-								<div wicket:id="data-table" style="display: block" />
-								<div wicket:id="plots">
-									<div wicket:id="plot" style="display: none"/>
-								</div>
-							</div>
-					  	</div>
-					</div>
-				</div>
-				<div class="col-md-4">
-					<div class="panel panel-default">
-					  <div class="panel-heading">Structure</div>
-					  <div class="panel-body">
-					    <!-- the structure panel must stay visible, otherwise it fails -->
-						<div id="structure" wicket:id="structure"/>
-					  </div>
-					</div>
-				</div>
-			</div>
-			
 		</div>
+		
+		<div class="row">
+			<div class="col-md-8">
+				<div class="panel panel-default">
+					<div class="panel-body">
+				  		<div id="tab-header">
+							<ul class="nav nav-tabs" role="tablist">
+					  			<li wicket:id="tabs">
+					  				<a href="#" wicket:id="tab-link">
+					  					<span class="tab-header-text" wicket:id="tab-title" />
+					  				</a>
+					  			</li>
+					  			<li style="float:right">
+					  				<a href="#" onclick="unHighlightAll();">Clear Selection</a>
+					  			</li>
+							</ul>
+						</div>
+						<div>
+							<div wicket:id="data-table" style="display: block" />
+							<div wicket:id="plots">
+								<div wicket:id="plot" style="display: none"/>
+							</div>
+						</div>
+				  	</div>
+				</div>
+			</div>
+			<div class="col-md-4">
+				<div class="panel panel-default">
+				  <div class="panel-heading">Structure</div>
+				  <div class="panel-body">
+				    <!-- the structure panel must stay visible, otherwise it fails -->
+					<div id="structure" wicket:id="structure"/>
+				  </div>
+				</div>
+			</div>
+		</div>
+		
+	</wicket:extend>	
 	</body>
 </html>

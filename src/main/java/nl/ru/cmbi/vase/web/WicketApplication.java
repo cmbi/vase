@@ -4,6 +4,7 @@ import nl.ru.cmbi.vase.job.HsspQueue;
 import nl.ru.cmbi.vase.tools.util.Config;
 import nl.ru.cmbi.vase.web.page.AlignmentPage;
 import nl.ru.cmbi.vase.web.page.HomePage;
+import nl.ru.cmbi.vase.web.page.InputPage;
 import nl.ru.cmbi.vase.web.rest.JobRestResource;
 
 import org.apache.wicket.injection.Injector;
@@ -55,6 +56,7 @@ public class WicketApplication extends WebApplication
 		// add your configuration here
 		
 		mountPage("/align", AlignmentPage.class);
+		mountPage("/input", InputPage.class);
 		
 		mountResource("/rest", new ResourceReference("restReference") {
 			
@@ -65,7 +67,8 @@ public class WicketApplication extends WebApplication
 				return resource;
 			}
 		});
-		
+
+		mountResource("/jobs.js",new PackageResourceReference(AlignmentPage.class, "jobs.js"));
 		mountResource("/align.js",new PackageResourceReference(AlignmentPage.class, "align.js"));
 		mountResource("/align.css",new PackageResourceReference(AlignmentPage.class, "align.css"));
 	}

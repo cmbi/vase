@@ -3,6 +3,9 @@ var data_cell_classname = "data_table_cell",
 	data_toggle_image_classname = "data_table_column_image",
 	toggle_classname = "toggled";
 
+
+// Because JQuery doesn't work on all tag types/class names,
+// some custom functions are required to perform JQuery-like actions.
 function findElements( tagname, classname ) {
 	
 	var tags = document.getElementsByTagName(tagname);
