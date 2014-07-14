@@ -30,6 +30,8 @@ public class SearchResultsPage extends BasePage {
 	public SearchResultsPage(final PageParameters parameters) {
 		
 		String structureID = parameters.get("structureID").toString();
+		setPageTitle("Search Results for "+structureID);
+		
 		List<SearchResult> results = search(structureID) ;
 		
 		if(results.size()==0) {

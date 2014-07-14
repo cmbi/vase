@@ -3,15 +3,27 @@
 	<body>
 	<wicket:extend>
 	
-	<wicket:container wicket:id="resultslist"></wicket:container>
+	<div class="panel panel-default">
+    <div class="panel-heading">Search Results</div>
+    <div class="panel-body">
+		<wicket:container wicket:id="resultslist"></wicket:container>
+    </div>
+	</div>
 
 	<wicket:fragment wicket:id="resultfragment">
 	
-		<table>
-		<tr wicket:id="results" class="search-result">
-			<th wicket:id="structureid" width="120px"></th>
-			<td wicket:id="chain"></td>
-		</tr>
+		<table class="table table-hover" width="200">
+			<thead></thead>
+				<tr>
+					<th>Structure ID</th>
+					<th>Chain</th>
+				</tr>
+			<tbody>
+				<tr wicket:id="results" class="search-result">
+					<td wicket:id="structureid" width="120px"></td>
+					<td wicket:id="chain"></td>
+				</tr>
+			</tbody>
 		</table>
 	</wicket:fragment>
 		
