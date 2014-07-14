@@ -1,15 +1,9 @@
 package nl.ru.cmbi.vase.tools.util;
 
-import java.io.IOException;
 import java.net.MalformedURLException;
-import java.net.SocketException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
- 
-import org.apache.commons.net.ftp.FTPClient;
-import org.apache.commons.net.ftp.FTPFile;
-import org.apache.commons.net.ftp.FTPReply;
 
 public class Utils {
 	
