@@ -1,54 +1,55 @@
 <!DOCTYPE html>
 <html xmlns:wicket="http://wicket.apache.org">
 <head>
-		<title wicket:id="page-title" />
-		
-		<script src="//code.jquery.com/jquery-migrate-1.2.1.min.js"></script>
-		<link rel='stylesheet' type='text/css' href='align.css' />
+    <title wicket:id="page-title" />
+
+    <script src="//code.jquery.com/jquery-migrate-1.2.1.min.js"></script>
+    <link rel='stylesheet' type='text/css' href='align.css' />
 </head>
 <body>
-	<nav class="navbar navbar-default" role="navigation">
-	  <div class="container-fluid">
-	  
-	    <div class="navbar-header">
-	      <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
-	        <span class="sr-only">Toggle navigation</span>
-	        <span class="icon-bar"></span>
-	        <span class="icon-bar"></span>
-	        <span class="icon-bar"></span>
-	      </button>
-	      <a class="navbar-brand" href="#">VASE</a>
-	    </div>
-	
-	    <!-- Collect the nav links, forms, and other content for toggling -->
-	    <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
-	      <ul class="nav navbar-nav">
-	      
-	        <li>
-		        <div>
-		        	<form style="display: inline;" action="search/" method="get" name="search">
-	  					<input id="structureID" name="structure ID"  placeholder="Enter a Structure ID" required="required" results="5" size="15" title="Please provide a valid Structure identifier" type="text" value="">
-						
-						<a href="javascript: document.search.submit();">
-							<span class="glyphicon glyphicon-search"></span>
-						</a>
-	            	</form>
-            	</div>
-	        </li>
-	      
-	        <li id="nav-input" ><a href="input/">Input a Structure</a></li>
-	        <li id="nav-about" ><a href="about/">About</a></li>
-	      </ul>
-	    </div>
-	    
-	  </div>
-	</nav>
+  <nav class="navbar navbar-default" role="navigation">
+    <div class="container-fluid">
 
-	<div class="container-fluid">
+      <div class="navbar-header">
+        <button type="button" class="navbar-toggle"
+                data-toggle="collapse"
+                data-target="#bs-example-navbar-collapse-1">
+          <span class="sr-only">Toggle navigation</span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" href="#">VASE</a>
+      </div>
 
-		<wicket:child />
+      <!-- Input form -->
+      <form class="navbar-form navbar-left"
+            action="search/" method="get" name="search">
+        <div class="form-group">
+          <input class="form-control" id="structureID" name="structure ID"
+                 placeholder="Enter a Structure ID"
+                 required="required" results="5" size="15"
+                 title="Please provide a valid Structure identifier"
+                 type="text" value="">
+          <a class="btn btn-default"
+             href="javascript: document.search.submit();">
+            <span class="glyphicon glyphicon-search"></span>
+          </a>
+        </div>
+      </form>
+      <!-- Collect the nav links, forms, and other content for toggling -->
+      <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+        <ul class="nav navbar-nav">
+          <li id="nav-input" ><a href="input/">Input a Structure</a></li>
+          <li id="nav-about" ><a href="about/">About</a></li>
+        </ul>
+      </div>
+    </div>
+  </nav>
 
-	</div>
-	
+  <div class="container-fluid">
+    <wicket:child />
+  </div>
+
 </body>
 </html>
