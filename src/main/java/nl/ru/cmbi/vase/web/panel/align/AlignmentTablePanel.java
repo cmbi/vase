@@ -10,7 +10,7 @@ import nl.ru.cmbi.vase.data.ResidueInfo;
 import nl.ru.cmbi.vase.data.TableData;
 import nl.ru.cmbi.vase.data.TableData.ColumnInfo;
 import nl.ru.cmbi.vase.data.VASEDataObject;
-import nl.ru.cmbi.vase.web.Utils;
+import nl.ru.cmbi.vase.tools.util.Utils;
 
 import org.apache.wicket.AttributeModifier;
 import org.apache.wicket.Component;

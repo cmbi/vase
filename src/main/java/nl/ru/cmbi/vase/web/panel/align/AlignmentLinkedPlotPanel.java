@@ -13,7 +13,7 @@ import nl.ru.cmbi.vase.data.TableData.ColumnInfo;
 import nl.ru.cmbi.vase.data.TableData.ColumnDataType;
 import nl.ru.cmbi.vase.data.VASEDataObject;
 import nl.ru.cmbi.vase.data.VASEDataObject.PlotDescription;
-import nl.ru.cmbi.vase.web.Utils;
+import nl.ru.cmbi.vase.tools.util.Utils;
 import nl.ru.cmbi.vase.web.panel.ScatterPlotOptions;
 import nl.ru.cmbi.vase.web.panel.ScatterPlotPanel;
 

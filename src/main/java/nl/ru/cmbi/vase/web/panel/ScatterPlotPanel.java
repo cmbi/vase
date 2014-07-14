@@ -7,7 +7,7 @@ import java.util.Locale;
 
 import lombok.Data;
 
-import nl.ru.cmbi.vase.web.Utils;
+import nl.ru.cmbi.vase.tools.util.Utils;
 
 import org.apache.wicket.AttributeModifier;
 import org.apache.wicket.Component;
