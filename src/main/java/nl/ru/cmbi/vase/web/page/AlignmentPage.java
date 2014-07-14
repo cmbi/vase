@@ -21,6 +21,7 @@ import nl.ru.cmbi.vase.data.VASEDataObject.PlotDescription;
 import nl.ru.cmbi.vase.parse.StockholmParser;
 import nl.ru.cmbi.vase.parse.VASEXMLParser;
 import nl.ru.cmbi.vase.tools.util.Config;
+import nl.ru.cmbi.vase.tools.util.Utils;
 import nl.ru.cmbi.vase.web.panel.align.AlignmentDisplayPanel;
 import nl.ru.cmbi.vase.web.panel.align.AlignmentLinkedPlotPanel;
 import nl.ru.cmbi.vase.web.panel.align.AlignmentTablePanel;
@@ -35,8 +36,11 @@ import org.apache.wicket.markup.html.WebPage;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
+import org.apache.wicket.markup.html.panel.Fragment;
+import org.apache.wicket.markup.repeater.RepeatingView;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
+import org.apache.wicket.model.Model;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.util.string.StringValue;
@@ -83,8 +87,7 @@ public class AlignmentPage extends BasePage {
 				}
 				else {
 				
-					URL stockholmURL = new URL(String.format("ftp://ftp.cmbi.ru.nl/pub/molbio/data/hssp3/%s.hssp.bz2",PDBID)),
-							pdbURL = new URL(String.format("http://www.rcsb.org/pdb/files/%s.pdb",PDBID));
+					URL stockholmURL = Utils.getStockholmURL(PDBID), pdbURL = Utils.getRcsbURL(PDBID);
 				
 					dataPerChain  = StockholmParser.parseStockHolm ( new BZip2CompressorInputStream(stockholmURL.openStream()), pdbURL);
 				}
@@ -136,8 +139,11 @@ public class AlignmentPage extends BasePage {
 		
 		add(new JSDefinitions("js-definitions", alignmentPanel));
 		
+		final RepeatingView tabs = new RepeatingView("tabs");
+		
 		addToTabs( "data-table", "Table", 
-				new AlignmentTablePanel("data-table",alignmentPanel,data));
+				new AlignmentTablePanel("data-table",alignmentPanel,data),
+				tabs);
 		
 		add(new ListView<PlotDescription>("plots",data.getPlots()){
 			
@@ -153,33 +159,13 @@ public class AlignmentPage extends BasePage {
 				
 				String id="plot"+plotCount; // must be unique
 				
-				addToTabs( id, pd.getPlotTitle(), plot);
+				addToTabs( id, pd.getPlotTitle(), plot, tabs);
 				
 				item.add(plot);
 			}
 		});
 		
-		add(new ListView<String>("tabs", this.tabidsModel){
-
-			@Override
-			protected void populateItem(ListItem<String> item) {
-				
-				String tabid = item.getModelObject();
-				item.add(new AttributeModifier("id","switch-"+tabid));
-				
-				WebMarkupContainer link = new WebMarkupContainer("tab-link");
-				
-				link.add(new AttributeModifier("onclick",String.format("switchTabVisibility('%s');", tabid)));
-				link.add(new Label("tab-title",tabTitles.get(tabid)));
-				
-				if(firstActiveTab.equals(tabid)) {
-					
-					item.add(new AttributeModifier("class","active"));
-				}
-				
-				item.add(link);
-			}
-		});
+		add(tabs);
 		
 		String structurePath =
 			RequestCycle.get().urlFor(HomePage.class, new PageParameters()).toString()
@@ -204,23 +190,46 @@ public class AlignmentPage extends BasePage {
 		}
 	};
 	
-	private String firstActiveTab = "";
-	
-	private void addToTabs(String id, String tabTitle, Component component) {
+	private void addToTabs(String id, String tabTitle, Component component, RepeatingView tabs) {
 
 		// first added becomes the active tab
 		String display="none";
+		boolean active=false;
 		if(tabTitles.size()==0) {
 			
-			firstActiveTab = id;
+			active=true;
 			display="block";
 		}
 		
 		tabTitles.put(id,tabTitle);
 		component.add(new AttributeModifier("id",id));
-		component.add(new AttributeModifier("style","display:"+display+";"));
+		component.add(new AttributeAppender("style",new Model("display:"+display),";"));
 		
 		add(component);
+		
+		tabs.add(new TabFragment(tabs.newChildId(),id,active));
+	}
+	
+	public class TabFragment extends Fragment {
+		
+		public TabFragment(String id, String tabid, boolean startActive) {
+			
+			super(id, "tab-fragment", AlignmentPage.this);
+			
+			add(new AttributeModifier("id","switch-"+tabid));
+			
+			WebMarkupContainer link = new WebMarkupContainer("tab-link");
+			
+			link.add(new AttributeModifier("onclick",String.format("switchTabVisibility('%s');", tabid)));
+			link.add(new Label("tab-title",tabTitles.get(tabid)));
+			
+			if(startActive) {
+				
+				add(new AttributeAppender("class",new Model("active"), " "));
+			}
+			
+			add(link);
+		}
 	}
 	
 	private class JSDefinitions extends Component {

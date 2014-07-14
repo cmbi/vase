@@ -40,20 +40,18 @@
         <div class="panel-body">
           <div id="tab-header">
             <ul class="nav nav-tabs" role="tablist">
-              <li wicket:id="tabs">
-                <a href="#" wicket:id="tab-link">
-                  <span class="tab-header-text" wicket:id="tab-title" />
-                </a>
-              </li>
+              <li wicket:id="tabs"></li>
               <li style="float:right">
                 <a href="#" onclick="unHighlightAll();">Clear Selection</a>
               </li>
             </ul>
           </div>
-          <div wicket:id="data-table" style="display: block" />
-          <div wicket:id="plots">
-            <div wicket:id="plot" style="display: none"/>
-          </div>
+          <div>
+			<div wicket:id="data-table"/>
+			<div wicket:id="plots">
+	          <div wicket:id="plot" style="display:none"/>
+          	</div>
+		  </div>
         </div>
       </div>
     </div>
@@ -67,6 +65,12 @@
       </div>
     </div>
   </div>
+  
+  <wicket:fragment wicket:id="tab-fragment">
+	<a href="#" wicket:id="tab-link">
+	  <span class="tab-header-text" wicket:id="tab-title" />
+	</a>
+  </wicket:fragment>
 
 </wicket:extend>
 </body>
