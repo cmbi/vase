@@ -1,56 +1,73 @@
 <!DOCTYPE html>
 <html lang="en">
-	<body>
-	<wicket:extend>
-	
-		<script type="text/javascript" src="align.js"></script>
-		<script type="text/javascript" wicket:id="js-definitions"></script>
-	
-		<h1 wicket:id="page-header" />
-		
-		<div class="panel panel-default">
-		  <div class="panel-heading">Alignment</div>
-		  <div class="panel-body">
-		    <div wicket:id="alignment" />
-		  </div>
-		</div>
-		
-		<div class="row">
-			<div class="col-md-8">
-				<div class="panel panel-default">
-					<div class="panel-body">
-				  		<div id="tab-header">
-							<ul class="nav nav-tabs" role="tablist">
-					  			<li wicket:id="tabs">
-					  				<a href="#" wicket:id="tab-link">
-					  					<span class="tab-header-text" wicket:id="tab-title" />
-					  				</a>
-					  			</li>
-					  			<li style="float:right">
-					  				<a href="#" onclick="unHighlightAll();">Clear Selection</a>
-					  			</li>
-							</ul>
-						</div>
-						<div>
-							<div wicket:id="data-table" style="display: block" />
-							<div wicket:id="plots">
-								<div wicket:id="plot" style="display: none"/>
-							</div>
-						</div>
-				  	</div>
-				</div>
-			</div>
-			<div class="col-md-4">
-				<div class="panel panel-default">
-				  <div class="panel-heading">Structure</div>
-				  <div class="panel-body">
-				    <!-- the structure panel must stay visible, otherwise it fails -->
-					<div id="structure" wicket:id="structure"/>
-				  </div>
-				</div>
-			</div>
-		</div>
-		
-	</wicket:extend>	
-	</body>
+<body>
+
+<wicket:extend>
+  <style>
+    .equal {
+      display: -webkit-box;
+      display: -moz-box;
+      display: -ms-flexbox;
+      display: -webkit-flex;
+      display: flex;
+      flex: auto;
+    }
+    .equal > div[class*='col-'] > div[class='panel panel-default'] {
+      display: -webkit-box;
+      display: -moz-box;
+      display: -ms-flexbox;
+      display: -webkit-flex;
+      display: flex;
+      flex-flow: column;
+    }
+  </style>
+  <script type="text/javascript" src="align.js"></script>
+  <script type="text/javascript" wicket:id="js-definitions"></script>
+
+  <h1 wicket:id="page-header" />
+
+  <div class="panel panel-default">
+    <div class="panel-heading">Alignment</div>
+    <div class="panel-body">
+      <div wicket:id="alignment" />
+    </div>
+  </div>
+
+  <div class="row equal">
+    <div class="col-md-8">
+      <div class="panel panel-default">
+        <div class="panel-heading">Residues</div>
+        <div class="panel-body">
+          <div id="tab-header">
+            <ul class="nav nav-tabs" role="tablist">
+              <li wicket:id="tabs">
+                <a href="#" wicket:id="tab-link">
+                  <span class="tab-header-text" wicket:id="tab-title" />
+                </a>
+              </li>
+              <li style="float:right">
+                <a href="#" onclick="unHighlightAll();">Clear Selection</a>
+              </li>
+            </ul>
+          </div>
+          <div wicket:id="data-table" style="display: block" />
+          <div wicket:id="plots">
+            <div wicket:id="plot" style="display: none"/>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="panel panel-default">
+        <div class="panel-heading">Structure</div>
+        <div class="panel-body">
+          <!-- the structure panel must stay visible, otherwise it fails -->
+          <div id="structure" wicket:id="structure"/>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</wicket:extend>
+</body>
 </html>
