@@ -32,3 +32,9 @@ th.header-sort-button:hover {
 	background-color: #DDDDFF;
 	cursor:pointer;
 }
+
+tr.search-result:hover {
+	
+	background-color: #DDFFDD;
+	cursor:pointer;
+}

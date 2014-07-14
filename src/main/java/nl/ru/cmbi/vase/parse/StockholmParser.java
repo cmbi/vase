@@ -3,15 +3,18 @@ package nl.ru.cmbi.vase.parse;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.regex.Pattern;
 
 import nl.ru.cmbi.vase.analysis.Calculator;
@@ -61,6 +64,56 @@ public class StockholmParser {
 			"([0-9]+\\.[0-9]+)\\s+([0-9]+)\\s+([0-9]+\\.[0-9]+)\\s*$", // ENTROPY RELENT WEIGHT
 	
 		seqPattern = "^[\\w\\-\\/]+\\s+[A-Z\\.]+$";
+	
+	public static Set<Character> listChainsInStockholm(InputStream stockholmIn) throws IOException {
+		
+		Set<Character> chains = new HashSet<Character>();
+		
+		String pdbID = null;
+		char currentChain='A';
+
+		final BufferedReader reader = new BufferedReader(new InputStreamReader(stockholmIn));
+		String line;
+		while((line=reader.readLine())!=null) {
+			
+			log.debug("listchains line "+line);
+			
+			if (line.matches(chainPattern)) {
+			
+				final String[] s = line.trim().split("\\s+");
+				final String id=s[s.length-1];
+				currentChain=id.charAt(5);
+				
+				chains.add(currentChain);
+				
+			} else if (line.matches(chainsdefPattern)) {
+				
+				final String[] s = line.trim().split("\\s+");
+				final char chain = s[4].charAt(0);
+				
+				chains.add(chain);
+				
+			} else if (line.matches(equalchainsPattern)) {
+
+				final String[] s = line.trim().split("\\s+");
+				final char sourceChain = s[3].charAt(0);
+				
+				// Chain listing starts at the 11th word in the expression.
+				for(int i=11; i<s.length; i++) {
+					
+					if(s.equals("and") ) continue; // 'and' is not a chain-ID, it's an interjection
+					
+					final char destChain=s[i].charAt(0); // Take the first character in the word, thus not the commas!
+					
+					chains.add(destChain);
+				}
+			}
+		}
+			
+		reader.close();
+		
+		return chains;
+	}
 	
 	public static Map<Character,VASEDataObject> parseStockHolm(InputStream stockholmIn, URL pdbURL) throws Exception {
 		

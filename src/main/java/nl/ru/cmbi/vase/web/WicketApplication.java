@@ -5,6 +5,7 @@ import nl.ru.cmbi.vase.tools.util.Config;
 import nl.ru.cmbi.vase.web.page.AlignmentPage;
 import nl.ru.cmbi.vase.web.page.HomePage;
 import nl.ru.cmbi.vase.web.page.InputPage;
+import nl.ru.cmbi.vase.web.page.SearchResultsPage;
 import nl.ru.cmbi.vase.web.rest.JobRestResource;
 
 import org.apache.wicket.injection.Injector;
@@ -55,7 +56,12 @@ public class WicketApplication extends WebApplication
 		
 		// add your configuration here
 		
+		mountPage("/search/${structureID}", SearchResultsPage.class);
+		
+		// alignmentPage can take either one, or two parameters,
+		// depending on the number of chains in the structure
 		mountPage("/align", AlignmentPage.class);
+		
 		mountPage("/input", InputPage.class);
 		
 		mountResource("/rest", new ResourceReference("restReference") {
