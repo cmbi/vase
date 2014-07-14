@@ -1,4 +1,11 @@
 
+var restURL = "../rest";
+
+function endswith(string,ending) {
+	
+	return string.substring(string.length - ending.length) == ending;
+}
+
 function setCookie(cname, cvalue, exdays) {
 	
     var d = new Date();
@@ -8,6 +15,7 @@ function setCookie(cname, cvalue, exdays) {
 }
 
 function getCookie(cname) {
+	
     var name = cname + "=";
     var ca = document.cookie.split(';');
     for(var i=0; i<ca.length; i++) {
@@ -18,20 +26,14 @@ function getCookie(cname) {
     return null;
 }
 
-function loadJob(jobid) {
+function deleteCookie(cname) {
+	
+	document.cookie = cname+"=; expires=Thu, 01 Jan 1970 00:00:00 GMT";
+}
+
+function initJob( jobid ) {
 	
 	var job = { id:jobid, status:'new' };
-	
-	$.ajax({
-		  type: "GET",
-		  dataType: "text",
-		  url: "rest/status/"+jobid,
-		  data: '',
-		  success: function(data, status, jqXHR) {
-			  
-			  job.status = status;
-		  }
-		});
 	
 	return job;
 }
@@ -41,30 +43,86 @@ var cookiesAccepted=false;
 
 var jobs=[];
 
+function saveJobIDs() {
+	
+	var s="";
+	for(var i=0; i<jobs.length; i++) {
+		
+		if(s.length>0) s+= ',' ;
+		
+		s += jobs[i].id ;
+	}
+	setCookie(jobidsCookieName, s, 365);
+}
+
+function jobRemove( jobid ) {
+	
+	for( var i=0; i<jobs.length; i++ ) {
+		
+		if( jobs[i].id == jobid ) {
+			
+			jobs.splice( i, 1 );
+		}
+	}
+	
+	removeJobListingRow( jobid );
+	
+	if( cookiesAccepted ) {
+		
+		saveJobIDs();
+	}
+}
+
+function jobAdd( job ) {
+	
+	var present = false;
+	for( var i=0; i<jobs.length; i++ ) {
+		
+		if( jobs[i].id == job.id ) {
+			present = true;
+		}
+	}
+	
+	if(!present) {
+		
+		jobs.push( job );
+	}
+	
+	if( cookiesAccepted ) {
+		
+		saveJobIDs();
+	}
+	
+	updateJobListingRow(job); // adds it if not yet in table
+}
+
+var pJobID = /^[0-9a-zA-Z\-]+$/ ;
+
 function submitJob(structure) {
 	
-	console.log("submitting:\n"+structure)
+	console.log("submitting: "+structure);
 	
 	$.ajax({
 		  type: "POST",
-		  url: "rest/custom",
-		  data: structure,
-		  dataType: 'text',
+		  url: restURL+"/custom",
+		  data: { pdbfile: structure },
 		  
 		  success: function(data, status, jqXHR) {
 
-			  var job = { id:data, status: 'new' };
-			  
-			  console.log(" job submitted: "+data);
-				
-			  jobs.push( job );
-			  
-			  saveJobs();
-			  
-			  updateJobListingRow(job);
+			  var jobid = data;
+			  if( pJobID.test( data ) ) {
+
+				  var job = initJob( data );
+				  
+				  jobAdd( job );
+			  }
+			  else console.log("an invalid job id was returned by rest: '"+jobid+"'");
 		  },
 	
-		  error: function( jqXHR, status, errorThrown ) { }
+		  error: function( jqXHR, status, errorThrown ) {
+			  
+			  console.log("error on job submit:" + errorThrown);
+		  }
 	});
 }
 
@@ -74,47 +132,36 @@ function pollJobs() {
 		
 		$.ajax( {
 			  type: "GET",
-			  dataType: "text",
-			  url: "rest/status/"+jobs[i].id,
+			  url: restURL+"/status/"+jobs[i].id,
 			  data: '',
 			  
 			  beforeSend: function(jqXHR, settings) {
-			        jqXHR.url = settings.url;
-			    },
+				  
+				  jqXHR.url = settings.url;
+			  },
 			  success: function(data, status, jqXHR) {
 				  
-				  console.log("url:"+jqXHR.url);
-				  
-				  jobs[i].status = data;
-				  
-				  updateJobListingRow(jobs[i]);
+				  for(var i=0; i<jobs.length;i++) {
+					  
+					  if( endswith( jqXHR.url, "/"+jobs[i].id ) ) {
+						  
+						  jobs[i].status = data;
+						  
+						  updateJobListingRow(jobs[i]);
+					  }
+				  }
 			  }
 		} );
 	}
 }
 
-function saveJobs() {
+function initJobPage() {
 	
-	var s="";
-	for(var i=0; i<jobs.length; i++) {
-		
-		if(s.length>0) s+= ',' ;
-		
-		s += jobs[i].id ;
-	}
-	
-	setCookie(jobidsCookieName, s, 365);
-}
-
-function initPage() {
-	
-	var cookie = getCookie(jobidsCookieName);
-	
-	console.log("cookie:"+cookie);
+	var cookie = getCookie( jobidsCookieName );
 	
 	if(cookie==null ) {
 		
-		cookiesAccepted = confirm('Do you allow this page to use cookies to remember your job submissions for you?');
+		cookiesAccepted = confirm('Do you allow this page to use cookies, to remember your job submissions for you?');
 		
 		if(cookiesAccepted)	{
 			
@@ -125,18 +172,21 @@ function initPage() {
 		
 		cookiesAccepted = true;
 		
-		if(cookie.trim().length>0) {
+		if( cookie.trim().length>0 ) {
 		
 			var jobids = cookie.split(',');
 			
 			for(var i=0; i<jobids.length; i++) {
 				
-				jobs.push( loadJob( jobids[i] ) );
+				var job = initJob( jobids[i] );
+				
+				jobAdd( job );
 			}
 		}
+		
+		// Do an initial poll to get rid of the status 'new'
+		pollJobs();
 	}
-	
-	updateJobListing();
 }
 
 function addJobRow( table, job) {
@@ -149,6 +199,20 @@ function addJobRow( table, job) {
 	
 	var statusCell= row.insertCell(1);
 	statusCell.innerHTML = job.status ;
+	
+	var deleteCell= row.insertCell(2);
+	deleteCell.setAttribute("class","delete-job-id glyphicon glyphicon-remove");
+	deleteCell.setAttribute("onclick","jobRemove('"+job.id+"');");
+}
+
+function removeJobListingRow( jobid ) {
+	
+	var list = document.getElementById("joblisting");
+	var row = document.getElementById(jobid);
+	
+	if (list != null && row != null) {
+		list.tBodies[0].removeChild(row);
+	}
 }
 
 function updateJobListingRow(job) {
@@ -157,22 +221,14 @@ function updateJobListingRow(job) {
 	
 	for(var i=0; i<list.rows.length; i++) {
 		
-		if(list.rows[i].id==job.id) {
+		if(list.rows[i].id
+			&& list.rows[i].id==job.id) {
 			
-			list.rows[i].cells[1].innerHTML=jobs[i].status;
+			list.rows[i].cells[1].innerHTML=job.status;
 			return;
 		}
 	}
 
 	// if not found, add to rows
 	addJobRow( list, job );
-}
-
-function updateJobListing() {
-	
-	var list = document.getElementById("joblisting");
-	for(var i=0; i<jobs.length; i++) {
-		
-		addJobRow( lits, sobs[i]);
-	}
 }

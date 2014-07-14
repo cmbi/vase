@@ -49,8 +49,6 @@ public class JobRestResource extends GsonRestResource {
 	@MethodMapping(value="/custom", httpMethod=HttpMethod.POST, produces = RestMimeTypes.TEXT_PLAIN)
 	public String custom() {
 		
-		return "000000-0000-0000-0000-000000"; /*
-		
 		// getPostParameters doesn't work for some reason
 		IRequestParameters p = RequestCycle.get().getRequest().getRequestParameters();
 
@@ -59,14 +57,13 @@ public class JobRestResource extends GsonRestResource {
 	    	return "";
 	    }
 		
-		return queue.submit(pdbfile.toString());*/
+		return queue.submit(pdbfile.toString());
 	}
 	
 	@MethodMapping(value = "/status/{jobid}", httpMethod=HttpMethod.GET, produces = RestMimeTypes.TEXT_PLAIN)
 	public String status(String jobid) {
 		
-		return "void";
-		//return queue.getStatus(jobid).toString();
+		return queue.getStatus(jobid).toString();
 	}
 	
 	@MethodMapping(value = "/structure/{id}", httpMethod=HttpMethod.GET, produces = RestMimeTypes.TEXT_PLAIN)

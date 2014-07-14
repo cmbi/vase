@@ -11,7 +11,7 @@
 			
 			function submitStructure() {
 				
-				var structure = document.forms["structure-input"]["input"].value ;
+				var structure = document.forms["structure-input"]["pdbfile"].value ;
 				
 				submitJob ( structure );
 			}
@@ -25,13 +25,13 @@
 				  <div class="panel-heading">Input PDB</div>
 				  <div class="panel-body">
 				  
-				  	<form name="structure-input" >
+				  	<form name="structure-input" action="rest/custom/" method="post" onsubmit="submitStructure();">
 				  	
-						<textarea name="input" required="required"
+						<textarea class="pdb-input" name="pdbfile" required="required"
 							style="width:100%;height:400px"
 							placeholder="Enter the contents of a PDB file here.." />
 							
-						<input type="button" value="Submit" onclick="submitStructure();" >
+						<input type="submit" value="Submit" >
 					</form>
 				  </div>
 				</div>
@@ -42,7 +42,7 @@
 				  <div class="panel-heading">Jobs</div>
 				  <div class="panel-body">
 				  
-				  	<table id="joblisting" style="height:400px;overflow-y:auto" >
+				  	<table id="joblisting" class="table" style="height:400px;overflow-y:auto" >
 				  		<thead>
 				  			<tr>
 				  				<th>Job ID</th>
@@ -55,7 +55,7 @@
 				  	
 				  	<script type="text/javascript">
 				  	
-						initPage();
+						initJobPage();
 						
 						// poll every 2 seconds
 						setInterval(pollJobs,2000);

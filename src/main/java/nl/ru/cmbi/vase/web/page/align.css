@@ -27,14 +27,23 @@ circle.scatter-dot.danger {
 	font-size:14px;
 }
 
+textarea.pdb-input {
+	font-family:Consolas, Monaco, Lucida Console, Liberation Mono,
+				DejaVu Sans Mono,Bitstream Vera Sans Mono,
+				Courier New, monospace;
+}
+
 th.header-sort-button:hover {
 	
 	background-color: #DDDDFF;
 	cursor:pointer;
 }
 
-tr.search-result:hover {
-	
-	background-color: #DDFFDD;
+td.delete-job-id {
+	cursor:pointer;
+}
+
+tr.search-result {
+
 	cursor:pointer;
 }
