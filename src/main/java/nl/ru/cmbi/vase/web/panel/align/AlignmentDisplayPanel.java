@@ -109,6 +109,7 @@ public class AlignmentDisplayPanel extends Panel {
 					}
 				}
 
+				pos.add(new AttributeModifier("data-placements", "top"));
 				pos.add(new AttributeModifier("title",title));
 				pos.add(new AttributeModifier("onclick",
 						String.format("toggleColumn('%s');",
