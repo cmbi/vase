@@ -6,6 +6,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.StringWriter;
 import java.net.URL;
 
 import java.util.ArrayList;
@@ -35,6 +36,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.regex.Matcher;
+import java.util.zip.GZIPInputStream;
 
 public class StockholmParser {
 	
@@ -114,11 +116,99 @@ public class StockholmParser {
 		
 		return chains;
 	}
-	
-	public static Map<Character,VASEDataObject> parseStockHolm(InputStream stockholmIn, URL pdbURL) throws Exception {
+
+	public static Map<Character, VASEDataObject> parseStockHolm(
+			InputStream stockholmIn,
+			InputStream pdbIn) throws Exception {
 		
 		AlignmentSet alignments = new AlignmentSet();
 		ResidueInfoSet residueInfoSet = new ResidueInfoSet();
+		
+		goThroughStockholm(stockholmIn,alignments,residueInfoSet);
+		
+		StringWriter pdbWriter = new StringWriter();
+		IOUtils.copy(pdbIn, pdbWriter, "UTF-8");
+		pdbWriter.close();
+		String pdbString = pdbWriter.toString();
+		
+		Map<Character,VASEDataObject> map = new HashMap<Character,VASEDataObject>();
+		for(char chainID : alignments.getChainIDs()) {
+			
+			Alignment alignment = alignments.getAlignment(chainID);
+			
+			pdbIn = IOUtils.toInputStream(pdbString, "UTF-8");
+			Map<Character,Map<String,PDBResidueInfo>> pdbResidues = PDBParser.parseResidues(pdbIn);
+			pdbIn.close();
+			
+			VASEDataObject data = new VASEDataObject(
+					alignment, 
+					getTable(alignments,pdbResidues,residueInfoSet,chainID),
+					pdbString);
+			
+			VASEDataObject.PlotDescription pd = new VASEDataObject.PlotDescription();
+			pd.setPlotTitle("Entropy vs. Variability");
+			pd.setXAxisColumnID("variability");
+			pd.setYAxisColumnID("entropy");
+			data.getPlots().add(pd);
+
+			pd = new VASEDataObject.PlotDescription();
+			pd.setPlotTitle("Entropy vs. Alignment Position");
+			pd.setXAxisColumnID("residue_number");
+			pd.setYAxisColumnID("entropy");
+			data.getPlots().add(pd);
+			
+			map.put(chainID, data);
+		}
+		
+		return map;
+	}
+	
+	public static Map<Character,VASEDataObject> parseStockHolm(InputStream stockholmIn, URL pdbURL)
+		throws Exception {
+		
+		AlignmentSet alignments = new AlignmentSet();
+		ResidueInfoSet residueInfoSet = new ResidueInfoSet();
+		
+		goThroughStockholm(stockholmIn,alignments,residueInfoSet);
+		
+		Map<Character,VASEDataObject> map = new HashMap<Character,VASEDataObject>();
+		for(char chainID : alignments.getChainIDs()) {
+			
+			Alignment alignment = alignments.getAlignment(chainID);
+			
+			InputStream pdbIn = pdbURL.openStream();
+			Map<Character,Map<String,PDBResidueInfo>> pdbResidues = PDBParser.parseResidues(pdbIn);
+			pdbIn.close();
+			
+			VASEDataObject data = new VASEDataObject(
+					alignment, 
+					getTable(alignments,pdbResidues,residueInfoSet,chainID),
+					pdbURL);
+			
+			VASEDataObject.PlotDescription pd = new VASEDataObject.PlotDescription();
+			pd.setPlotTitle("Entropy vs. Variability");
+			pd.setXAxisColumnID("variability");
+			pd.setYAxisColumnID("entropy");
+			data.getPlots().add(pd);
+
+			pd = new VASEDataObject.PlotDescription();
+			pd.setPlotTitle("Entropy vs. Alignment Position");
+			pd.setXAxisColumnID("residue_number");
+			pd.setYAxisColumnID("entropy");
+			data.getPlots().add(pd);
+			
+			map.put(chainID, data);
+		}
+		
+		return map;
+	}
+
+	private static void goThroughStockholm(InputStream stockholmIn,
+			
+				AlignmentSet alignments, // output
+				ResidueInfoSet residueInfoSet // output
+				
+				) throws Exception {
 		
 		final BufferedReader reader = new BufferedReader(new InputStreamReader(stockholmIn));
 
@@ -224,37 +314,6 @@ public class StockholmParser {
 		}
 		
 		reader.close();
-		
-		Map<Character,VASEDataObject> map = new HashMap<Character,VASEDataObject>();
-		for(char chainID : alignments.getChainIDs()) {
-			
-			Alignment alignment = alignments.getAlignment(chainID);
-			
-			InputStream pdbIn = pdbURL.openStream();
-			Map<Character,Map<String,PDBResidueInfo>> pdbResidues = PDBParser.parseResidues(pdbIn);
-			pdbIn.close();
-			
-			VASEDataObject data = new VASEDataObject(
-					alignment, 
-					getTable(alignments,pdbResidues,residueInfoSet,chainID),
-					pdbURL);
-			
-			VASEDataObject.PlotDescription pd = new VASEDataObject.PlotDescription();
-			pd.setPlotTitle("Entropy vs. Variability");
-			pd.setXAxisColumnID("variability");
-			pd.setYAxisColumnID("entropy");
-			data.getPlots().add(pd);
-
-			pd = new VASEDataObject.PlotDescription();
-			pd.setPlotTitle("Entropy vs. Alignment Position");
-			pd.setXAxisColumnID("residue_number");
-			pd.setYAxisColumnID("entropy");
-			data.getPlots().add(pd);
-			
-			map.put(chainID, data);
-		}
-		
-		return map;
 	}
 	
 	private static String getAlignedPDBSeq(Alignment alignment) {

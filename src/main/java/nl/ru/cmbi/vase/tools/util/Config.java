@@ -26,5 +26,8 @@ public class Config {
 		return p;
 	}
 
-	
+	public static File getHSSPCacheDir() {
+
+		return new File(properties.getProperty("hsspcache"));
+	}
 }

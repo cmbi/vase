@@ -76,7 +76,10 @@ public class AlignmentPage extends BasePage {
 	
 			try {
 				
-				File xmlFile = new File(Config.getCacheDir(), PDBID+".xml.gz");
+				// Some files that might be there or not:
+				File	xmlFile = new File(Config.getCacheDir(), PDBID+".xml.gz"),
+						hsspFile = new File(Config.getHSSPCacheDir(), PDBID+".hssp.bz2"),
+						pdbFile = new File(Config.getHSSPCacheDir(), PDBID+".pdb.gz");
 				if(xmlFile.isFile()) {
 					
 					dataPerChain = new HashMap<Character,VASEDataObject>(); // just a wrapper
@@ -85,11 +88,18 @@ public class AlignmentPage extends BasePage {
 						VASEXMLParser.parse( new GZIPInputStream( new FileInputStream(xmlFile) ) )
 					);
 				}
+				else if(hsspFile.isFile() && pdbFile.isFile())
+				{					
+					dataPerChain = StockholmParser.parseStockHolm (
+						new BZip2CompressorInputStream(new FileInputStream(hsspFile)),
+								new GZIPInputStream(new FileInputStream(pdbFile)) );
+				}
 				else {
 				
 					URL stockholmURL = Utils.getStockholmURL(PDBID), pdbURL = Utils.getRcsbURL(PDBID);
 				
-					dataPerChain  = StockholmParser.parseStockHolm ( new BZip2CompressorInputStream(stockholmURL.openStream()), pdbURL);
+					dataPerChain  = StockholmParser.parseStockHolm ( 
+						new BZip2CompressorInputStream(stockholmURL.openStream()), pdbURL);
 				}
 			} catch (Exception e) {
 							
