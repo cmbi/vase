@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.StringWriter;
 import java.lang.annotation.Annotation;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
@@ -54,7 +55,10 @@ public class JobRestResource extends GsonRestResource {
 
 	    StringValue pdbfile = p.getParameterValue("pdbfile");
 	    if(pdbfile.toString()==null) {
-	    	return "";
+	    	
+			log.error("pdbfile parameter not set");
+
+			throw new AbortWithHttpErrorCodeException(404);
 	    }
 		
 		return queue.submit(pdbfile.toString());
@@ -69,13 +73,30 @@ public class JobRestResource extends GsonRestResource {
 	@MethodMapping(value = "/structure/{id}", httpMethod=HttpMethod.GET, produces = RestMimeTypes.TEXT_PLAIN)
 	public String structure(String id) {
 		
-		File xmlFile = new File(Config.getCacheDir(),id+".xml.gz");
+		File	xmlFile = new File(Config.getCacheDir(),id+".xml.gz"),
+				pdbFile = new File(Config.getHSSPCacheDir(),id+".pdb.gz");
 		
 		try {
 			
-			VASEDataObject data = VASEXMLParser.parse( new GZIPInputStream( new FileInputStream(xmlFile) ) );
+			if(xmlFile.isFile()) {
 			
-			return data.getPdbContents();
+				VASEDataObject data = VASEXMLParser.parse( new GZIPInputStream( new FileInputStream(xmlFile) ) );
+			
+				return data.getPdbContents();
+			}
+			else if(pdbFile.isFile()) {
+				
+				StringWriter pdbWriter = new StringWriter();
+				IOUtils.copy(new GZIPInputStream( new FileInputStream(pdbFile) ), pdbWriter, "UTF-8");
+				pdbWriter.close();
+				return pdbWriter.toString();
+			}
+			else {
+				
+				log.error("no structure file for "+id);
+
+				throw new AbortWithHttpErrorCodeException(404);
+			}
 			
 		} catch (Exception e) {
 			
