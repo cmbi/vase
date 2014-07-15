@@ -47,7 +47,7 @@ public class StockholmParser {
 		pdbIDPattern = "^#=GF CC PDBID\\s+[\\w\\-]+\\s*$",
 		chainPattern = "^#=GF ID\\s+[\\w]{4}\\/[A-Z0-9]\\s*$",
 		
-		chainsdefPattern = "^#=GF CC DBREF\\s+[1-9][A-Z0-9]{3}\\s+([A-Z0-9])\\s+.*$",
+		dbRefPattern = "^#=GF CC DBREF\\s+[1-9][A-Z0-9]{3}\\s+([A-Z0-9])\\s+.*$",
 		equalchainsPattern = "^#=GF CC Chain ([A-Z]) is considered to be the same as ([A-Z](?:, [A-Z])*(?: and [A-Z])?)$",
 		
 		variabilityPattern = "^#=GF\\s+RI" +
@@ -66,56 +66,6 @@ public class StockholmParser {
 			"([0-9]+\\.[0-9]+)\\s+([0-9]+)\\s+([0-9]+\\.[0-9]+)\\s*$", // ENTROPY RELENT WEIGHT
 	
 		seqPattern = "^[\\w\\-\\/]+\\s+[A-Z\\.]+$";
-	
-	public static Set<Character> listChainsInStockholm(InputStream stockholmIn) throws IOException {
-		
-		Set<Character> chains = new HashSet<Character>();
-		
-		String pdbID = null;
-		char currentChain='A';
-
-		final BufferedReader reader = new BufferedReader(new InputStreamReader(stockholmIn));
-		String line;
-		while((line=reader.readLine())!=null) {
-			
-			log.debug("listchains line "+line);
-			
-			if (line.matches(chainPattern)) {
-			
-				final String[] s = line.trim().split("\\s+");
-				final String id=s[s.length-1];
-				currentChain=id.charAt(5);
-				
-				chains.add(currentChain);
-				
-			} else if (line.matches(chainsdefPattern)) {
-				
-				final String[] s = line.trim().split("\\s+");
-				final char chain = s[4].charAt(0);
-				
-				chains.add(chain);
-				
-			} else if (line.matches(equalchainsPattern)) {
-
-				final String[] s = line.trim().split("\\s+");
-				final char sourceChain = s[3].charAt(0);
-				
-				// Chain listing starts at the 11th word in the expression.
-				for(int i=11; i<s.length; i++) {
-					
-					if(s.equals("and") ) continue; // 'and' is not a chain-ID, it's an interjection
-					
-					final char destChain=s[i].charAt(0); // Take the first character in the word, thus not the commas!
-					
-					chains.add(destChain);
-				}
-			}
-		}
-			
-		reader.close();
-		
-		return chains;
-	}
 
 	public static Map<Character, VASEDataObject> parseStockHolm(
 			InputStream stockholmIn,
@@ -202,6 +152,58 @@ public class StockholmParser {
 		
 		return map;
 	}
+	
+	public static Set<Character> listChainsInStockholm(InputStream stockholmIn) throws IOException {
+		
+		Set<Character> chains = new HashSet<Character>();
+		
+		String pdbID = null;
+		char currentChain='A';
+
+		final BufferedReader reader = new BufferedReader(new InputStreamReader(stockholmIn));
+		String line;
+		while((line=reader.readLine())!=null) {
+			
+			log.debug("listchains line "+line);
+			
+			if(line.trim().equals("//")) { // indicates the end of the current chain
+				
+				currentChain = ' ';
+			}
+			else if (line.matches(chainPattern)) {
+			
+				final String[] s = line.trim().split("\\s+");
+				final String id=s[s.length-1];
+				currentChain=id.charAt(5);
+				
+				chains.add(currentChain);
+				
+			} else if (line.matches(dbRefPattern)) {
+				
+				// DBRefs don't indicate the current chain
+				continue;
+				
+			} else if (line.matches(equalchainsPattern)) {
+
+				final String[] s = line.trim().split("\\s+");
+				final char sourceChain = s[3].charAt(0);
+				
+				// Chain listing starts at the 11th word in the expression.
+				for(int i=11; i<s.length; i++) {
+					
+					if(s.equals("and") ) continue; // 'and' is not a chain-ID, it's an interjection
+					
+					final char destChain=s[i].charAt(0); // Take the first character in the word, thus not the commas!
+					
+					chains.add(destChain);
+				}
+			}
+		}
+			
+		reader.close();
+		
+		return chains;
+	}
 
 	private static void goThroughStockholm(InputStream stockholmIn,
 			
@@ -224,7 +226,11 @@ public class StockholmParser {
 			Matcher vm = vp.matcher(line),
 					pm = pp.matcher(line);
 			
-			if(line.matches(pdbIDPattern)) {
+			if(line.trim().equals("//")) { // indicates the end of the current chain
+				
+				currentChain = ' ';
+			}
+			else if(line.matches(pdbIDPattern)) {
 				
 				final String[] s = line.trim().split("\\s+");
 				
@@ -243,19 +249,10 @@ public class StockholmParser {
 				
 				alignments.addChain(currentChain);
 				
-			} else if (line.matches(chainsdefPattern)) {
-			// these lines list the IDs of the chains in the pdb file
-				
-				final String[] s = line.trim().split("\\s+");
-				final String ac=s[3];
-				final char chain = s[4].charAt(0);
+			} else if (line.matches(dbRefPattern)) {
 
-				if(pdbID!=null && !pdbID.equalsIgnoreCase(ac)) {
-					throw new Exception("line "+linenr+": got id "+ac+", but expected: "+pdbID);
-				}
-				pdbID=ac;
-				
-				alignments.addChain(chain);
+				// DBRefs don't indicate the current chain
+				continue;
 				
 			} else if(vm.matches()) {
 				
