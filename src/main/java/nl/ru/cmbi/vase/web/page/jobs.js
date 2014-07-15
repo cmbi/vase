@@ -100,8 +100,6 @@ var pJobID = /^[0-9a-zA-Z\-]+$/ ;
 
 function submitJob(structure) {
 	
-	console.log("submitting: "+structure);
-	
 	$.ajax({
 		  type: "POST",
 		  url: restURL+"/custom",
@@ -219,16 +217,24 @@ function updateJobListingRow(job) {
 	
 	var list = document.getElementById("joblisting");
 	
+	var present = false;
 	for(var i=0; i<list.rows.length; i++) {
 		
 		if(list.rows[i].id
 			&& list.rows[i].id==job.id) {
 			
+			if(job.status.toLowerCase()=="finished") {
+
+				list.rows[i].cells[0].innerHTML="<a href=\"../align/"+job.id+"\">"+job.id+"</a>"
+			}
+			
 			list.rows[i].cells[1].innerHTML=job.status;
-			return;
+			present=true;
 		}
 	}
 
 	// if not found, add to rows
-	addJobRow( list, job );
+	if(!present) {
+		addJobRow( list, job );
+	}
 }
