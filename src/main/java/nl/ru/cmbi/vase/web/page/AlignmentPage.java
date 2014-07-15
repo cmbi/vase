@@ -22,6 +22,7 @@ import nl.ru.cmbi.vase.parse.StockholmParser;
 import nl.ru.cmbi.vase.parse.VASEXMLParser;
 import nl.ru.cmbi.vase.tools.util.Config;
 import nl.ru.cmbi.vase.tools.util.Utils;
+import nl.ru.cmbi.vase.web.WicketApplication;
 import nl.ru.cmbi.vase.web.panel.align.AlignmentDisplayPanel;
 import nl.ru.cmbi.vase.web.panel.align.AlignmentLinkedPlotPanel;
 import nl.ru.cmbi.vase.web.panel.align.AlignmentTablePanel;
@@ -41,6 +42,7 @@ import org.apache.wicket.markup.repeater.RepeatingView;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
+import org.apache.wicket.request.Url;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.util.string.StringValue;
@@ -88,9 +90,12 @@ public class AlignmentPage extends BasePage {
 				}
 				else if(hsspFile.isFile() && pdbFile.isFile())
 				{					
-					dataPerChain = StockholmParser.parseStockHolm (
-						new BZip2CompressorInputStream(new FileInputStream(hsspFile)),
-								new GZIPInputStream(new FileInputStream(pdbFile)) );
+					String fullPDBURL = RequestCycle.get().getUrlRenderer().renderFullUrl(Url.parse("../rest/structure/"+structureID));
+					
+					URL pdbURL = new URL( fullPDBURL );
+					
+					dataPerChain  = StockholmParser.parseStockHolm ( 
+							new BZip2CompressorInputStream(new FileInputStream(hsspFile)), pdbURL);
 				}
 				else {
 				
