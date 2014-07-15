@@ -73,7 +73,7 @@ public class StockholmParser {
 		
 		AlignmentSet alignments = new AlignmentSet();
 		ResidueInfoSet residueInfoSet = new ResidueInfoSet();
-		String pdbID="";
+		StringBuilder pdbID=new StringBuilder("");
 		
 		goThroughStockholm(stockholmIn,alignments,residueInfoSet,pdbID);
 		
@@ -96,7 +96,7 @@ public class StockholmParser {
 					getTable(alignments,pdbResidues,residueInfoSet,chainID),
 					pdbString);
 
-			data.setTitle( String.format("Alignment of %s chain %c", pdbID, chainID) );
+			data.setTitle( String.format("Alignment of %s chain %c", pdbID.toString(), chainID) );
 			
 			VASEDataObject.PlotDescription pd = new VASEDataObject.PlotDescription();
 			pd.setPlotTitle("Entropy vs. Variability");
@@ -121,7 +121,7 @@ public class StockholmParser {
 		
 		AlignmentSet alignments = new AlignmentSet();
 		ResidueInfoSet residueInfoSet = new ResidueInfoSet();
-		String pdbID = "";
+		StringBuilder pdbID = new StringBuilder("");
 		
 		goThroughStockholm(stockholmIn,alignments,residueInfoSet,pdbID);
 		
@@ -139,7 +139,7 @@ public class StockholmParser {
 					getTable(alignments,pdbResidues,residueInfoSet,chainID),
 					pdbURL);
 
-			data.setTitle( String.format("Alignment of %s chain %c", pdbID, chainID) );
+			data.setTitle( String.format("Alignment of %s chain %c", pdbID.toString(), chainID) );
 			
 			VASEDataObject.PlotDescription pd = new VASEDataObject.PlotDescription();
 			pd.setPlotTitle("Entropy vs. Variability");
@@ -213,9 +213,9 @@ public class StockholmParser {
 
 	private static void goThroughStockholm(InputStream stockholmIn,
 			
-				AlignmentSet alignments, // output
-				ResidueInfoSet residueInfoSet, // output
-				String pdbID // output
+				final AlignmentSet alignments, // output
+				final ResidueInfoSet residueInfoSet, // output
+				final StringBuilder pdbID // output
 				
 				) throws Exception {
 		
@@ -240,7 +240,9 @@ public class StockholmParser {
 				
 				final String[] s = line.trim().split("\\s+");
 				
-				pdbID=s[s.length-1];
+				pdbID.replace(0, pdbID.length(), s[s.length-1] );
+				
+				log.info("set pdb id to "+pdbID );
 				
 			} else if (line.matches(chainPattern)) {
 			
@@ -248,10 +250,13 @@ public class StockholmParser {
 				final String id=s[s.length-1], ac=id.substring(0,4);
 				currentChain=id.charAt(5);
 	
-				if(pdbID!=null && !pdbID.equalsIgnoreCase(ac)) {
+				if( !pdbID.toString().equalsIgnoreCase(ac)) {
 					throw new Exception("line "+linenr+": got id "+ac+", but expected: "+pdbID);
 				}
-				pdbID=ac;
+				
+				pdbID.replace(0, pdbID.length(), ac );
+				
+				log.info("set pdb id to "+pdbID );
 				
 				alignments.addChain(currentChain);
 				
