@@ -75,17 +75,18 @@ function jobRemove( jobid ) {
 
 function jobAdd( job ) {
 	
-	var present = false;
+	var jobIndex = -1;
 	for( var i=0; i<jobs.length; i++ ) {
 		
 		if( jobs[i].id == job.id ) {
-			present = true;
+			jobIndex = i;
 		}
 	}
 	
-	if(!present) {
+	if(jobIndex<0) {
 		
 		jobs.push( job );
+		jobIndex = jobs.length - 1;
 	}
 	
 	if( cookiesAccepted ) {
@@ -93,7 +94,7 @@ function jobAdd( job ) {
 		saveJobIDs();
 	}
 	
-	updateJobListingRow(job); // adds it if not yet in table
+	updateJobListingRow(jobs[ jobIndex ]); // adds it if not yet in table
 }
 
 var pJobID = /^[0-9a-zA-Z\-]+$/ ;
@@ -208,7 +209,7 @@ function addJobRow( table, job) {
 	row.id=job.id;
 	
 	var arrowLeftCell = row.insertCell(0);
-	arrowLeftCell.setAttribute("title","Show Input of "+job.id);
+	arrowLeftCell.setAttribute("title","Show Submitted Data on "+job.id);
 	arrowLeftCell.setAttribute("class","show-job-input glyphicon glyphicon-arrow-left");
 	arrowLeftCell.setAttribute("onclick","setTextareaToPDBFileOf( '"+job.id+"' );");
 	
@@ -254,8 +255,9 @@ function updateJobListingRow(job) {
 		}
 	}
 
-	// if not found, add to rows
+	// if not found, add a new row
 	if(!present) {
+		
 		addJobRow( list, job );
 	}
 }
