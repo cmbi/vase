@@ -7,6 +7,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.StringWriter;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
 import java.net.URL;
 
 import java.util.ArrayList;
@@ -38,6 +40,8 @@ import org.slf4j.LoggerFactory;
 import java.util.regex.Matcher;
 import java.util.zip.GZIPInputStream;
 
+import lombok.Data;
+
 public class StockholmParser {
 	
 	static Logger log = LoggerFactory.getLogger(StockholmParser.class);
@@ -66,55 +70,6 @@ public class StockholmParser {
 			"([0-9]+\\.[0-9]+)\\s+([0-9]+)\\s+([0-9]+\\.[0-9]+)\\s*$", // ENTROPY RELENT WEIGHT
 	
 		seqPattern = "^[\\w\\-\\/]+\\s+[A-Z\\.]+$";
-
-	public static Map<Character, VASEDataObject> parseStockHolm(
-			InputStream stockholmIn,
-			InputStream pdbIn) throws Exception {
-		
-		AlignmentSet alignments = new AlignmentSet();
-		ResidueInfoSet residueInfoSet = new ResidueInfoSet();
-		StringBuilder pdbID=new StringBuilder("");
-		
-		goThroughStockholm(stockholmIn,alignments,residueInfoSet,pdbID);
-		
-		StringWriter pdbWriter = new StringWriter();
-		IOUtils.copy(pdbIn, pdbWriter, "UTF-8");
-		pdbWriter.close();
-		String pdbString = pdbWriter.toString();
-		
-		Map<Character,VASEDataObject> map = new HashMap<Character,VASEDataObject>();
-		for(char chainID : alignments.getChainIDs()) {
-			
-			Alignment alignment = alignments.getAlignment(chainID);
-			
-			pdbIn = IOUtils.toInputStream(pdbString, "UTF-8");
-			Map<Character,Map<String,PDBResidueInfo>> pdbResidues = PDBParser.parseResidues(pdbIn);
-			pdbIn.close();
-			
-			VASEDataObject data = new VASEDataObject(
-					alignment, 
-					getTable(alignments,pdbResidues,residueInfoSet,chainID),
-					pdbString);
-
-			data.setTitle( String.format("Alignment of %s chain %c", pdbID.toString(), chainID) );
-			
-			VASEDataObject.PlotDescription pd = new VASEDataObject.PlotDescription();
-			pd.setPlotTitle("Entropy vs. Variability");
-			pd.setXAxisColumnID("variability");
-			pd.setYAxisColumnID("entropy");
-			data.getPlots().add(pd);
-
-			pd = new VASEDataObject.PlotDescription();
-			pd.setPlotTitle("Entropy vs. Alignment Position");
-			pd.setXAxisColumnID("residue_number");
-			pd.setYAxisColumnID("entropy");
-			data.getPlots().add(pd);
-			
-			map.put(chainID, data);
-		}
-		
-		return map;
-	}
 	
 	public static Map<Character,VASEDataObject> parseStockHolm(InputStream stockholmIn, URL pdbURL)
 		throws Exception {
@@ -140,6 +95,27 @@ public class StockholmParser {
 					pdbURL);
 
 			data.setTitle( String.format("Alignment of %s chain %c", pdbID.toString(), chainID) );
+			
+			String label = alignment.getLabels().get(0);
+			
+			String pdbURLString = pdbURL.toString().toLowerCase(), pdbid;
+			if(pdbURLString.startsWith("http://www.rcsb.org/pdb/files/") && pdbURLString.endsWith(".pdb")) {
+				
+				pdbid = pdbURLString.split("\\/files\\/")[1].split("\\.")[0];
+				pdbURLString = "http://www.rcsb.org/pdb/explore/explore.do?structureId="+pdbid;
+			}
+			
+			data.getSequenceReferenceURLs().put( label, new URL(pdbURLString) );
+			
+			for( int i=1; i< alignment.getLabels().size(); i++ ) {
+
+				label = alignment.getLabels().get(i);
+				String id = label.split("/")[0];
+				
+				URL url = new URL("http://www.uniprot.org/uniprot/"+id);
+				
+				data.getSequenceReferenceURLs().put(label, url);
+			}
 			
 			VASEDataObject.PlotDescription pd = new VASEDataObject.PlotDescription();
 			pd.setPlotTitle("Entropy vs. Variability");
