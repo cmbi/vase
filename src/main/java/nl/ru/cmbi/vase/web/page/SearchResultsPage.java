@@ -25,11 +25,13 @@ import org.slf4j.LoggerFactory;
 
 public class SearchResultsPage extends BasePage {
 	
+	public static final String parameterName = "structureID";
+	
 	private static Logger log = LoggerFactory.getLogger(SearchResultsPage.class);
 
 	public SearchResultsPage(final PageParameters parameters) {
 		
-		String structureID = parameters.get("structureID").toString();
+		String structureID = parameters.get(parameterName).toString();
 		setPageTitle("Search Results for "+structureID);
 		
 		List<SearchResult> results = search(structureID) ;
