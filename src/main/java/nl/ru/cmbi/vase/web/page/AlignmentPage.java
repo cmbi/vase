@@ -54,32 +54,30 @@ public class AlignmentPage extends BasePage {
 	
 	private static final Logger log = LoggerFactory.getLogger(AlignmentPage.class);
 	
-	private String PDBID;
+	private String structureID;
 	private Character chainID=null;
-	
-	private static Calculator calculator = new Calculator();
 
 	public AlignmentPage(final PageParameters parameters) {
 		
-		StringValue	pdbIDString		= parameters.get(0),
-					chainIDString	= parameters.get(1);
+		StringValue	structureIDString	= parameters.get(0),
+					chainIDString		= parameters.get(1);
 		
 		Map<Character,VASEDataObject> dataPerChain;
 		
-		if(pdbIDString==null || pdbIDString.isNull() || pdbIDString.isEmpty()) {
+		if(structureIDString==null || structureIDString.isNull() || structureIDString.isEmpty()) {
 					
-			throw new RestartResponseAtInterceptPageException(new ErrorPage("pdb id missing"));
+			throw new RestartResponseAtInterceptPageException(new ErrorPage("structure id missing"));
 			
 		} else {
 		
-			PDBID = pdbIDString.toString().toLowerCase();
+			structureID = structureIDString.toString().toLowerCase();
 	
 			try {
 				
 				// Some files that might be there or not:
-				File	xmlFile = new File(Config.getCacheDir(), PDBID+".xml.gz"),
-						hsspFile = new File(Config.getHSSPCacheDir(), PDBID+".hssp.bz2"),
-						pdbFile = new File(Config.getHSSPCacheDir(), PDBID+".pdb.gz");
+				File	xmlFile = new File(Config.getCacheDir(), structureID+".xml.gz"),
+						hsspFile = new File(Config.getHSSPCacheDir(), structureID+".hssp.bz2"),
+						pdbFile = new File(Config.getHSSPCacheDir(), structureID+".pdb.gz");
 				if(xmlFile.isFile()) {
 					
 					dataPerChain = new HashMap<Character,VASEDataObject>(); // just a wrapper
@@ -96,16 +94,16 @@ public class AlignmentPage extends BasePage {
 				}
 				else {
 				
-					URL stockholmURL = Utils.getStockholmURL(PDBID), pdbURL = Utils.getRcsbURL(PDBID);
+					URL stockholmURL = Utils.getStockholmURL(structureID), pdbURL = Utils.getRcsbURL(structureID);
 				
 					dataPerChain  = StockholmParser.parseStockHolm ( 
 						new BZip2CompressorInputStream(stockholmURL.openStream()), pdbURL);
 				}
 			} catch (Exception e) {
 							
-				log.error("Error getting alignments for " + pdbIDString + " : " + e.getMessage(),e);
+				log.error("Error getting alignments for " + structureIDString + " : " + e.getMessage(),e);
 				
-				throw new RestartResponseAtInterceptPageException(new ErrorPage("Error getting alignments for " + pdbIDString + " : " + e.toString()));
+				throw new RestartResponseAtInterceptPageException(new ErrorPage("Error getting alignments for " + structureIDString + " : " + e.toString()));
 			}
 			
 			if(chainIDString!=null && !chainIDString.isNull() && !chainIDString.isEmpty()) {
@@ -114,6 +112,8 @@ public class AlignmentPage extends BasePage {
 			}
 			else if (dataPerChain.size()==1) {
 				
+				// no chain id needs to be given, since there's only one
+				
 				List<Character> chainIDs = new ArrayList<Character>();
 				chainIDs.addAll(dataPerChain.keySet());
 				
@@ -121,12 +121,14 @@ public class AlignmentPage extends BasePage {
 			}
 			else if(chainID==null) {
 				
-				String chains = "Select one of the following chains: ";
-				for(char chain : dataPerChain.keySet()) {
-					chains += " "+chain;
-				}
+				// Redirect to a page with chain selection
 				
-				throw new RestartResponseAtInterceptPageException(new ErrorPage(chains));
+				PageParameters params = new PageParameters();
+				params.add( SearchResultsPage.parameterName, structureID) ;
+				
+				setResponsePage(SearchResultsPage.class, params);
+				
+				return;
 			}
 			else if(!dataPerChain.containsKey(chainID)) {
 				
@@ -134,15 +136,13 @@ public class AlignmentPage extends BasePage {
 			}
 		}
 		
-
-//		####################################################################
+		this.initPageWith( dataPerChain.get(chainID) );
+	}
+	
+	private void initPageWith(final VASEDataObject data) {
 		
-		String title=String.format("Alignment of %s chain %c", PDBID,chainID);
-		
-		setPageTitle(title);
-		add(new Label("page-header",title));
-		
-		final VASEDataObject data = dataPerChain.get(chainID);
+		setPageTitle(data.getTitle());
+		add(new Label("alignment-header",data.getTitle()));
 		
 		final AlignmentDisplayPanel alignmentPanel = new AlignmentDisplayPanel("alignment",data);
 		add(alignmentPanel);
@@ -179,7 +179,7 @@ public class AlignmentPage extends BasePage {
 		
 		String structurePath =
 			RequestCycle.get().urlFor(HomePage.class, new PageParameters()).toString()
-			+ "rest/structure/" + PDBID;
+			+ "rest/structure/" + structureID;
 		
 		if(data.getPdbURL()!=null) {
 			
@@ -189,40 +189,31 @@ public class AlignmentPage extends BasePage {
 		add(new StructurePanel("structure",structurePath));
 	}
 	
-	private Map<String,String> tabTitles = new LinkedHashMap<String,String>();
-	
-	private IModel<List<String>> tabidsModel = new LoadableDetachableModel<List<String>>() {
-
-		@Override
-		protected List<String> load() {
-			
-			return new ArrayList<String>(tabTitles.keySet());
-		}
-	};
+	private List<String> tabids = new ArrayList<String>();
 	
 	private void addToTabs(String id, String tabTitle, Component component, RepeatingView tabs) {
 
 		// first added becomes the active tab
 		String display="none";
-		boolean active=false;
-		if(tabTitles.size()==0) {
+		boolean bActive=false;
+		if(tabids.size()==0) {
 			
-			active=true;
+			bActive=true;
 			display="block";
 		}
 		
-		tabTitles.put(id,tabTitle);
+		tabids.add(id);
 		component.add(new AttributeModifier("id",id));
 		component.add(new AttributeAppender("style",new Model("display:"+display),";"));
 		
 		add(component);
 		
-		tabs.add(new TabFragment(tabs.newChildId(),id,active));
+		tabs.add(new TabFragment(tabs.newChildId(),id,tabTitle,bActive));
 	}
 	
 	public class TabFragment extends Fragment {
 		
-		public TabFragment(String id, String tabid, boolean startActive) {
+		public TabFragment(String id, String tabid, String title, boolean startActive) {
 			
 			super(id, "tab-fragment", AlignmentPage.this);
 			
@@ -231,7 +222,7 @@ public class AlignmentPage extends BasePage {
 			WebMarkupContainer link = new WebMarkupContainer("tab-link");
 			
 			link.add(new AttributeModifier("onclick",String.format("switchTabVisibility('%s');", tabid)));
-			link.add(new Label("tab-title",tabTitles.get(tabid)));
+			link.add(new Label("tab-title",title));
 			
 			if(startActive) {
 				
@@ -261,7 +252,7 @@ public class AlignmentPage extends BasePage {
 			
 			getResponse().write("var tabids=[");
 			
-			for(String tabid : AlignmentPage.this.tabTitles.keySet()) {
+			for(String tabid : AlignmentPage.this.tabids) {
 				
 				getResponse().write(String.format("\'%s\',", tabid));
 			}
