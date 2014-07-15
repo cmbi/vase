@@ -2,6 +2,7 @@ package nl.ru.cmbi.vase.web;
 
 import nl.ru.cmbi.vase.job.HsspQueue;
 import nl.ru.cmbi.vase.tools.util.Config;
+import nl.ru.cmbi.vase.web.page.AboutPage;
 import nl.ru.cmbi.vase.web.page.AlignmentPage;
 import nl.ru.cmbi.vase.web.page.HomePage;
 import nl.ru.cmbi.vase.web.page.InputPage;
@@ -42,6 +43,21 @@ public class WicketApplication extends WebApplication
 		
 		return hsspQueue;
 	}
+	
+	private ResourceReference restReference = new ResourceReference("restReference") {
+		
+		JobRestResource resource = new JobRestResource(WicketApplication.this);
+		
+		@Override
+		public IResource getResource() {
+			return resource;
+		}
+	};
+	
+	public ResourceReference getRestReference() {
+		
+		return restReference;
+	}
 
 	/**
 	 * @see org.apache.wicket.Application#init()
@@ -63,16 +79,9 @@ public class WicketApplication extends WebApplication
 		mountPage("/align", AlignmentPage.class);
 		
 		mountPage("/input", InputPage.class);
+		mountPage("/about", AboutPage.class);
 		
-		mountResource("/rest", new ResourceReference("restReference") {
-			
-			JobRestResource resource = new JobRestResource(WicketApplication.this);
-			
-			@Override
-			public IResource getResource() {
-				return resource;
-			}
-		});
+		mountResource("/rest", this.restReference);
 
 		mountResource("/jobs.js",new PackageResourceReference(AlignmentPage.class, "jobs.js"));
 		mountResource("/align.js",new PackageResourceReference(AlignmentPage.class, "align.js"));
