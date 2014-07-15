@@ -69,7 +69,7 @@ public class StockholmParser {
 			"([0-9]+)\\s+([0-9]+)\\s+([0-9]+)\\s+" + // NOCC NDEL NINS 
 			"([0-9]+\\.[0-9]+)\\s+([0-9]+)\\s+([0-9]+\\.[0-9]+)\\s*$", // ENTROPY RELENT WEIGHT
 	
-		seqPattern = "^[\\w\\-\\/]+\\s+[A-Z\\.]+$";
+		seqPattern = "^([\\w\\-\\/]*)\\s+([A-Z\\.]+)$";
 	
 	public static Map<Character,VASEDataObject> parseStockHolm(InputStream stockholmIn, URL pdbURL)
 		throws Exception {
@@ -216,14 +216,16 @@ public class StockholmParser {
 
 		char currentChain='A';
 		final Pattern	vp = Pattern.compile(variabilityPattern),
-						pp = Pattern.compile(profilePattern);
+						pp = Pattern.compile(profilePattern),
+						sp = Pattern.compile(seqPattern);
 
 		String line; int linenr=0;
 		while((line=reader.readLine())!=null) {
 			linenr++;
 
 			Matcher vm = vp.matcher(line),
-					pm = pp.matcher(line);
+					pm = pp.matcher(line),
+					sm = sp.matcher(line);
 			
 			if(line.trim().equals("//")) { // indicates the end of the current chain
 				
@@ -300,11 +302,9 @@ public class StockholmParser {
 					alignments.addChainReference(sourceChain,destChain);
 				}
 			}
-			else if(line.matches(seqPattern)) {
+			else if(sm.matches()) {
 
-				final String[] s = line.split("\\s+");
-
-				final String key = s[0], seq = s[1];
+				final String key = sm.group(0), seq = sm.group(1);
 
 				alignments.addToSeq(currentChain,key,seq);
 			}
