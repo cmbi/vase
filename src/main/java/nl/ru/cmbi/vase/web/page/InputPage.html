@@ -29,7 +29,7 @@
 				  
 				  	<form name="structure-input" action="/input" method="POST" onsubmit="return submitStructure();">
 				  	
-						<textarea class="pdb-input" name="pdbfile" required="required"
+						<textarea id="pdb-input" class="pdb-input" name="pdbfile" required="required"
 							style="width:100%;height:400px"
 							placeholder="Enter the contents of a PDB file here.." />
 							
@@ -47,8 +47,10 @@
 				  	<table id="joblisting" class="table" >
 				  		<thead>
 				  			<tr>
+				  				<th></th>
 				  				<th>Job ID</th>
 				  				<th>Status</th>
+				  				<th></th>
 				  			</tr>
 				  		</thead>
 				  		<tbody>

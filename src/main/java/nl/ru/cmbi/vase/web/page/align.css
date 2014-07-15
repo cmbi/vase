@@ -56,7 +56,9 @@ th.header-sort-button:hover {
 	cursor:pointer;
 }
 
-td.delete-job-id {
+td.delete-job-id:hover, td.show-job-input:hover {
+	
+	background-color: #DDDDFF;
 	cursor:pointer;
 }
 

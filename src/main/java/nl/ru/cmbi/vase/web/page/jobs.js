@@ -187,18 +187,39 @@ function initJobPage() {
 	}
 }
 
+function setTextareaToPDBFileOf( jobid ) {
+
+	$.ajax( {
+		  type: "GET",
+		  url: restURL+"/structure/"+jobid,
+		  data: '',
+		  
+		  success: function(data, status, jqXHR) {
+			  
+			  document.getElementById("pdb-input").value = data ;
+		  }
+	} );
+	
+}
+
 function addJobRow( table, job) {
 	
 	var row = table.tBodies[0].insertRow(-1);
 	row.id=job.id;
 	
-	var idCell= row.insertCell(0);
+	var arrowLeftCell = row.insertCell(0);
+	arrowLeftCell.setAttribute("title","Show Input of "+job.id);
+	arrowLeftCell.setAttribute("class","show-job-input glyphicon glyphicon-arrow-left");
+	arrowLeftCell.setAttribute("onclick","setTextareaToPDBFileOf( '"+job.id+"' );");
+	
+	var idCell= row.insertCell(1);
 	idCell.innerHTML = job.id;
 	
-	var statusCell= row.insertCell(1);
+	var statusCell= row.insertCell(2);
 	statusCell.innerHTML = job.status ;
 	
-	var deleteCell= row.insertCell(2);
+	var deleteCell= row.insertCell(3);
+	deleteCell.setAttribute("title","Remove from List");
 	deleteCell.setAttribute("class","delete-job-id glyphicon glyphicon-remove");
 	deleteCell.setAttribute("onclick","jobRemove('"+job.id+"');");
 }
@@ -225,10 +246,10 @@ function updateJobListingRow(job) {
 			
 			if(job.status.toLowerCase()=="finished") {
 
-				list.rows[i].cells[0].innerHTML="<a href=\"../align/"+job.id+"\">"+job.id+"</a>"
+				list.rows[i].cells[1].innerHTML="<a href=\"../align/"+job.id+"\">"+job.id+"</a>"
 			}
 			
-			list.rows[i].cells[1].innerHTML=job.status;
+			list.rows[i].cells[2].innerHTML=job.status;
 			present=true;
 		}
 	}
