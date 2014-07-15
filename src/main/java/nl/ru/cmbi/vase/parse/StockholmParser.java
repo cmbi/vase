@@ -165,12 +165,17 @@ public class StockholmParser {
 		
 		String pdbID = null;
 		char currentChain='A';
+		final Pattern	vp = Pattern.compile(variabilityPattern),
+						pp = Pattern.compile(profilePattern);
 
 		final BufferedReader reader = new BufferedReader(new InputStreamReader(stockholmIn));
 		String line;
 		while((line=reader.readLine())!=null) {
 			
 			log.debug("listchains line "+line);
+
+			Matcher vm = vp.matcher(line),
+					pm = pp.matcher(line);
 			
 			if(line.trim().equals("//")) { // indicates the end of the current chain
 				
@@ -189,6 +194,18 @@ public class StockholmParser {
 				// DBRefs don't indicate the current chain
 				continue;
 				
+			} else if(vm.matches()) {
+						
+				currentChain = vm.group(3).charAt(0);
+				
+				chains.add(currentChain);
+				
+			} else if (pm.matches()) {
+				
+				currentChain = pm.group(3).charAt(0);
+				
+				chains.add(currentChain);
+						
 			} else if (line.matches(equalchainsPattern)) {
 
 				final String[] s = line.trim().split("\\s+");
@@ -242,8 +259,6 @@ public class StockholmParser {
 				
 				pdbID.replace(0, pdbID.length(), s[s.length-1] );
 				
-				log.info("set pdb id to "+pdbID );
-				
 			} else if (line.matches(chainPattern)) {
 			
 				final String[] s = line.trim().split("\\s+");
@@ -255,8 +270,6 @@ public class StockholmParser {
 				}
 				
 				pdbID.replace(0, pdbID.length(), ac );
-				
-				log.info("set pdb id to "+pdbID );
 				
 				alignments.addChain(currentChain);
 				
