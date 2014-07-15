@@ -25,16 +25,17 @@
 			<div class="col-md-8">
 				<div class="panel panel-default">
 				  <div class="panel-heading">Input PDB</div>
-				  <div class="panel-body">
+				  <div class="panel-body" style="height:400px">
 				  
 				  	<form name="structure-input" action="/input" method="POST" onsubmit="return submitStructure();">
 				  	
 						<textarea id="pdb-input" class="pdb-input" name="pdbfile" required="required"
-							style="width:100%;height:400px"
+							style="width:100%;height:340px"
 							placeholder="Enter the contents of a PDB file here.." />
 							
 						<input type="submit" value="Submit" >
 					</form>
+					
 				  </div>
 				</div>
 			</div>
@@ -42,9 +43,9 @@
 			<div class="col-md-4">
 				<div class="panel panel-default">
 				  <div class="panel-heading">Jobs</div>
-				  <div class="panel-body" style="overflow-y:auto">
+				  <div class="panel-body" style="height:400px">
 				  
-				  	<table id="joblisting" class="table" >
+				  	<table id="joblisting" class="table"  >
 				  		<thead>
 				  			<tr>
 				  				<th></th>
@@ -53,23 +54,23 @@
 				  				<th></th>
 				  			</tr>
 				  		</thead>
-				  		<tbody>
+				  		<tbody style="height:300px; overflow-y: auto">
 				  		</tbody>
 				  	</table>
 				  	
-				  	<script type="text/javascript">
-				  	
-						initJobPage();
-						
-						// poll every 2 seconds
-						setInterval(pollJobs,2000);
-					
-				  	</script>
 				  </div>
 				</div>
 			</div>
 		</div>
+				  	
+  	<script type="text/javascript">
+  	
+		initJobPage();
 		
+		// poll every 2 seconds
+		setInterval(pollJobs,2000);
+	
+  	</script>
 	</wicket:extend>	
 	</body>
 </html>
