@@ -73,8 +73,9 @@ public class StockholmParser {
 		
 		AlignmentSet alignments = new AlignmentSet();
 		ResidueInfoSet residueInfoSet = new ResidueInfoSet();
+		String pdbID="";
 		
-		goThroughStockholm(stockholmIn,alignments,residueInfoSet);
+		goThroughStockholm(stockholmIn,alignments,residueInfoSet,pdbID);
 		
 		StringWriter pdbWriter = new StringWriter();
 		IOUtils.copy(pdbIn, pdbWriter, "UTF-8");
@@ -94,6 +95,8 @@ public class StockholmParser {
 					alignment, 
 					getTable(alignments,pdbResidues,residueInfoSet,chainID),
 					pdbString);
+
+			data.setTitle( String.format("Alignment of %s chain %c", pdbID, chainID) );
 			
 			VASEDataObject.PlotDescription pd = new VASEDataObject.PlotDescription();
 			pd.setPlotTitle("Entropy vs. Variability");
@@ -118,8 +121,9 @@ public class StockholmParser {
 		
 		AlignmentSet alignments = new AlignmentSet();
 		ResidueInfoSet residueInfoSet = new ResidueInfoSet();
+		String pdbID = "";
 		
-		goThroughStockholm(stockholmIn,alignments,residueInfoSet);
+		goThroughStockholm(stockholmIn,alignments,residueInfoSet,pdbID);
 		
 		Map<Character,VASEDataObject> map = new HashMap<Character,VASEDataObject>();
 		for(char chainID : alignments.getChainIDs()) {
@@ -134,6 +138,8 @@ public class StockholmParser {
 					alignment, 
 					getTable(alignments,pdbResidues,residueInfoSet,chainID),
 					pdbURL);
+
+			data.setTitle( String.format("Alignment of %s chain %c", pdbID, chainID) );
 			
 			VASEDataObject.PlotDescription pd = new VASEDataObject.PlotDescription();
 			pd.setPlotTitle("Entropy vs. Variability");
@@ -208,13 +214,13 @@ public class StockholmParser {
 	private static void goThroughStockholm(InputStream stockholmIn,
 			
 				AlignmentSet alignments, // output
-				ResidueInfoSet residueInfoSet // output
+				ResidueInfoSet residueInfoSet, // output
+				String pdbID // output
 				
 				) throws Exception {
 		
 		final BufferedReader reader = new BufferedReader(new InputStreamReader(stockholmIn));
 
-		String pdbID = null;
 		char currentChain='A';
 		final Pattern	vp = Pattern.compile(variabilityPattern),
 						pp = Pattern.compile(profilePattern);

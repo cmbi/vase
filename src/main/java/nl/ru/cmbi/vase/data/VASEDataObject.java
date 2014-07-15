@@ -15,6 +15,8 @@ import lombok.Setter;
 @Data
 public class VASEDataObject {
 	
+	private String title = "";
+	
 	@Data
 	public static class PlotDescription {
 		
