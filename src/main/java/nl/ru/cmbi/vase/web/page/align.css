@@ -1,5 +1,22 @@
 @CHARSET "UTF-8";
 
+.equal {
+  display: -webkit-box;
+  display: -moz-box;
+  display: -ms-flexbox;
+  display: -webkit-flex;
+  display: flex;
+  flex: auto;
+}
+.equal > div[class*='col-'] > div[class='panel panel-default'] {
+  display: -webkit-box;
+  display: -moz-box;
+  display: -ms-flexbox;
+  display: -webkit-flex;
+  display: flex;
+  flex-flow: column;
+}
+
 .data_table_row:hover {
 	background-color: #FFDDDD
 }
