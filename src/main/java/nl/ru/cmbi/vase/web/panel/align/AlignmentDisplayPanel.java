@@ -21,6 +21,7 @@ import org.apache.wicket.ajax.markup.html.AjaxFallbackLink;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.link.ExternalLink;
+import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.Panel;
@@ -129,12 +130,26 @@ public class AlignmentDisplayPanel extends Panel {
 				final String label = AlignmentDisplayPanel.this.alignment.getLabels().get(row);
 				
 				String id = label.split("/")[0], ref=null;
-				if(id.length()==4)
-					ref="http://www.rcsb.org/pdb/explore/explore.do?structureId="+id;
-				else if(id.length()==6)
-					ref="http://www.uniprot.org/uniprot/"+id;
 				
-				item.add(new ExternalLink("ref",ref).add(new Label("label",label)));
+				VASEDataObject data = AlignmentDisplayPanel.this.data;
+				
+				if(data.getSequenceReferenceURLs().containsKey(label))
+					ref=data.getSequenceReferenceURLs().get(label).toString();
+				else
+					ref="";
+				
+				final boolean linkActive = !ref.isEmpty();
+				
+				ExternalLink link = new ExternalLink("ref",ref)
+				{
+				    @Override
+				    public boolean isEnabled() {
+				        return linkActive;
+				    }
+				};
+				
+				link.add(new Label("label",label));
+				item.add(link);
 			}
 		});
 		
