@@ -292,7 +292,10 @@ public class AlignmentPage extends BasePage {
 			}
 			getResponse().write("];\n");
 
-			String urlString = RequestCycle.get().urlFor(HomePage.class, new PageParameters()).toString();
+			String urlString = RequestCycle.get().getUrlRenderer().renderFullUrl(
+				Url.parse(
+					RequestCycle.get().urlFor(HomePage.class, null) ));
+			
 			getResponse().write(String.format("var baseURL='%s';\n", urlString));
 			
 			getResponse().write("var pPDBresclass=/"

@@ -2,6 +2,7 @@ package nl.ru.cmbi.vase.web.page;
 
 import org.apache.wicket.Component;
 import org.apache.wicket.core.util.string.JavaScriptUtils;
+import org.apache.wicket.request.Url;
 import org.apache.wicket.request.cycle.RequestCycle;
 
 public class InputPage extends BasePage {
@@ -24,8 +25,11 @@ public class InputPage extends BasePage {
 		protected void onRender() {
 			
 			JavaScriptUtils.writeOpenTag(getResponse());
+
+			String urlString = RequestCycle.get().getUrlRenderer().renderFullUrl(
+				Url.parse(
+					RequestCycle.get().urlFor(HomePage.class, null) ));
 			
-			String urlString = RequestCycle.get().urlFor(HomePage.class, null).toString();
 			getResponse().write(String.format("var baseURL='%s';\n", urlString));
 			
 			JavaScriptUtils.writeCloseTag(getResponse());
