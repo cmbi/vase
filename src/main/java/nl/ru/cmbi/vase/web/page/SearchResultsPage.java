@@ -1,13 +1,16 @@
 package nl.ru.cmbi.vase.web.page;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
+import nl.ru.cmbi.vase.data.VASEDataObject;
 import nl.ru.cmbi.vase.parse.StockholmParser;
 import nl.ru.cmbi.vase.tools.util.Config;
 import nl.ru.cmbi.vase.tools.util.Utils;
@@ -19,6 +22,8 @@ import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.Fragment;
+import org.apache.wicket.request.Url;
+import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -93,7 +98,7 @@ public class SearchResultsPage extends BasePage {
 					results.add( new SearchResult(structureID,chain) );
 				}
 				
-			} catch (IOException e) {
+			} catch (Exception e) {
 				
 				log.error(e.getMessage(),e);
 			}

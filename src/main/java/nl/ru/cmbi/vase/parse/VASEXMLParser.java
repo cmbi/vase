@@ -12,11 +12,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import nl.ru.cmbi.vase.data.Alignment;
 import nl.ru.cmbi.vase.data.TableData;
 import nl.ru.cmbi.vase.data.VASEDataObject;
 import nl.ru.cmbi.vase.data.TableData.ColumnInfo;
 import nl.ru.cmbi.vase.data.VASEDataObject.PlotDescription;
+import nl.ru.cmbi.vase.data.stockholm.Alignment;
 
 import org.apache.commons.io.IOUtils;
 import org.dom4j.CDATA;

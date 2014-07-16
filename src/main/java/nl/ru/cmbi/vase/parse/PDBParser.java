@@ -10,7 +10,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import nl.ru.cmbi.vase.data.PDBResidueInfo;
+import nl.ru.cmbi.vase.data.pdb.PDBResidueInfo;
 
 public class PDBParser {
 	

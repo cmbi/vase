@@ -4,8 +4,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import nl.ru.cmbi.vase.data.Alignment;
-import nl.ru.cmbi.vase.data.ResidueInfoSet;
+import nl.ru.cmbi.vase.data.stockholm.Alignment;
+import nl.ru.cmbi.vase.data.stockholm.ResidueInfoSet;
 import nl.ru.cmbi.vase.tools.util.Utils;
 import nl.ru.cmbi.vase.web.page.AlignmentPage;
 import nl.ru.cmbi.vase.web.page.HomePage;

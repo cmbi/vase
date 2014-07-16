@@ -2,22 +2,27 @@ package nl.ru.cmbi.vase.web.page;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.regex.Matcher;
 import java.util.zip.GZIPInputStream;
 
 import nl.ru.cmbi.vase.analysis.Calculator;
 import nl.ru.cmbi.vase.analysis.MutationDataObject;
-import nl.ru.cmbi.vase.data.Alignment;
-import nl.ru.cmbi.vase.data.AlignmentSet;
-import nl.ru.cmbi.vase.data.ResidueInfo;
-import nl.ru.cmbi.vase.data.ResidueInfoSet;
 import nl.ru.cmbi.vase.data.VASEDataObject;
 import nl.ru.cmbi.vase.data.VASEDataObject.PlotDescription;
+import nl.ru.cmbi.vase.data.stockholm.Alignment;
+import nl.ru.cmbi.vase.data.stockholm.AlignmentSet;
+import nl.ru.cmbi.vase.data.stockholm.ResidueInfo;
+import nl.ru.cmbi.vase.data.stockholm.ResidueInfoSet;
 import nl.ru.cmbi.vase.parse.StockholmParser;
 import nl.ru.cmbi.vase.parse.VASEXMLParser;
 import nl.ru.cmbi.vase.tools.util.Config;
@@ -58,13 +63,47 @@ public class AlignmentPage extends BasePage {
 	
 	private String structureID;
 	private Character chainID=null;
+	
+	private URL getPDBURL(String structureID)
+		throws MalformedURLException {
+
+		File pdbFile = new File(Config.getHSSPCacheDir(), structureID+".pdb.gz");
+
+		if(pdbFile.isFile()) {
+			
+			return new URL( 
+				RequestCycle.get().getUrlRenderer().renderFullUrl(
+					Url.parse("../rest/structure/"+structureID)) );
+		}
+		else if(structureID.matches(StockholmParser.pdbAcPattern)) {
+			
+			return Utils.getRcsbURL(structureID);
+		}
+		else {
+			return null;
+		}
+	}
+	private InputStream getStockholmInputStream(String structureID)
+		throws MalformedURLException, IOException {
+
+		// Some files that might be there or not:
+		File	hsspFile = new File(Config.getHSSPCacheDir(), structureID+".hssp.bz2");
+		
+		if(hsspFile.isFile()) {
+			
+			return new BZip2CompressorInputStream(
+				new FileInputStream(hsspFile) );
+		}
+		else {
+			return new BZip2CompressorInputStream( 
+				Utils.getStockholmURL(structureID).openStream() );
+		}
+	}
 
 	public AlignmentPage(final PageParameters parameters) {
 		
 		StringValue	structureIDString	= parameters.get(0),
 					chainIDString		= parameters.get(1);
-		
-		Map<Character,VASEDataObject> dataPerChain;
 		
 		if(structureIDString==null || structureIDString.isNull() || structureIDString.isEmpty()) {
 					
@@ -73,36 +112,59 @@ public class AlignmentPage extends BasePage {
 		} else {
 		
 			structureID = structureIDString.toString().toLowerCase();
+			
+			if(chainIDString!=null && !chainIDString.isNull() && !chainIDString.isEmpty()) {
+				
+				chainID = chainIDString.toChar();
+			}
 	
 			try {
 				
-				// Some files that might be there or not:
-				File	xmlFile = new File(Config.getCacheDir(), structureID+".xml.gz"),
-						hsspFile = new File(Config.getHSSPCacheDir(), structureID+".hssp.bz2"),
-						pdbFile = new File(Config.getHSSPCacheDir(), structureID+".pdb.gz");
+				File xmlFile = new File(Config.getCacheDir(), structureID+".xml.gz");
 				if(xmlFile.isFile()) {
 					
-					dataPerChain = new HashMap<Character,VASEDataObject>(); // just a wrapper
+					VASEDataObject data = 
+						VASEXMLParser.parse( new GZIPInputStream( new FileInputStream(xmlFile) ) );
 					
-					dataPerChain.put('-', 
-						VASEXMLParser.parse( new GZIPInputStream( new FileInputStream(xmlFile) ) )
-					);
-				}
-				else if(hsspFile.isFile() && pdbFile.isFile())
-				{					
-					String fullPDBURL = RequestCycle.get().getUrlRenderer().renderFullUrl(Url.parse("../rest/structure/"+structureID));
-					
-					URL pdbURL = new URL( fullPDBURL );
-					
-					dataPerChain  = StockholmParser.parseStockHolm ( 
-							new BZip2CompressorInputStream(new FileInputStream(hsspFile)), pdbURL);
+					this.initPageWith( data );
 				}
 				else {
-				
-					URL stockholmURL = Utils.getStockholmURL(structureID), pdbURL = Utils.getRcsbURL(structureID);
-				
-					dataPerChain  = StockholmParser.parseStockHolm ( 
-						new BZip2CompressorInputStream(stockholmURL.openStream()), pdbURL);
+					
+					URL pdbURL = getPDBURL(structureID);
+					
+					Set<Character> stockholmChainIDs =
+						StockholmParser.listChainsInStockholm( 
+							getStockholmInputStream(structureID) );
+										
+					if ( chainID==null ) {
+						
+						if( stockholmChainIDs.size()==1) {
+						
+							// no chain id needs to be given, since there's only one
+							
+							chainID = stockholmChainIDs.iterator().next();
+						}
+						else {
+							
+							// Redirect to a page with chain selection
+							
+							PageParameters params = new PageParameters();
+							params.add( SearchResultsPage.parameterName, structureID) ;
+							
+							this.setResponsePage(SearchResultsPage.class, params);
+							
+							return;
+						}
+					}
+					else if(!stockholmChainIDs.contains(chainID)) {
+						
+						throw new RestartResponseAtInterceptPageException(new ErrorPage("No such chain in "+structureID+": "+chainID));
+					}
+					
+					VASEDataObject data =
+						StockholmParser.parseStockHolm ( getStockholmInputStream(structureID), pdbURL, chainID );
+					
+					this.initPageWith( data );
 				}
 			} catch (Exception e) {
 							
@@ -110,38 +172,7 @@ public class AlignmentPage extends BasePage {
 				
 				throw new RestartResponseAtInterceptPageException(new ErrorPage("Error getting alignments for " + structureIDString + " : " + e.toString()));
 			}
-			
-			if(chainIDString!=null && !chainIDString.isNull() && !chainIDString.isEmpty()) {
-				
-				chainID = chainIDString.toChar();
-			}
-			else if (dataPerChain.size()==1) {
-				
-				// no chain id needs to be given, since there's only one
-				
-				List<Character> chainIDs = new ArrayList<Character>();
-				chainIDs.addAll(dataPerChain.keySet());
-				
-				chainID = chainIDs.get(0);
-			}
-			else if(chainID==null) {
-				
-				// Redirect to a page with chain selection
-				
-				PageParameters params = new PageParameters();
-				params.add( SearchResultsPage.parameterName, structureID) ;
-				
-				setResponsePage(SearchResultsPage.class, params);
-				
-				return;
-			}
-			else if(!dataPerChain.containsKey(chainID)) {
-				
-				throw new RestartResponseAtInterceptPageException(new ErrorPage("No such chain: "+chainID));
-			}
 		}
-		
-		this.initPageWith( dataPerChain.get(chainID) );
 	}
 	
 	private void initPageWith(final VASEDataObject data) {
@@ -182,11 +213,9 @@ public class AlignmentPage extends BasePage {
 		
 		add(tabs);
 		
-		String structurePath =
-			RequestCycle.get().urlFor(HomePage.class, new PageParameters()).toString()
-			+ "rest/structure/" + structureID;
-		
-		if(data.getPdbURL()!=null) {
+		String structurePath = RequestCycle.get().getUrlRenderer().renderFullUrl(Url.parse("../rest/structure/"+structureID));
+				
+		if(data.getPdbURL()!=null) { // might not be set if it's an xml file with inline pdb
 			
 			structurePath = data.getPdbURL().toString();
 		}

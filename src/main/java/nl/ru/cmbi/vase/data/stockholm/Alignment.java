@@ -1,4 +1,4 @@
-package nl.ru.cmbi.vase.data;
+package nl.ru.cmbi.vase.data.stockholm;
 
 import java.lang.StringBuilder;
 import java.util.ArrayList;
