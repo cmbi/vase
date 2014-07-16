@@ -24,6 +24,7 @@ import org.apache.wicket.markup.html.link.ExternalLink;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
+import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
@@ -128,28 +129,17 @@ public class AlignmentDisplayPanel extends Panel {
 				final Integer row = (Integer) item.getModelObject();
 				
 				final String label = AlignmentDisplayPanel.this.alignment.getLabels().get(row);
-				
-				String id = label.split("/")[0], ref=null;
-				
+								
 				VASEDataObject data = AlignmentDisplayPanel.this.data;
-				
+
+				String ref="";
 				if(data.getSequenceReferenceURLs().containsKey(label))
 					ref=data.getSequenceReferenceURLs().get(label).toString();
+								
+				if( !ref.isEmpty() && !label.isEmpty() )
+					item.add(new LabelFragment("label",label,ref));
 				else
-					ref="";
-				
-				final boolean linkActive = !ref.isEmpty();
-				
-				ExternalLink link = new ExternalLink("ref",ref)
-				{
-				    @Override
-				    public boolean isEnabled() {
-				        return linkActive;
-				    }
-				};
-				
-				link.add(new Label("label",label));
-				item.add(link);
+					item.add(new Label("label",label.isEmpty()?"&nbsp":label).setEscapeModelStrings(false) );
 			}
 		});
 		
@@ -171,5 +161,15 @@ public class AlignmentDisplayPanel extends Panel {
 				item.add(seqPre);
 			}
 		});
+	}
+	
+	public class LabelFragment extends Fragment {
+		public LabelFragment(final String id, String label, String ref) {
+			super(id, "labelfragment", AlignmentDisplayPanel.this);
+			
+			ExternalLink link = new ExternalLink("ref",ref);;
+			link.add(new Label("label",label));
+			add(link);
+		}
 	}
 }

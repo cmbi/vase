@@ -39,7 +39,7 @@ function onScrollAlignment(alignment) {
       We realize this, by wrapping it in a padded div element.
       -->
 		<div wicket:id="labels">
-		  <a href="#" wicket:id="ref"><span wicket:id="label" /></a>
+			<wicket:container wicket:id="label"></wicket:container>
 		</div>
 		
 		<!-- space occupier for scrolling -->
@@ -72,5 +72,12 @@ function onScrollAlignment(alignment) {
   </div>
 </div>
 </wicket:panel>
+
+<wicket:fragment  wicket:id="labelfragment">
+	<a href="#" wicket:id="ref">
+		<span wicket:id="label" />
+	</a>
+</wicket:fragment>
+
 </body>
 </html>
