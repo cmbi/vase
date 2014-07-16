@@ -6,16 +6,20 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.lang.annotation.Annotation;
+import java.net.URL;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.regex.Matcher;
 import java.util.zip.GZIPInputStream;
 
 import nl.ru.cmbi.vase.data.VASEDataObject;
 import nl.ru.cmbi.vase.job.HsspJob;
 import nl.ru.cmbi.vase.job.HsspQueue;
+import nl.ru.cmbi.vase.parse.StockholmParser;
 import nl.ru.cmbi.vase.parse.VASEXMLParser;
 import nl.ru.cmbi.vase.tools.util.Config;
+import nl.ru.cmbi.vase.tools.util.Utils;
 import nl.ru.cmbi.vase.web.WicketApplication;
 import nl.ru.cmbi.vase.web.page.AlignmentPage;
 
@@ -73,12 +77,24 @@ public class JobRestResource extends GsonRestResource {
 	@MethodMapping(value = "/structure/{id}", httpMethod=HttpMethod.GET, produces = RestMimeTypes.TEXT_PLAIN)
 	public String structure(String id) {
 		
+		Matcher mpdb = StockholmParser.pPDBAC.matcher(id);
+		
 		File	xmlFile = new File(Config.getCacheDir(),id+".xml.gz"),
 				pdbFile = new File(Config.getHSSPCacheDir(),id+".pdb.gz");
 		
 		try {
-			
-			if(xmlFile.isFile()) {
+
+			if(mpdb.matches()) {
+				
+				URL url = Utils.getRcsbURL(mpdb.group(1));
+				
+				StringWriter pdbWriter = new StringWriter();
+				IOUtils.copy(url.openStream(), pdbWriter, "UTF-8");
+				pdbWriter.close();
+				
+				return pdbWriter.toString();
+			}
+			else if(xmlFile.isFile()) {
 			
 				VASEDataObject data = VASEXMLParser.parse( new GZIPInputStream( new FileInputStream(xmlFile) ) );
 			
@@ -89,6 +105,7 @@ public class JobRestResource extends GsonRestResource {
 				StringWriter pdbWriter = new StringWriter();
 				IOUtils.copy(new GZIPInputStream( new FileInputStream(pdbFile) ), pdbWriter, "UTF-8");
 				pdbWriter.close();
+				
 				return pdbWriter.toString();
 			}
 			else {
