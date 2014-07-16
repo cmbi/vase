@@ -9,11 +9,14 @@
 			// Tell the nav-bar that this is the active page
 			$('#nav-input').addClass('active');
 			
-			function submitStructure() {
+			function submitCallback() {
 				
 				var structure = document.forms["structure-input"]["pdbfile"].value ;
 				
 				submitJob ( structure );
+
+				// clear the text area
+				document.getElementById("pdb-input").value = "" ;
 				
 				return false; // we want to stay on this page
 			}
@@ -27,7 +30,7 @@
 				  <div class="panel-heading">Input PDB</div>
 				  <div class="panel-body" style="height:400px">
 				  
-				  	<form name="structure-input" action="/input" method="POST" onsubmit="return submitStructure();">
+				  	<form name="structure-input" action="/input" method="POST" onsubmit="return submitCallback();">
 				  	
 						<textarea id="pdb-input" class="pdb-input" name="pdbfile" required="required"
 							style="width:100%;height:340px"
