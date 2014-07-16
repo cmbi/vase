@@ -6,9 +6,23 @@
 <div class="row">
 	<div class="col-md-8">
 		<div class="panel panel-default">
-		  <div class="panel-heading">Welcome to VASE</div>
+			<div class="panel-heading">Welcome to VASE</div>
 			<div class="panel-body">
-			  	VASE is a tool for visualizing alignments on a protein structure.
+<p>
+VASE is a web-tool for visualizing alignments on a protein structure.
+
+It allows you to enter the ID of a protein structure in PDB format for which VASE
+will generate an interface. VASE will show a set of homologous sequences, aligned
+to the sequence of your structure, along with entropy/variability data and a
+3D interface. Here's an example:
+<a href="#" wicket:id="example-link" onclick="window.open(this.href); return false;" ><span wicket:id="example-id"></span></a>
+</p>
+<p>
+VASE can work with official PDB entries, as well as custom structures.
+To use your own structure, submit the contents of the PDB file in the
+<a wicket:id="input-link" href="#">input page</a>
+and wait for the job to finish. When the alignment is done, a link to it will appear.	
+</p>
 		  	</div>
 		</div>
 	</div>
