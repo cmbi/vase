@@ -1,5 +1,5 @@
 
-var restURL = "../rest";
+var restURL = baseURL + "/rest", alignURL = baseURL + "/align";
 
 function endswith(string,ending) {
 	
@@ -247,7 +247,7 @@ function updateJobListingRow(job) {
 			
 			if(job.status.toLowerCase()=="finished") {
 
-				list.rows[i].cells[1].innerHTML="<a href=\"../align/"+job.id+"\">"+job.id+"</a>"
+				list.rows[i].cells[1].innerHTML="<a href='"+alignURL+"/"+job.id+"'>"+job.id+"</a>"
 			}
 			
 			list.rows[i].cells[2].innerHTML=job.status;
