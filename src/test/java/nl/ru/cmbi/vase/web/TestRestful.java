@@ -44,7 +44,7 @@ public class TestRestful
     @Test
     public void testCustom() throws IOException, InterruptedException {
     	
-    	URL url = new URL("http://www.rcsb.org/pdb/files/101M.pdb");
+    	URL url = new URL("http://www.rcsb.org/pdb/files/1CRN.pdb");
     	StringWriter writer = new StringWriter();
     	IOUtils.copy(url.openStream(), writer);
     	String pdb = writer.toString();
@@ -55,7 +55,6 @@ public class TestRestful
 		
 		mockRequest.setMethod("POST");
 		mockRequest.setParameter("pdbfile", pdb);
-		mockRequest.setParameter("chain", "A");
 
 		tester.setRequest(mockRequest);
 		tester.executeUrl("rest/custom");
