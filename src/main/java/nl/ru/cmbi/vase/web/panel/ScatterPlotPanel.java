@@ -76,7 +76,7 @@ public class ScatterPlotPanel extends Panel {
 	// space between plot and edge of the svg
 	private double	pixMargeLeft = 30.0,
 					pixMargeRight=10.0,
-					pixMargeUp=10.0,
+					pixMargeUp=20.0,
 					pixMargeDown=30.0;
 
 	public ScatterPlotPanel(String id,

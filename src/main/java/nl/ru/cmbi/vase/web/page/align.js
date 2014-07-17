@@ -401,4 +401,72 @@ function switchTabVisibility(id) {
 			removeClass( switchElement, 'active' );
 		}
 	}
+	
+	setDataTableSizes();
+	setDataPlotSizes();
+}
+
+var plotHeightDefault = 400.0, scrollbarMarge = 20.0;
+
+function setDataPlotSizes() {
+	
+	$("[id^=plot]").each( function (i){
+	
+		var targetPanelHeight = jsmolInfo.height,
+			tabHeaderHeight = $('#tab-header').height(),
+			plotHeight = targetPanelHeight - tabHeaderHeight,
+		
+			structurePanelWidth = $('#col-structure').outerWidth(true),
+			plotOffX = $(this).position().left,
+			plotWidth = window.innerWidth - structurePanelWidth - 2*plotOffX,
+			
+			scaling = (plotHeight - scrollbarMarge) / plotHeightDefault;
+		
+		$(this).css('height','' + plotHeight + 'px');
+		$(this).css('width','' + plotWidth + 'px');
+		
+		$(this).children('svg').each(
+			function (i,svg) {
+			
+			svg.setAttribute("height",plotHeight - scrollbarMarge);
+			
+			for(var i=0; i<svg.children.length; i++) {
+				
+				var g = svg.children[i];
+				if(g.tagName=='g' && g.getAttribute('class')=='plot-resize') {
+				
+					g.setAttribute( 'transform', 'scale('+scaling+')');
+				}
+			}
+		});
+
+	
+	});
+}
+
+function setDataTableSizes () {
+
+	var table = $('#data-table > div > table');
+	
+	var targetPanelHeight = jsmolInfo.height,
+		tabHeaderHeight = $('#tab-header').height(),
+	
+		targetTableHeight = targetPanelHeight - tabHeaderHeight,
+		headerheight = table.children('thead').height(),
+		bodyHeight = targetTableHeight - headerheight ,
+	
+		structurePanelWidth = $('#col-structure').outerWidth(true),
+		tableOffX = $('#data-table').position().left,
+	
+		tableWidth = window.innerWidth - structurePanelWidth - 2*tableOffX;
+	
+	table.children('tbody').css('height','' + bodyHeight + 'px');
+	table.children('tbody').css('width','' + tableWidth + 'px');
+	table.children('thead').css('width','' + tableWidth + 'px');
+}
+
+function setAlignmentPageSizes() {
+	
+	setDataTableSizes();
+	setDataPlotSizes();
 }
