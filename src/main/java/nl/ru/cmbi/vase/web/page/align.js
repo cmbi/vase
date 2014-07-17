@@ -406,7 +406,7 @@ function switchTabVisibility(id) {
 	setDataPlotSizes();
 }
 
-var plotHeightDefault = 400.0, scrollbarMarge = 20.0;
+var scrollbarMarge = 20.0;
 
 function setDataPlotSizes() {
 	
@@ -429,6 +429,7 @@ function setDataPlotSizes() {
 			function (i,svg) {
 			
 			svg.setAttribute("height",plotHeight - scrollbarMarge);
+			svg.setAttribute("width",plotWidthDefault * scaling);
 			
 			for(var i=0; i<svg.children.length; i++) {
 				

@@ -323,6 +323,11 @@ public class AlignmentPage extends BasePage {
 			getResponse().write("var alignment_columnheader_classname='"
 					+ AlignmentDisplayPanel.columnHeaderClassname+"';\n");
 			
+			getResponse().write( String.format(
+					"var plotHeightDefault = %f,plotWidthDefault = %f;\n",
+					AlignmentLinkedPlotPanel.plotImageHeight,
+					AlignmentLinkedPlotPanel.plotImageWidth ));
+			
 			//////////////////////////////////////////////////
 					
 			JavaScriptUtils.writeCloseTag(getResponse());

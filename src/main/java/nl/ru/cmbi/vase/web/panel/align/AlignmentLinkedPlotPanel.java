@@ -62,6 +62,10 @@ public class AlignmentLinkedPlotPanel extends ScatterPlotPanel {
 		return stepSize;
 	}
 	
+	public static final double
+		plotImageWidth = 800,
+		plotImageHeight=400;
+	
 	private static ScatterPlotOptions getOptions( AlignmentDisplayPanel alignmentPanel,PlotDescription pd, TableData tableData) {
 		
 		ScatterPlotOptions options = new ScatterPlotOptions();
@@ -97,8 +101,8 @@ public class AlignmentLinkedPlotPanel extends ScatterPlotPanel {
 		options.setXStepSize(determineStepSize(options.getMinX(),options.getMaxX()));
 		options.setYStepSize(determineStepSize(options.getMinY(),options.getMaxY()));
 		
-		options.setImagePixWidth(800);
-		options.setImagePixHeight(400);
+		options.setImagePixWidth(plotImageWidth);
+		options.setImagePixHeight(plotImageHeight);
 		
 		options.setXValues(xValues);
 		options.setYValues(yValues);
