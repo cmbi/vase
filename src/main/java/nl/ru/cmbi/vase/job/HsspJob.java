@@ -125,7 +125,7 @@ public class HsspJob implements Runnable {
 		StringWriter pdbStringWriter = new StringWriter();
 		IOUtils.copy( new GZIPInputStream(new FileInputStream(getPdbFile())), pdbStringWriter);
 		
-        URL url = new URL(Config.properties.getProperty("hsspws"));
+        URL url = new URL("http://www.cmbi.ru.nl/hsspsoap/wsdl");
         log.info("Setting Hsspsoap endpoint to: {}", url);
 
         final HsspsoapPortType hsspsoap = new Hsspsoap(url).getHsspsoap();

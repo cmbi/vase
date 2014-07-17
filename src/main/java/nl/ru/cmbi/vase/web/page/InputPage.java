@@ -28,7 +28,7 @@ public class InputPage extends BasePage {
 
 			String urlString = RequestCycle.get().getUrlRenderer().renderFullUrl(
 				Url.parse(
-					RequestCycle.get().urlFor(HomePage.class, null) ));
+					RequestCycle.get().urlFor( this.getApplication().getHomePage(), null) ));
 			
 			getResponse().write(String.format("var baseURL='%s';\n", urlString));
 			

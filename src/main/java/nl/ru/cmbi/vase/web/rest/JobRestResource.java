@@ -48,11 +48,23 @@ public class JobRestResource extends GsonRestResource {
 
 	public JobRestResource(WicketApplication application) {
 		
-		queue = application.getHsspQueue();
+		if(Config.isXmlOnly()) {
+			
+			queue = null ;
+		}
+		else {
+			queue = application.getHsspQueue();
+		}
 	}
 
 	@MethodMapping(value="/custom", httpMethod=HttpMethod.POST, produces = RestMimeTypes.TEXT_PLAIN)
 	public String custom() {
+		
+		if(Config.isXmlOnly()) {
+			
+			// hssp job submission is not allowed if hssp is turned off
+			throw new AbortWithHttpErrorCodeException(404);
+		}
 		
 		// getPostParameters doesn't work for some reason
 		IRequestParameters p = RequestCycle.get().getRequest().getRequestParameters();
@@ -70,6 +82,12 @@ public class JobRestResource extends GsonRestResource {
 	
 	@MethodMapping(value = "/status/{jobid}", httpMethod=HttpMethod.GET, produces = RestMimeTypes.TEXT_PLAIN)
 	public String status(String jobid) {
+		
+		if(Config.isXmlOnly()) {
+			
+			// hssp job submission is not allowed if hssp is turned off
+			throw new AbortWithHttpErrorCodeException(404);
+		}
 		
 		return queue.getStatus(jobid).toString();
 	}

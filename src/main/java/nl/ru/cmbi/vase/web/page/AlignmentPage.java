@@ -47,6 +47,7 @@ import org.apache.wicket.markup.repeater.RepeatingView;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
+import org.apache.wicket.protocol.http.RequestUtils;
 import org.apache.wicket.request.Url;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
@@ -117,9 +118,8 @@ public class AlignmentPage extends BasePage {
 				
 				chainID = chainIDString.toChar();
 			}
-	
-			try {
-				
+
+			try {	
 				File xmlFile = new File(Config.getCacheDir(), structureID+".xml.gz");
 				if(xmlFile.isFile()) {
 					
@@ -129,6 +129,12 @@ public class AlignmentPage extends BasePage {
 					this.initPageWith( data );
 				}
 				else {
+					
+					if( Config.isXmlOnly() ) {
+						
+						throw new RestartResponseAtInterceptPageException(
+							new ErrorPage( "VASE is running in xml-only mode, so only xml-entries can be accessed. (see homepage)") );
+					}
 					
 					URL pdbURL = getPDBURL(structureID);
 					
@@ -152,13 +158,13 @@ public class AlignmentPage extends BasePage {
 							params.add( SearchResultsPage.parameterName, structureID) ;
 							
 							this.setResponsePage(SearchResultsPage.class, params);
-							
 							return;
 						}
 					}
 					else if(!stockholmChainIDs.contains(chainID)) {
 						
-						throw new RestartResponseAtInterceptPageException(new ErrorPage("No such chain in "+structureID+": "+chainID));
+						throw new RestartResponseAtInterceptPageException(
+							new ErrorPage("No such chain in "+structureID+": "+chainID));
 					}
 					
 					VASEDataObject data =
@@ -166,11 +172,18 @@ public class AlignmentPage extends BasePage {
 					
 					this.initPageWith( data );
 				}
-			} catch (Exception e) {
+				
+			} catch (RestartResponseAtInterceptPageException e) {
+			
+				//just rethrow it
+				throw e;
+				
+			} catch (Exception e) { // any other type of exception
 							
 				log.error("Error getting alignments for " + structureIDString + " : " + e.getMessage(),e);
 				
-				throw new RestartResponseAtInterceptPageException(new ErrorPage("Error getting alignments for " + structureIDString + " : " + e.toString()));
+				throw new RestartResponseAtInterceptPageException(
+					new ErrorPage("Error getting alignments for " + structureIDString + " : " + e.toString()));
 			}
 		}
 	}
@@ -291,10 +304,10 @@ public class AlignmentPage extends BasePage {
 				getResponse().write(String.format("\'%s\',", tabid));
 			}
 			getResponse().write("];\n");
-
+			
 			String urlString = RequestCycle.get().getUrlRenderer().renderFullUrl(
-				Url.parse(
-					RequestCycle.get().urlFor(HomePage.class, null) ));
+				Url.parse( 
+					RequestCycle.get().urlFor( this.getApplication().getHomePage(), null ) ) );
 			
 			getResponse().write(String.format("var baseURL='%s';\n", urlString));
 			
@@ -309,6 +322,8 @@ public class AlignmentPage extends BasePage {
 
 			getResponse().write("var alignment_columnheader_classname='"
 					+ AlignmentDisplayPanel.columnHeaderClassname+"';\n");
+			
+			//////////////////////////////////////////////////
 					
 			JavaScriptUtils.writeCloseTag(getResponse());
 		}

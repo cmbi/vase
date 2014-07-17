@@ -2,17 +2,18 @@
 <html xmlns:wicket="http://wicket.apache.org">
 <body>
 <wicket:extend>
-
+		
 <div class="row">
 	<div class="col-md-8">
 		<div class="panel panel-default">
-			<div class="panel-heading">ERROR</div>
+			<div class="panel-heading">Available Alignments</div>
 			<div class="panel-body">
-				<p wicket:id="message" />
-				
-				
-				<a href="#" wicket:id="home">Click here to go back</a>
-			</div>
+				<ul>
+					<li wicket:id="alignments">
+						<a href="#" wicket:id="alignment-link"><span wicket:id="alignment-id"></span></a>
+					</li>
+				</ul>
+		  	</div>
 		</div>
 	</div>
 </div>
