@@ -16,12 +16,14 @@ import nl.ru.cmbi.vase.data.VASEDataObject.PlotDescription;
 import nl.ru.cmbi.vase.tools.util.Utils;
 import nl.ru.cmbi.vase.web.panel.ScatterPlotOptions;
 import nl.ru.cmbi.vase.web.panel.ScatterPlotPanel;
+import nl.ru.cmbi.vase.web.panel.ScatterPlotPanel.DotComponent;
 
 import org.apache.wicket.AttributeModifier;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxFallbackLink;
 import org.apache.wicket.behavior.AttributeAppender;
+import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.IModel;
@@ -30,7 +32,7 @@ import org.apache.wicket.model.Model;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class AlignmentLinkedPlotPanel extends Panel {
+public class AlignmentLinkedPlotPanel extends ScatterPlotPanel {
 	
 	static Logger log = LoggerFactory.getLogger(AlignmentLinkedPlotPanel.class);
 	
@@ -59,13 +61,8 @@ public class AlignmentLinkedPlotPanel extends Panel {
 		
 		return stepSize;
 	}
-
-	public AlignmentLinkedPlotPanel(String id,
-			final AlignmentDisplayPanel alignmentPanel,
-			final PlotDescription pd,
-			final TableData tableData) {
-		
-		super(id);
+	
+	private static ScatterPlotOptions getOptions( AlignmentDisplayPanel alignmentPanel,PlotDescription pd, TableData tableData) {
 		
 		ScatterPlotOptions options = new ScatterPlotOptions();
 		
@@ -78,17 +75,10 @@ public class AlignmentLinkedPlotPanel extends Panel {
 		final Map<Integer,Integer> dotIndexToResidueNumber
 			=new HashMap<Integer,Integer>(); // remembers which residue is associated with each dot
 		
-		for(int residueNumber=1; residueNumber<=alignmentPanel.getNumberOfColumns(); residueNumber++) {
-			
-			int rowIndex = tableData.getRowIndexForResidueNumber( residueNumber );
-			if(rowIndex==-1) {
-				throw new RuntimeException("residue number not found in table: "+residueNumber);
-			}
-			
-			dotIndexToResidueNumber.put(xValues.size(),residueNumber);
-			
-			xValues.add((Number) tableData.getRowValues(rowIndex).get( xColumnInfo.getId() ));
-			yValues.add((Number) tableData.getRowValues(rowIndex).get( yColumnInfo.getId() ));
+		for(int i=0; i<tableData.getNumberOfRows(); i++) {
+						
+			xValues.add(i, (Number) tableData.getRowValues(i).get( xColumnInfo.getId() ));
+			yValues.add(i, (Number) tableData.getRowValues(i).get( yColumnInfo.getId() ));
 		}
 		
 		double	smallestX = Utils.min(xValues).doubleValue(),
@@ -108,7 +98,7 @@ public class AlignmentLinkedPlotPanel extends Panel {
 		options.setYStepSize(determineStepSize(options.getMinY(),options.getMaxY()));
 		
 		options.setImagePixWidth(800);
-		options.setImagePixHeight(380);
+		options.setImagePixHeight(400);
 		
 		options.setXValues(xValues);
 		options.setYValues(yValues);
@@ -116,41 +106,87 @@ public class AlignmentLinkedPlotPanel extends Panel {
 		options.setXAxisTitle(xColumnInfo.getTitle());
 		options.setYAxisTitle(yColumnInfo.getTitle());
 		
-		ScatterPlotPanel scatterPlot = new ScatterPlotPanel("chart",options) 
-		{
-			protected String xScaleRepresentation(double x) {
-				
-				if(tableData.columnIsOfType(xColumnInfo.getId(),ColumnDataType.INTEGER))
-				
-					return String.format("%d", (int)x);
-				else
-					return String.format("%.1f", x);
-			}
-			
-			protected String yScaleRepresentation(double y) {
-				
-				if(tableData.columnIsOfType(yColumnInfo.getId(),ColumnDataType.INTEGER))
-				
-					return String.format("%d", (int)y);
-				else
-					return String.format("%.1f", y);
-			}
-			
-			protected Component createDot(final String markupID, final int index) {
-				
-				int residueNumber = dotIndexToResidueNumber.get(index);
-				Component dot = new Label(markupID);
-				
-				dot.add(new AttributeModifier("onclick",
-						String.format("toggleColumn('%s');",
-							alignmentPanel.getResidueNumberClassRepresentation(residueNumber))));
-				
-				dot.add(new AttributeAppender("class",new Model(alignmentPanel.getColumnClassRepresentation(residueNumber)), " "));
-								
-				return dot;
-			}
-		};
+		return options;
+	}
+	
+	private AlignmentDisplayPanel alignmentPanel;
+	private TableData tableData;
+	private PlotDescription plotDescription;
+
+	public AlignmentLinkedPlotPanel(String id,
+			final AlignmentDisplayPanel alignmentPanel,
+			final PlotDescription pd,
+			final TableData tableData) {
 		
-		add(scatterPlot);
+		super(id, getOptions(alignmentPanel,pd,tableData));
+		
+		this.alignmentPanel = alignmentPanel;
+		this.tableData = tableData;
+		this.plotDescription = pd;
+		
+	}
+	protected String xScaleRepresentation(double x) {
+		
+		ColumnInfo xColumnInfo = 
+			tableData.getColumnByID( plotDescription.getXAxisColumnID() );
+				
+		if(tableData.columnIsOfType(xColumnInfo.getId(),ColumnDataType.INTEGER))
+		
+			return String.format("%d", (int)x);
+		else
+			return String.format("%.1f", x);
+	}
+	
+	protected String yScaleRepresentation(double y) {
+		
+		ColumnInfo yColumnInfo =
+			tableData.getColumnByID( plotDescription.getYAxisColumnID() );
+		
+		if(tableData.columnIsOfType(yColumnInfo.getId(),ColumnDataType.INTEGER))
+		
+			return String.format("%d", (int)y);
+		else
+			return String.format("%.1f", y);
+	}
+	
+	protected void onDotCreate(DotComponent dot) {
+
+		int residueNumber = tableData.getResidueNumber( dot.getIndex() );
+		
+		ColumnInfo xColumnInfo = 
+			tableData.getColumnByID( plotDescription.getXAxisColumnID() );
+		ColumnInfo yColumnInfo =
+			tableData.getColumnByID( plotDescription.getYAxisColumnID() );
+		
+		dot.add(
+			new AttributeModifier("onclick",
+				String.format("toggleColumn('%s');",
+					alignmentPanel.getResidueNumberClassRepresentation(residueNumber))));
+		
+		dot.add(
+			new AttributeAppender("class",
+				new Model(alignmentPanel.getColumnClassRepresentation(residueNumber)), " "));
+		
+		dot.setTooltip(String.format("%s:%s, %s:%s", 
+			
+			xColumnInfo.getTitle(),
+			xScaleRepresentation(dot.getXValue()),
+			yColumnInfo.getTitle(),
+			yScaleRepresentation(dot.getYValue())
+		));
+	}
+	
+	protected Component createDot(final String markupID, final int index) {
+		
+		int residueNumber = tableData.getResidueNumber(index);
+		WebMarkupContainer dot = new WebMarkupContainer(markupID);
+		
+		dot.add(new AttributeModifier("onclick",
+				String.format("toggleColumn('%s');",
+					alignmentPanel.getResidueNumberClassRepresentation(residueNumber))));
+		
+		dot.add(new AttributeAppender("class",new Model(alignmentPanel.getColumnClassRepresentation(residueNumber)), " "));
+					
+		return dot;
 	}
 }

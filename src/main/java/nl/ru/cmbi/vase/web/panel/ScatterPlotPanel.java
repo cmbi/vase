@@ -19,16 +19,47 @@ import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.Panel;
+import org.apache.wicket.model.PropertyModel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class ScatterPlotPanel extends Panel {
 	
 	static Logger log = LoggerFactory.getLogger(ScatterPlotPanel.class);
+	
+	public class DotComponent extends WebMarkupContainer {
 
-	protected Component createDot (final String markupID, final int index) {
+		public DotComponent(String id, double x, double y, int index) {
+			super(id);
+			
+			add(new Label("dot-tooltip",new PropertyModel(this,"tooltip")));
+			this.index = index;
+			this.x=x;
+			this.y=y;
+		}
+		
+		private String tooltip;
+		private int index;
+		private double x, y;
+		
+		public double getXValue() {
+			return x;
+		}
+		public double getYValue() {
+			return y;
+		}
+		
+		public void setTooltip(String s) {
+			this.tooltip = s;
+		}
 
-		return new Label(markupID);
+		public int getIndex() {
+			
+			return this.index;
+		}
+	}
+
+	protected void onDotCreate(DotComponent dot) {
 	}
 
 	protected String xScaleRepresentation(final double x) {
@@ -116,16 +147,19 @@ public class ScatterPlotPanel extends Panel {
 
 				final Integer index = (Integer) item.getModelObject();
 
-				Component dot=ScatterPlotPanel.this.createDot ("dot", index);
-
 				double	x=options.getXValues().get(index).doubleValue(),
 						y=options.getYValues().get(index).doubleValue(),
 
 						pxX = x * pixXScaling + pixOriginXPos,
 						pxY = pixOriginYPos - y * pixYScaling;
 
+				DotComponent dot=new DotComponent ("dot",x,y,index);
+
 				dot.add(new AttributeModifier("cx",String.valueOf(pxX)));
 				dot.add(new AttributeModifier("cy",String.valueOf(pxY)));
+				
+				ScatterPlotPanel.this.onDotCreate(dot);
+				
 				item.add(dot);
 			}
 		};
