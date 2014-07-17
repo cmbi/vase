@@ -32,7 +32,7 @@ public class ScatterPlotPanel extends Panel {
 		public DotComponent(String id, double x, double y, int index) {
 			super(id);
 			
-			add(new Label("dot-tooltip",new PropertyModel(this,"tooltip")));
+			add(new Label("dot-tooltip",new PropertyModel<String>(this,"tooltip")));
 			this.index = index;
 			this.x=x;
 			this.y=y;
@@ -158,8 +158,15 @@ public class ScatterPlotPanel extends Panel {
 				dot.add(new AttributeModifier("cx",String.valueOf(pxX)));
 				dot.add(new AttributeModifier("cy",String.valueOf(pxY)));
 				
-				ScatterPlotPanel.this.onDotCreate(dot);
+				dot.setTooltip(String.format("%s:%s, %s:%s", 
+					
+					options.getXAxisTitle(),
+					ScatterPlotPanel.this.xScaleRepresentation(dot.getXValue()),
+					options.getYAxisTitle(),
+					ScatterPlotPanel.this.yScaleRepresentation(dot.getYValue())
+				));
 				
+				ScatterPlotPanel.this.onDotCreate(dot);
 				item.add(dot);
 			}
 		};

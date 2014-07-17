@@ -153,11 +153,6 @@ public class AlignmentLinkedPlotPanel extends ScatterPlotPanel {
 
 		int residueNumber = tableData.getResidueNumber( dot.getIndex() );
 		
-		ColumnInfo xColumnInfo = 
-			tableData.getColumnByID( plotDescription.getXAxisColumnID() );
-		ColumnInfo yColumnInfo =
-			tableData.getColumnByID( plotDescription.getYAxisColumnID() );
-		
 		dot.add(
 			new AttributeModifier("onclick",
 				String.format("toggleColumn('%s');",
@@ -166,27 +161,5 @@ public class AlignmentLinkedPlotPanel extends ScatterPlotPanel {
 		dot.add(
 			new AttributeAppender("class",
 				new Model(alignmentPanel.getColumnClassRepresentation(residueNumber)), " "));
-		
-		dot.setTooltip(String.format("%s:%s, %s:%s", 
-			
-			xColumnInfo.getTitle(),
-			xScaleRepresentation(dot.getXValue()),
-			yColumnInfo.getTitle(),
-			yScaleRepresentation(dot.getYValue())
-		));
-	}
-	
-	protected Component createDot(final String markupID, final int index) {
-		
-		int residueNumber = tableData.getResidueNumber(index);
-		WebMarkupContainer dot = new WebMarkupContainer(markupID);
-		
-		dot.add(new AttributeModifier("onclick",
-				String.format("toggleColumn('%s');",
-					alignmentPanel.getResidueNumberClassRepresentation(residueNumber))));
-		
-		dot.add(new AttributeAppender("class",new Model(alignmentPanel.getColumnClassRepresentation(residueNumber)), " "));
-					
-		return dot;
 	}
 }
