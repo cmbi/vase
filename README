@@ -1,0 +1,20 @@
+vase
+====
+
+Visualization of Alignments Structures and Entropy
+
+===========
+Configuration:
+===========
+
+The configuration file is at src/main/resources/config.properties
+
+If you want the users to be able to submit custom structures, then you must set hsspcache to a valid writable directory. You must also set hsspthreads to the maximum number of simultaneous job submissions. 
+
+If you only want VASE to display the content of a series of VASE-format xml files, then you can set xmlonly to true.
+
+===========
+Build & Install
+===========
+
+VASE requires maven to compile. You can build the war file using: mvn package. Then deploy it.
