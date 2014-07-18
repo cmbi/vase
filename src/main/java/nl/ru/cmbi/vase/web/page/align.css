@@ -30,7 +30,7 @@
 }
 
 circle.scatter-dot {
-	fill: green
+	fill: rgb(126, 193, 255)
 }
 circle.scatter-dot.danger {
 	fill: red

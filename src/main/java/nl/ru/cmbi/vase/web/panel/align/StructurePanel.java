@@ -49,7 +49,7 @@ public class StructurePanel extends Panel {
 				
 				getResponse().write("var jmolInit=\"");
 				
-				getResponse().write("background [222,255,255];");
+				getResponse().write("background white;");
 				getResponse().write("load "+structurePath+";");
 				getResponse().write("select *;");
 				getResponse().write("color atoms lightgrey structure;");
