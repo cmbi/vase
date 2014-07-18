@@ -408,6 +408,23 @@ function switchTabVisibility(id) {
 
 var scrollbarMarge = 20.0;
 
+function setAlignmentSizes() {
+	
+	// Only height, since width is automatically adjusted
+	
+	var headerY = $("#alignment-header").position().top,
+		headerHeight = $("#alignment-header").height(),
+		currentContentsHeight = $("#alignment-contents").height(),
+		bottomRowY = $("#row-bottom").position().top,
+		bottomRowHeight = $("#row-bottom").outerHeight(true),
+		distanceAlignmentBottom = bottomRowY - (headerY + headerHeight + currentContentsHeight),
+		
+		newAlignmentHeight = window.innerHeight - bottomRowHeight 
+			- headerY - headerHeight - distanceAlignmentBottom;
+	
+	$(".alignment-content-height").css('height','' + newAlignmentHeight + 'px');
+}
+
 function setDataPlotSizes() {
 	
 	$("[id^=plot]").each( function (i){
@@ -445,6 +462,17 @@ function setDataPlotSizes() {
 	});
 }
 
+function setTabHeaderSizes() {
+	// places them on top of each other if neccesary
+
+	var structurePanelWidth = $('#col-structure').outerWidth(true),
+		tabHeaderOffX = $('#tab-header').position().left,
+
+		tabHeaderWidth = window.innerWidth - structurePanelWidth - 2*tabHeaderOffX;
+	
+	$('#tab-header').css('width','' + tabHeaderWidth + 'px');
+}
+
 function setDataTableSizes () {
 
 	var table = $('#data-table > div > table');
@@ -468,6 +496,11 @@ function setDataTableSizes () {
 
 function setAlignmentPageSizes() {
 	
+	// The tab header sizes must be set before the tab contents (table and plots),
+	// since those depend on its height property.
+	setTabHeaderSizes();
 	setDataTableSizes();
 	setDataPlotSizes();
+	
+	setAlignmentSizes();
 }
