@@ -1,5 +1,6 @@
 
-var restURL = baseURL + "/rest", alignURL = baseURL + "/align";
+var restURL = baseURL + "/rest",
+	alignURL = baseURL + "/align";
 
 function endswith(string,ending) {
 	
@@ -119,6 +120,8 @@ function submitJob(structure) {
 		  },
 	
 		  error: function( jqXHR, status, errorThrown ) {
+			  
+			  alert("An error occurred while submitting your job. " + errorThrown);
 			  
 			  console.log("error on job submit:" + errorThrown);
 		  }
