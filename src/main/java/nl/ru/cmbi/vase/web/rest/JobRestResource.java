@@ -4,17 +4,22 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.StringWriter;
 import java.lang.annotation.Annotation;
+import java.net.URL;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.regex.Matcher;
 import java.util.zip.GZIPInputStream;
 
 import nl.ru.cmbi.vase.data.VASEDataObject;
 import nl.ru.cmbi.vase.job.HsspJob;
 import nl.ru.cmbi.vase.job.HsspQueue;
+import nl.ru.cmbi.vase.parse.StockholmParser;
 import nl.ru.cmbi.vase.parse.VASEXMLParser;
 import nl.ru.cmbi.vase.tools.util.Config;
+import nl.ru.cmbi.vase.tools.util.Utils;
 import nl.ru.cmbi.vase.web.WicketApplication;
 import nl.ru.cmbi.vase.web.page.AlignmentPage;
 
@@ -43,25 +48,46 @@ public class JobRestResource extends GsonRestResource {
 
 	public JobRestResource(WicketApplication application) {
 		
-		queue = application.getHsspQueue();
+		if(Config.isXmlOnly()) {
+			
+			queue = null ;
+		}
+		else {
+			queue = application.getHsspQueue();
+		}
 	}
 
-	@MethodMapping(value="/custom", httpMethod=HttpMethod.POST)
+	@MethodMapping(value="/custom", httpMethod=HttpMethod.POST, produces = RestMimeTypes.TEXT_PLAIN)
 	public String custom() {
+		
+		if(Config.isXmlOnly()) {
+			
+			// hssp job submission is not allowed if hssp is turned off
+			throw new AbortWithHttpErrorCodeException(404);
+		}
 		
 		// getPostParameters doesn't work for some reason
 		IRequestParameters p = RequestCycle.get().getRequest().getRequestParameters();
 
 	    StringValue pdbfile = p.getParameterValue("pdbfile");
 	    if(pdbfile.toString()==null) {
-	    	return "";
+	    	
+			log.error("pdbfile parameter not set");
+
+			throw new AbortWithHttpErrorCodeException(404);
 	    }
 		
 		return queue.submit(pdbfile.toString());
 	}
 	
-	@MethodMapping(value = "/status/{jobid}", httpMethod=HttpMethod.GET)
+	@MethodMapping(value = "/status/{jobid}", httpMethod=HttpMethod.GET, produces = RestMimeTypes.TEXT_PLAIN)
 	public String status(String jobid) {
+		
+		if(Config.isXmlOnly()) {
+			
+			// hssp job submission is not allowed if hssp is turned off
+			throw new AbortWithHttpErrorCodeException(404);
+		}
 		
 		return queue.getStatus(jobid).toString();
 	}
@@ -69,13 +95,43 @@ public class JobRestResource extends GsonRestResource {
 	@MethodMapping(value = "/structure/{id}", httpMethod=HttpMethod.GET, produces = RestMimeTypes.TEXT_PLAIN)
 	public String structure(String id) {
 		
-		File xmlFile = new File(Config.getCacheDir(),id+".xml.gz");
+		Matcher mpdb = StockholmParser.pPDBAC.matcher(id);
+		
+		File	xmlFile = new File(Config.getCacheDir(),id+".xml.gz"),
+				pdbFile = new File(Config.getHSSPCacheDir(),id+".pdb.gz");
 		
 		try {
+
+			if(mpdb.matches()) {
+				
+				URL url = Utils.getRcsbURL(mpdb.group(1));
+				
+				StringWriter pdbWriter = new StringWriter();
+				IOUtils.copy(url.openStream(), pdbWriter, "UTF-8");
+				pdbWriter.close();
+				
+				return pdbWriter.toString();
+			}
+			else if(xmlFile.isFile()) {
 			
-			VASEDataObject data = VASEXMLParser.parse( new GZIPInputStream( new FileInputStream(xmlFile) ) );
+				VASEDataObject data = VASEXMLParser.parse( new GZIPInputStream( new FileInputStream(xmlFile) ) );
 			
-			return data.getPdbContents();
+				return data.getPdbContents();
+			}
+			else if(pdbFile.isFile()) {
+				
+				StringWriter pdbWriter = new StringWriter();
+				IOUtils.copy(new GZIPInputStream( new FileInputStream(pdbFile) ), pdbWriter, "UTF-8");
+				pdbWriter.close();
+				
+				return pdbWriter.toString();
+			}
+			else {
+				
+				log.error("no structure file for "+id);
+
+				throw new AbortWithHttpErrorCodeException(404);
+			}
 			
 		} catch (Exception e) {
 			

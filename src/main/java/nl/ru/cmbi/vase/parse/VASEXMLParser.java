@@ -12,11 +12,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import nl.ru.cmbi.vase.data.Alignment;
 import nl.ru.cmbi.vase.data.TableData;
 import nl.ru.cmbi.vase.data.VASEDataObject;
 import nl.ru.cmbi.vase.data.TableData.ColumnInfo;
 import nl.ru.cmbi.vase.data.VASEDataObject.PlotDescription;
+import nl.ru.cmbi.vase.data.stockholm.Alignment;
 
 import org.apache.commons.io.IOUtils;
 import org.dom4j.CDATA;
@@ -160,6 +160,12 @@ public class VASEXMLParser {
 		
 		Element root = doc.addElement("xml");
 		
+		if(data.getTitle()!=null) {
+			
+			Element title = root.addElement("title");
+			title.setText(data.getTitle());
+		}
+		
 		Element fasta = root.addElement("fasta");
 		ByteArrayOutputStream fastaStream = new ByteArrayOutputStream();
 		FastaParser.toFasta(data.getAlignment().getMap(),fastaStream);
@@ -216,6 +222,12 @@ public class VASEXMLParser {
 			data = new VASEDataObject(alignment,tableData,new URL(pdb.attributeValue("url")));
 		else
 			data = new VASEDataObject(alignment,tableData,pdb.getText());
+		
+		Element title = root.element("title");
+		if(title!=null) {
+			
+			data.setTitle(title.getText());
+		}
 		
 		for(Element sequenceUrl : (List<Element>)root.elements("sequence-url")) {
 

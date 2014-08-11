@@ -5,36 +5,47 @@
 </head>
 
 <body>
-<wicket:panel>	
-	<script type="text/javascript">
-		function onScrollTable(table) {
-
-		var header = document.getElementById ("data-table-header");
-		header.scrollLeft = table.scrollLeft;
+<wicket:panel>
+  <style>
+  .data-column-width {
+    width:160px;
+  }
+  </style>
+  <script type="text/javascript">
+  
+	function onScrollTable(tbody) {
+		
+		var table = tbody.parentNode;
+		
+		table.tHead.scrollLeft = tbody.scrollLeft;
 	}
-	</script>
-	
-	<table class="table table-hover">
-		<thead>
-			<tr>
-				<th wicket:id="header-cell">
-					<div class="data_table_title" wicket:id="header-div">
-						<span wicket:id="header-title"></span>
-						<span wicket:id="header-toggle-image"
-							class="data_table_column_image glyphicon glyphicon-chevron-up"></span>
-					</div>
-				</th>
-			</tr>
-		</thead>
-		<tbody style="height: 120px; overflow-y: scroll;">
-			<tr wicket:id="rows" class="data_table_row">
-				<td wicket:id="cells">
-					<div class="data_table_cell" wicket:id="cell-text" />
-				</td>
-			</tr>
-		</tbody>
-	</table>
-	
+  </script>
+  <div class="table-responsive">
+    <table class="table table-hover" style="width:100%;margin:0">
+    
+      <thead style="display:block;overflow:hidden">
+        <tr>
+          <th wicket:id="header-cell" class="header-sort-button" >
+            <div class="data_table_title data-column-width" wicket:id="header-div">
+              <span wicket:id="header-title"></span>
+              <span wicket:id="header-toggle-image"
+                class="data_table_column_image glyphicon"></span>
+            </div>
+          </th>
+          <th>&nbsp;</th>
+        </tr>
+      </thead>
+      
+      <tbody style="display:block; overflow: auto" onscroll='onScrollTable(this);'>
+        <tr wicket:id="rows" class="data_table_row">
+          <td wicket:id="cells">
+            <div class="data_table_cell data-column-width" wicket:id="cell-text" />
+          </td>
+        </tr>
+      </tbody>
+      
+    </table>
+  </div>
 </wicket:panel>
 </body>
 </html>

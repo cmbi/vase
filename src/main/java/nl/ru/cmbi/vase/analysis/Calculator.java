@@ -7,7 +7,7 @@ import java.util.Map;
 
 import org.apache.log4j.Logger;
 
-import nl.ru.cmbi.vase.data.Alignment;
+import nl.ru.cmbi.vase.data.stockholm.Alignment;
 
 public class Calculator {
 

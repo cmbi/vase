@@ -2,8 +2,12 @@ package nl.ru.cmbi.vase.web;
 
 import nl.ru.cmbi.vase.job.HsspQueue;
 import nl.ru.cmbi.vase.tools.util.Config;
+import nl.ru.cmbi.vase.web.page.AboutPage;
 import nl.ru.cmbi.vase.web.page.AlignmentPage;
 import nl.ru.cmbi.vase.web.page.HomePage;
+import nl.ru.cmbi.vase.web.page.XmlListingPage;
+import nl.ru.cmbi.vase.web.page.InputPage;
+import nl.ru.cmbi.vase.web.page.SearchResultsPage;
 import nl.ru.cmbi.vase.web.rest.JobRestResource;
 
 import org.apache.wicket.injection.Injector;
@@ -31,7 +35,15 @@ public class WicketApplication extends WebApplication
 	@Override
 	public Class<? extends WebPage> getHomePage()
 	{
-		return HomePage.class;
+		/* When running in xml-only mode, 
+		 * vase just becomes a tool for viewing xml files in cache. 
+		 */
+		
+		if(Config.isXmlOnly())
+			
+			return XmlListingPage.class;
+		else
+			return HomePage.class;
 	}
 	
 	private HsspQueue hsspQueue = new HsspQueue(Integer.parseInt(Config.properties.getProperty("hsspthreads")));
@@ -39,6 +51,21 @@ public class WicketApplication extends WebApplication
 	public HsspQueue getHsspQueue() {
 		
 		return hsspQueue;
+	}
+	
+	private ResourceReference restReference = new ResourceReference("restReference") {
+		
+		JobRestResource resource = new JobRestResource(WicketApplication.this);
+		
+		@Override
+		public IResource getResource() {
+			return resource;
+		}
+	};
+	
+	public ResourceReference getRestReference() {
+		
+		return restReference;
 	}
 
 	/**
@@ -52,21 +79,21 @@ public class WicketApplication extends WebApplication
 		// Bootstrap
 		Bootstrap.install(this);
 		
-		// add your configuration here
-		
+		// alignmentPage can take either one, or two parameters,
+		// depending on the number of chains in the structure
 		mountPage("/align", AlignmentPage.class);
 		
-		mountResource("/rest", new ResourceReference("restReference") {
-			
-			JobRestResource resource = new JobRestResource(WicketApplication.this);
-			
-			@Override
-			public IResource getResource() {
-				return resource;
-			}
-		});
+		if(!Config.isXmlOnly()) {
 		
-		mountResource("/align.js",new PackageResourceReference(AlignmentPage.class, "align.js"));
-		mountResource("/align.css",new PackageResourceReference(AlignmentPage.class, "align.css"));
+			mountPage("/input", InputPage.class);
+			mountPage("/about", AboutPage.class);
+			mountPage("/search/${structureID}", SearchResultsPage.class);
+		}
+		
+		mountResource("/rest", this.restReference);
+
+		mountResource("/jobs.js",	new PackageResourceReference(AlignmentPage.class, "jobs.js"		));
+		mountResource("/align.js",	new PackageResourceReference(AlignmentPage.class, "align.js"	));
+		mountResource("/align.css",	new PackageResourceReference(AlignmentPage.class, "align.css"	));
 	}
 }

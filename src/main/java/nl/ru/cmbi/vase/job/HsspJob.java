@@ -8,6 +8,7 @@ import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.StringWriter;
 import java.io.Writer;
@@ -23,6 +24,7 @@ import java.util.zip.GZIPOutputStream;
 import javax.xml.ws.BindingProvider;
 import javax.xml.ws.soap.SOAPFaultException;
 
+import org.apache.commons.compress.compressors.bzip2.BZip2CompressorOutputStream;
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -123,7 +125,7 @@ public class HsspJob implements Runnable {
 		StringWriter pdbStringWriter = new StringWriter();
 		IOUtils.copy( new GZIPInputStream(new FileInputStream(getPdbFile())), pdbStringWriter);
 		
-        URL url = new URL(Config.properties.getProperty("hsspws"));
+        URL url = new URL("http://www.cmbi.ru.nl/hsspsoap/wsdl");
         log.info("Setting Hsspsoap endpoint to: {}", url);
 
         final HsspsoapPortType hsspsoap = new Hsspsoap(url).getHsspsoap();
@@ -134,7 +136,8 @@ public class HsspJob implements Runnable {
         
     	String hssp = hsspsoap.getHSSPForPDBFile(pdbStringWriter.toString());
         
-        Writer hsspWriter = new FileWriter(getHsspFile());
+    	OutputStream hsspOut = new BZip2CompressorOutputStream(new FileOutputStream(getHsspFile()));
+        Writer hsspWriter = new OutputStreamWriter(hsspOut);
         hsspWriter.write(hssp);
         hsspWriter.close();
         

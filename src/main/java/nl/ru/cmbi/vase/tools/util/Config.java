@@ -10,7 +10,10 @@ public class Config {
 	
 	public static File getCacheDir() {
 		
-		return new File(properties.getProperty("cache"));
+		String path=properties.getProperty("cache");
+		if(path==null) return null;
+		
+		return new File(path);
 	}
 	
 	private static Properties getProperties() {
@@ -25,6 +28,17 @@ public class Config {
 		
 		return p;
 	}
-
 	
+	public static boolean isXmlOnly() {
+		
+		return Boolean.parseBoolean( properties.getProperty("xmlonly") );
+	}
+
+	public static File getHSSPCacheDir() {
+
+		String path=properties.getProperty("hsspcache");
+		if(path==null) return null;
+		
+		return new File(path);
+	}
 }

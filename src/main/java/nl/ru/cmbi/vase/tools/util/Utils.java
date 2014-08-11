@@ -1,9 +1,25 @@
-package nl.ru.cmbi.vase.web;
+package nl.ru.cmbi.vase.tools.util;
 
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
 public class Utils {
+	
+	public static final String stockholmLocationURL = "ftp://ftp.cmbi.ru.nl/pub/molbio/data/hssp3",
+								rcsbLocationURL = "http://www.rcsb.org/pdb/files";
+	
+	
+	public static URL getStockholmURL( String pdbid ) throws MalformedURLException {
+		
+		return new URL(String.format("%s/%s.hssp.bz2",stockholmLocationURL, pdbid));
+	}
+	
+	public static URL getRcsbURL( String pdbid ) throws MalformedURLException {
+		
+		return new URL(String.format("%s/%s.pdb",rcsbLocationURL, pdbid));
+	}
 	
 	public static <T extends Number> T max(List<T> numbers) {
 		

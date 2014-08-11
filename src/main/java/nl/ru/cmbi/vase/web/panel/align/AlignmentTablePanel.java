@@ -5,12 +5,12 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
-import nl.ru.cmbi.vase.data.Alignment;
-import nl.ru.cmbi.vase.data.ResidueInfo;
 import nl.ru.cmbi.vase.data.TableData;
 import nl.ru.cmbi.vase.data.TableData.ColumnInfo;
+import nl.ru.cmbi.vase.data.stockholm.Alignment;
+import nl.ru.cmbi.vase.data.stockholm.ResidueInfo;
 import nl.ru.cmbi.vase.data.VASEDataObject;
-import nl.ru.cmbi.vase.web.Utils;
+import nl.ru.cmbi.vase.tools.util.Utils;
 
 import org.apache.wicket.AttributeModifier;
 import org.apache.wicket.Component;

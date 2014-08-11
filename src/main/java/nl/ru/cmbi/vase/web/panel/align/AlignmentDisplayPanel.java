@@ -6,12 +6,12 @@ import java.util.List;
 import java.util.Map;
 
 
-import nl.ru.cmbi.vase.data.Alignment;
-import nl.ru.cmbi.vase.data.ResidueInfo;
 import nl.ru.cmbi.vase.data.VASEDataObject;
 import nl.ru.cmbi.vase.tools.util.AminoAcid;
-import nl.ru.cmbi.vase.web.Utils;
+import nl.ru.cmbi.vase.tools.util.Utils;
 import nl.ru.cmbi.vase.data.TableData.ColumnInfo;
+import nl.ru.cmbi.vase.data.stockholm.Alignment;
+import nl.ru.cmbi.vase.data.stockholm.ResidueInfo;
 import nl.ru.cmbi.vase.data.TableData;
 
 import org.apache.wicket.AttributeModifier;
@@ -21,8 +21,10 @@ import org.apache.wicket.ajax.markup.html.AjaxFallbackLink;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.link.ExternalLink;
+import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
+import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
@@ -83,8 +85,6 @@ public class AlignmentDisplayPanel extends Panel {
 		this.data = data;
 		this.alignment = data.getAlignment();
 		
-		final String labelFill = "                  ";
-		
 		add(new ListView("positions",Utils.listRange(1,AlignmentDisplayPanel.this.alignment.countColumns() + 1)){
 
 			@Override
@@ -111,7 +111,11 @@ public class AlignmentDisplayPanel extends Panel {
 					}
 				}
 
-				pos.add(new AttributeModifier("title",title));
+				pos.add(new AttributeModifier("data-placements", "top"));
+				pos.add(new AttributeModifier("title",title.trim()));
+				pos.add(new AttributeModifier("onclick",
+						String.format("toggleColumn('%s');",
+								AlignmentDisplayPanel.this.getResidueNumberClassRepresentation(residueNumber))));
 			}
 		});
 		
@@ -125,14 +129,17 @@ public class AlignmentDisplayPanel extends Panel {
 				final Integer row = (Integer) item.getModelObject();
 				
 				final String label = AlignmentDisplayPanel.this.alignment.getLabels().get(row);
-				
-				String id = label.split("/")[0], ref=null;
-				if(id.length()==4)
-					ref="http://www.rcsb.org/pdb/explore/explore.do?structureId="+id;
-				else if(id.length()==6)
-					ref="http://www.uniprot.org/uniprot/"+id;
-				
-				item.add(new ExternalLink("ref",ref).add(new Label("label",label)));
+								
+				VASEDataObject data = AlignmentDisplayPanel.this.data;
+
+				String ref="";
+				if(data.getSequenceReferenceURLs().containsKey(label))
+					ref=data.getSequenceReferenceURLs().get(label).toString();
+								
+				if( !ref.isEmpty() && !label.isEmpty() )
+					item.add(new LabelFragment("label",label,ref));
+				else
+					item.add(new Label("label",label.isEmpty()?"&nbsp":label).setEscapeModelStrings(false) );
 			}
 		});
 		
@@ -154,5 +161,15 @@ public class AlignmentDisplayPanel extends Panel {
 				item.add(seqPre);
 			}
 		});
+	}
+	
+	public class LabelFragment extends Fragment {
+		public LabelFragment(final String id, String label, String ref) {
+			super(id, "labelfragment", AlignmentDisplayPanel.this);
+			
+			ExternalLink link = new ExternalLink("ref",ref);;
+			link.add(new Label("label",label));
+			add(link);
+		}
 	}
 }

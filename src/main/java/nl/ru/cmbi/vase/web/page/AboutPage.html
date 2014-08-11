@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html xmlns:wicket="http://wicket.apache.org">
+<body>
+<wicket:extend>
+
+<script type="text/javascript">
+
+	// Tell the nav-bar that this is the active page
+	$('#nav-about').addClass('active');
+	
+</script>
+		
+<div class="row">
+	<div class="col-md-8">
+		<div class="panel panel-default">
+			<div class="panel-body">
+			
+<h4>About VASE</h4>
+			
+<p>
+VASE is developed at the Centre for Molecular and
+Biomolecular Informatics 
+(<a href="http://www.cmbi.ru.nl" onclick="window.open(this.href); return false;">CMBI</a>)
+department of Bioinformatics at the 
+<a href="http://www.ru.nl" onclick="window.open(this.href); return false;">Radboud University</a>
+ in Nijmegen by C. Baakman (Coos.Baakman@radboudumc.nl) and J. Black.
+</p>
+
+<h4>Data Sources</h4>
+
+<p>
+VASE uses the structures from the Protein Databank
+(<a href="http://www.rcsb.org/pdb/home/home.do" onclick="window.open(this.href); return false;">PDB</a>)
+where available. Alignment information is taken from the stockholm files at 
+<a href="ftp://ftp.cmbi.ru.nl/pub/molbio/data/hssp3/" onclick="window.open(this.href); return false;">CMBI</a>,
+whenever an official PDB structure is requested.
+
+For user-submitted structures, stockholm files are generated using CMBI's
+
+<a href="http://www.cmbi.ru.nl/hsspsoap/?wsdl" onclick="window.open(this.href); return false;">webservice</a>.
+
+</p>
+
+<h4>External Software</h4>
+
+<p>
+VASE uses
+<a href="http://jmol.sourceforge.net/" onclick="window.open(this.href); return false;">JMOL</a>
+to create a 3D representation of protein structures.
+</p>
+
+<p>
+
+</p>
+
+<h4>Source Code</h4>
+
+<p>VASE is open source and available for download at <a href="https://github.com/cmbi/vase/" onclick="window.open(this.href); return false;">GitHub</a>.
+</p>
+			</div>
+			<div class="panel-footer">
+<p>
+    Contact:
+    <a href="mailto:Coos.Baakman@radboudumc.nl">
+    Coos.Baakman@radboudumc.nl
+    </a> | Version: ${project.version} | Built on: ${timestamp}
+</p>
+			
+			</div>
+		</div>
+	</div>
+</div>
+
+</wicket:extend>
+</body>
+</html>

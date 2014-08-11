@@ -1,46 +1,20 @@
 @CHARSET "UTF-8";
 
-pre.alignpre {
-	margin: 0;
-	padding: 0;
+.equal {
+  display: -webkit-box;
+  display: -moz-box;
+  display: -ms-flexbox;
+  display: -webkit-flex;
+  display: flex;
+  flex: auto;
 }
-
-.alignment_frame {
-	border-collapse: collapse;
-	border-spacing: 0;
-	width:inherit;
-}
-.alignment_frame td,th {
-	vertical-align:top;
-	padding:0;
-}
-
-.data_table table {
-	border-collapse: collapse;
-	border-spacing: 0;
-	text-align:left;
-}
-
-.data_table td, .data_table th {
-	width: 160px;
-	padding: 0;
-}
-
-/* it is important that both have the same width: */
-#data-table-header, #data-table-body {
-	width:100%;
-}
-
-.data_table_cell, .data_table_title {
-	width: 160px;
-}
-
-.data_table th {
-	font-weight: bold;
-}
-
-.data_table_title:hover {
-	background-color: #DDDDFF
+.equal > div[class*='col-'] > div[class='panel panel-default'] {
+  display: -webkit-box;
+  display: -moz-box;
+  display: -ms-flexbox;
+  display: -webkit-flex;
+  display: flex;
+  flex-flow: column;
 }
 
 .data_table_row:hover {
@@ -51,48 +25,44 @@ pre.alignpre {
 	background-color: #DD0000
 }
 
-.data_table_column_image {
-	display: none
-}
-.data_table_column_image.toggled {
-	display: inline
-}
-
-/* it is important that both have the same width: */
-#alignment-contents, #alignment-header {
-	/*width: 1380px;*/
-	text-align:left;
-}
-/* it is important that both have the same height: */
-#alignment-contents, #alignment-labels {
-	height: 375px;
-}
-
 .alignment_highlighted {
 	background-color: red
 }
 
 circle.scatter-dot {
-	fill: green
+	fill: rgb(126, 193, 255)
 }
-circle.scatter-dot.alignment_highlighted {
+circle.scatter-dot.danger {
 	fill: red
 }
 
-#structure {
-	float: right
+.align-monospace {
+	line-height:100%;
+	font-family:Consolas, Monaco, Lucida Console, Liberation Mono,
+				DejaVu Sans Mono,Bitstream Vera Sans Mono,
+				Courier New, monospace;
+	font-size:14px;
 }
 
-.unselectable {
-	-moz-user-select: -moz-none;
-	-khtml-user-select: none;
-	-webkit-user-select: none;
-	-o-user-select: none;
-	user-select: none;
+textarea.pdb-input {
+	font-family:Consolas, Monaco, Lucida Console, Liberation Mono,
+				DejaVu Sans Mono,Bitstream Vera Sans Mono,
+				Courier New, monospace;
 }
 
-h1, body {
-	padding:0;
-	border:0;
-	margin:0
+th.header-sort-button:hover {
+	
+	background-color: #DDDDFF;
+	cursor:pointer;
+}
+
+td.delete-job-id:hover, td.show-job-input:hover {
+	
+	background-color: #DDDDFF;
+	cursor:pointer;
+}
+
+tr.search-result {
+
+	cursor:pointer;
 }

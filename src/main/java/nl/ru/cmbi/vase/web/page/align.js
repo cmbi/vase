@@ -3,16 +3,17 @@ var data_cell_classname = "data_table_cell",
 	data_toggle_image_classname = "data_table_column_image",
 	toggle_classname = "toggled";
 
+
+// Because JQuery doesn't work on all tag types/class names,
+// some custom functions are required to perform JQuery-like actions.
 function findElements( tagname, classname ) {
 	
 	var tags = document.getElementsByTagName(tagname);
 	var classtags = [];
 	for (var i = 0; i < tags.length; i++) {
 		
-		var classString = tags[i].getAttribute("class");
-		
-		if(null != classString && classString.indexOf(classname) != -1 ) {
-			
+		if( hasClass(tags[i], classname) ) {
+
 			classtags.push(tags[i]);
 		}
 	}
@@ -20,18 +21,44 @@ function findElements( tagname, classname ) {
 	return classtags
 }
 
+function hasClass( element, classname ) {
+	
+	if(element != null && element.getAttribute("class")!=null) {
+
+		var classes = element.getAttribute("class").split(/\s+/);
+
+		for(var i=0; i<classes.length; i++) {
+
+			if( classes[i] == classname ) {
+				
+				return true;
+			}
+		}
+	}
+	return false;
+}
+
 function addClass( element, classname ) {
 	
-	if( element.getAttribute("class").indexOf(classname) == -1 ) {
+	var classString = element.getAttribute("class");
+	if(classString==null) {
 		
-		element.setAttribute('class', element.getAttribute("class") +" "+ classname );
+		classString = "";
+	}
+	
+	if( classString.indexOf(classname) == -1 ) {
+		
+		element.setAttribute('class', classString +" "+ classname );
 	}
 }
 
 function removeClass( element, classname ) {
 	
-	element.setAttribute('class',element.getAttribute("class")
-			.replace(classname,"").trim() );
+	var classString = element.getAttribute("class");
+	if(classString!=null) {
+
+		element.setAttribute('class',classString.replace(classname,"").trim() );
+	}
 }
 
 function compareTableValues( string1, string2 ) {
@@ -95,7 +122,8 @@ function orderTableBy(varID) {
 		so use the custom function instead.
 	*/
 	
-	var divs = findElements("div",data_row_classname);
+	var divs = findElements("div",data_cell_classname);
+	
 	var dataCells = [];
 	for (var i = 0; i < divs.length; i++) {
 		
@@ -155,14 +183,8 @@ function orderTableBy(varID) {
 	}
 }
 
-var	alignment_highlighted_classname = "alignment_highlighted";
-
-function isColumnHighlighted(classname) {
-	
-	var elements = document.getElementsByClassName(classname+" "+alignment_columnheader_classname+" "+alignment_highlighted_classname);
-	
-	return (elements.length > 0);
-}
+var	table_highlighted_classname = "danger",
+	alignment_highlighted_classname = "label-danger";
 
 /* 
  * For performance reasons, we don't place every aligned residue in a tag.
@@ -172,7 +194,7 @@ function isColumnHighlighted(classname) {
 function updateSequenceHighlighting () {
 	
 	var headerElements = document.getElementsByClassName(alignment_columnheader_classname);
-	var highLightedHeaderElements = document.getElementsByClassName(alignment_columnheader_classname+" "+alignment_highlighted_classname);
+	var highLightedHeaderElements = document.getElementsByClassName(alignment_columnheader_classname+" "+"label-danger");
 	
 	// Make a boolean list that knows which columns (indices) haven been highlighted:
 	var columnsHighlighted= [];
@@ -213,7 +235,7 @@ function updateSequenceHighlighting () {
 			var end = columnsHighlighted[i] + 1;
 
 			// Write html code for highlighted area.
-			tagged += "<span class='"+alignment_highlighted_classname+"'>"
+			tagged += "<span class='"+"label-danger"+"'>"
 				+ tagLess.substring(start, end) + "</span>";
 
 			// Write html code for are between this highlight and the next.
@@ -233,84 +255,129 @@ function updateSequenceHighlighting () {
 	}
 }
 
-// svg elements give problems when using the 'className' field, so use 'getattribute' and 'setAttribute' instead.
-
-function highlightColumn(classname) {
-
-	var elements = document.getElementsByClassName(classname);
+function findColumnElement(classname) {
 	
-	var m;
-	
-    for (var i = 0; i < elements.length; i++) {
-    	
-    	if( elements[i].getAttribute("class").indexOf(alignment_highlighted_classname) == -1 ) {
-    		
-    		elements[i].setAttribute('class', elements[i].getAttribute("class") +" "+ alignment_highlighted_classname );
-    		
-    		if(!m) {
-    			var m = pPDBresclass.exec(elements[i].getAttribute("class"));
-    		}
-    	}
-    }
-	
-    // highlight the residue in jmol too:
-    if(m) {
-    	Jmol.script(jmolApplet0, 'select ' + m[1] + ';color red;');
-    }
-}
-
-function unHighlightAll() {
-	
-	var elements = document.getElementsByClassName(alignment_highlighted_classname);
-	
-	// 'elements' is continuously updated, thus markings must be removed in reverse order
-	
-    for (i = elements.length-1; i>=0; i--) {
-
-		elements[i].setAttribute('class', elements[i].getAttribute("class")
-				.replace(alignment_highlighted_classname,"").trim() );
-	}
-	
-    
-    Jmol.script(jmolApplet0, 'select *; color atoms lightgrey structure;');
-
-    updateSequenceHighlighting();
-}
-
-function unHighlightColumn(classname) {
-	
-	var elements = document.getElementsByClassName(classname);
-	
-	var m;
-	
-    for (var i = 0; i < elements.length; i++) {
-
-		elements[i].setAttribute('class', elements[i].getAttribute("class")
-				.replace(alignment_highlighted_classname,"").trim() );
+	var columnElements = findElements( "*", alignment_columnheader_classname ) ;
+	for(var i =0; i<columnElements.length ; i++) {
 		
-		if(!m) {
-			var m = pPDBresclass.exec(elements[i].getAttribute("class"));
+		if( hasClass( columnElements[i], classname) ) {
+			
+			return columnElements[i];
 		}
 	}
+	return null;
+}
+
+function findAlignmentPosClassname(classname) {
 	
-    // unhighlight the residue in jmol too:
-    if(m) {
-    	
-    	Jmol.script(jmolApplet0, 'select ' + m[1] + ';color lightgrey;');
+	var m = palignmentposclass.exec(classname);
+	if(m)
+		return classname;
+	else {
+		
+		var element = findColumnElement(classname);
+		if(element==null || element.getAttribute("class")==null)
+			return null;
+		
+		m = palignmentposclass.exec(element.getAttribute("class"));
+		if(m)
+			return m[0];
+	}
+	
+	return null;
+}
+
+function updateJmol(classname) {
+	
+	// If the column was highlighted, highlight the residue in the jmol; otherwise
+	// unhighlight it.
+	var columnElement = $('.' + alignment_columnheader_classname + '.' + classname);
+	var columnClass = columnElement.attr('class');
+	
+	if (columnElement.hasClass(alignment_highlighted_classname)) {
+		var color = 'red';
+	} else {
+		var color = 'lightgrey';
+	}
+
+	var m = pPDBresclass.exec(columnClass);
+	if(m) {
+    	Jmol.script(jmolApplet0, 'select ' + m[1] + ';color ' + color + ';');
     }
+}
+
+function updateTable(classname) {
+
+	var columnElement = $('.' + alignment_columnheader_classname + '.' + classname);
+	
+	if( columnElement.hasClass( alignment_highlighted_classname) ) {
+
+		$('.' + data_row_classname + '.' + classname).addClass(table_highlighted_classname);
+	} else {
+		$('.' + data_row_classname + '.' + classname).removeClass(table_highlighted_classname);
+	}
+}
+
+var scatter_dot_classname = "scatter-dot";
+
+function updatePlots(classname) {
+	
+	// jquery doesn't work on svg elements !
+	var dots = findElements( 'circle', scatter_dot_classname ) ;
+
+	var columnElement = $('.' + alignment_columnheader_classname + '.' + classname);
+	var toggled = columnElement.hasClass(alignment_highlighted_classname) ;
+	
+	for(var i=0; i<dots.length; i++) {
+		
+		if( hasClass(dots[i],classname) ) {
+			
+			if( toggled ) {
+		
+				addClass( dots[i], table_highlighted_classname );
+			} else {
+				removeClass( dots[i], table_highlighted_classname );
+			}
+		}
+	}
+}
+
+function clearPlotsHighlighting() {
+
+	// jquery doesn't work on svg elements !
+	var dots = findElements( 'circle', scatter_dot_classname ) ;
+	
+	for(var i=0; i<dots.length; i++) {
+		
+		removeClass( dots[i], table_highlighted_classname );
+	}
 }
 
 function toggleColumn(classname) {
 	
-	if(isColumnHighlighted(classname)) {
-    	
-    	unHighlightColumn(classname);
-    	
-    } else {
-    	
-    	highlightColumn(classname);
-    }
+	console.log("toggle column "+classname);
 	
+	// jquery doesn't find the classes with jmol syntax in it,
+	// so find the alignmentpos classname first:
+	var classname = findAlignmentPosClassname(classname);
+	
+	// Always update the column header first as the sequence highlighting and jmol
+	// highlighting depend on it.
+	$('.' + alignment_columnheader_classname + '.' + classname).toggleClass("label-danger");
+	
+	updateTable(classname);
+	updatePlots(classname);
+	updateJmol(classname);
+    updateSequenceHighlighting();
+}
+
+function unHighlightAll() {
+	
+	$('.'+table_highlighted_classname).removeClass(table_highlighted_classname);
+	$('.'+alignment_highlighted_classname).removeClass(alignment_highlighted_classname);
+    
+	clearPlotsHighlighting();
+    Jmol.script(jmolApplet0, 'select *; color atoms lightgrey structure;');
     updateSequenceHighlighting();
 }
 
@@ -320,8 +387,6 @@ function switchTabVisibility(id) {
 		
 		var tabElement = document.getElementById(tabids[i]);
 		var switchElement = document.getElementById("switch-"+tabids[i]);
-		
-		console.log("switch-"+tabids[i]+": "+switchElement!=null);
 		
 		if( tabids[i]==id ) {
 			
@@ -337,76 +402,105 @@ function switchTabVisibility(id) {
 		}
 	}
 	
-	setTablePlotsSizes();
+	setDataTableSizes();
+	setDataPlotSizes();
 }
 
-function setSizes() {
-	
-	setTablePlotsSizes();
-	
-	setAlignmentSize();
-}
+var scrollbarMarge = 20.0;
 
-function setTablePlotsSizes() {
+function setAlignmentSizes() {
 	
-	var	pageWidth  = window.innerWidth;
+	// Only height, since width is automatically adjusted
 	
-	var tableOrPlotMaxWidth = pageWidth - jsmolInfo.width;
-
-	var	tableAndPlots = document.getElementById("table-and-plots"),
-		tableHeader = document.getElementById("data-table-header"),
-		tableBody = document.getElementById("data-table-body");
-	
-	tableAndPlots.style.width = "" + tableOrPlotMaxWidth + "px";
-
-	var tableClientWidth = tableBody.scrollWidth;
-	if(tableBody.scrollWidth > tableOrPlotMaxWidth) {
-
-		// take off 15px for scroll bar
-		tableClientWidth =  tableOrPlotMaxWidth - 15;
-	}
-	
-	tableHeader  .style.width = "" + tableClientWidth + "px";
-	tableBody    .style.width = "" + tableClientWidth + "px";
-
-	var plots = findElements("div","alignment-linked-plot");
-	for(var i=0; i<plots.length; i++) {
+	var headerY = $("#alignment-header").position().top,
+		headerHeight = $("#alignment-header").height(),
+		currentContentsHeight = $("#alignment-contents").height(),
+		bottomRowY = $("#row-bottom").position().top,
+		bottomRowHeight = $("#row-bottom").outerHeight(true),
+		distanceAlignmentBottom = bottomRowY - (headerY + headerHeight + currentContentsHeight),
 		
-		plots[i].style.width = tableOrPlotMaxWidth ; 
-	}
+		newAlignmentHeight = window.innerHeight - bottomRowHeight 
+			- headerY - headerHeight - distanceAlignmentBottom;
+	
+	$(".alignment-content-height").css('height','' + newAlignmentHeight + 'px');
 }
 
-function setAlignmentSize() {
+function setDataPlotSizes() {
 	
-	// Adjusts the size of the alignment's scrollable area to the space left in the top half.
-	// For the bottom half's height is considered fixed.
+	$("[id^=plot]").each( function (i){
 	
-	var	pageWidth  = window.innerWidth,
-		pageHeight = window.innerHeight;
-	
-	var pageHeader		= document.getElementById("page-header"),
-		alignmentHeader	= document.getElementById("alignment-header"),
-		alignmentFrame	= document.getElementById("alignment-frame"),
-		bottomHalf		= document.getElementById("bottom-half");
+		var targetPanelHeight = jsmolInfo.height,
+			tabHeaderHeight = $('#tab-header').height(),
+			plotHeight = targetPanelHeight - tabHeaderHeight,
+		
+			structurePanelWidth = $('#col-structure').outerWidth(true),
+			plotOffX = $(this).position().left,
+			plotWidth = window.innerWidth - structurePanelWidth - 2*plotOffX,
+			
+			scaling = (plotHeight - scrollbarMarge) / plotHeightDefault;
+		
+		$(this).css('height','' + plotHeight + 'px');
+		$(this).css('width','' + plotWidth + 'px');
+		
+		$(this).children('svg').each(
+			function (i,svg) {
+			
+			svg.setAttribute("height",plotHeight - scrollbarMarge);
+			svg.setAttribute("width",plotWidthDefault * scaling);
+			
+			for(var i=0; i<svg.children.length; i++) {
+				
+				var g = svg.children[i];
+				if(g.tagName=='g' && g.getAttribute('class')=='plot-resize') {
+				
+					g.setAttribute( 'transform', 'scale('+scaling+')');
+				}
+			}
+		});
 
-	// apparently 3px need to be taken off here, or it won't fit
-	// (the required amount seems to vary per browser)
-	var	topHeight = pageHeight - bottomHalf.clientHeight - 5;
 	
-	// Space reserved for alignment scrolling panel:
-	// (take off 15 px for the scroll bars)
-	var	alignmentHeight = topHeight - pageHeader.clientHeight - alignmentHeader.clientHeight - 15,
-		alignmentLabelsWidth = 140,
-		alignmentWidth = pageWidth - alignmentLabelsWidth - 15;
-	
-	var	alignmentContents	= document.getElementById("alignment-contents"),
-		alignmentLabels		= document.getElementById("alignment-labels");
+	});
+}
 
-	alignmentContents.style.height = "" + alignmentHeight + "px";
-	alignmentLabels  .style.height = "" + alignmentHeight + "px";
-	alignmentHeader  .style.width  = "" + alignmentWidth  + "px";
-	alignmentContents.style.width  = "" + alignmentWidth  + "px";
+function setTabHeaderSizes() {
+	// places them on top of each other if neccesary
 
-	alignmentLabels  .style.width  = "" + alignmentLabelsWidth + "px";
+	var structurePanelWidth = $('#col-structure').outerWidth(true),
+		tabHeaderOffX = $('#tab-header').position().left,
+
+		tabHeaderWidth = window.innerWidth - structurePanelWidth - 2*tabHeaderOffX;
 	
+	$('#tab-header').css('width','' + tabHeaderWidth + 'px');
+}
+
+function setDataTableSizes () {
+
+	var table = $('#data-table > div > table');
+	
+	var targetPanelHeight = jsmolInfo.height,
+		tabHeaderHeight = $('#tab-header').height(),
+	
+		targetTableHeight = targetPanelHeight - tabHeaderHeight,
+		headerheight = table.children('thead').height(),
+		bodyHeight = targetTableHeight - headerheight ,
+	
+		structurePanelWidth = $('#col-structure').outerWidth(true),
+		tableOffX = $('#data-table').position().left,
+	
+		tableWidth = window.innerWidth - structurePanelWidth - 2*tableOffX;
+	
+	table.children('tbody').css('height','' + bodyHeight + 'px');
+	table.children('tbody').css('width','' + tableWidth + 'px');
+	table.children('thead').css('width','' + tableWidth + 'px');
+}
+
+function setAlignmentPageSizes() {
+	
+	// The tab header sizes must be set before the tab contents (table and plots),
+	// since those depend on its height property.
+	setTabHeaderSizes();
+	setDataTableSizes();
+	setDataPlotSizes();
+	
+	setAlignmentSizes();
 }

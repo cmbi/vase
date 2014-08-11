@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
 
+import nl.ru.cmbi.vase.data.stockholm.Alignment;
+
 import org.dom4j.Element;
 
 import lombok.AccessLevel;
@@ -14,6 +16,8 @@ import lombok.Setter;
 
 @Data
 public class VASEDataObject {
+	
+	private String title = "";
 	
 	@Data
 	public static class PlotDescription {

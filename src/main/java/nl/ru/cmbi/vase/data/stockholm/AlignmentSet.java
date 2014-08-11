@@ -1,4 +1,4 @@
-package nl.ru.cmbi.vase.data;
+package nl.ru.cmbi.vase.data.stockholm;
 
 import java.io.Serializable;
 import java.lang.StringBuilder;
