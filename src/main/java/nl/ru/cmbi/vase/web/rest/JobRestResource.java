@@ -1,13 +1,21 @@
 package nl.ru.cmbi.vase.web.rest;
 
+import java.io.BufferedReader;
+import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.io.StringWriter;
+import java.io.Writer;
 import java.lang.annotation.Annotation;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.ProtocolException;
 import java.net.URL;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
@@ -25,8 +33,16 @@ import nl.ru.cmbi.vase.tools.util.Utils;
 import nl.ru.cmbi.vase.web.WicketApplication;
 import nl.ru.cmbi.vase.web.page.AlignmentPage;
 
+import org.apache.commons.compress.compressors.bzip2.BZip2CompressorInputStream;
 import org.apache.commons.compress.compressors.bzip2.BZip2CompressorOutputStream;
 import org.apache.commons.io.IOUtils;
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.wicket.injection.Injector;
 import org.apache.wicket.request.IRequestParameters;
 import org.apache.wicket.request.Url;
@@ -36,13 +52,6 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.util.string.StringValue;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.restlet.data.Form;
-import org.restlet.data.MediaType;
-import org.restlet.data.Method;
-import org.restlet.ext.json.JsonRepresentation;
-import org.restlet.representation.StringRepresentation;
-import org.restlet.resource.ClientResource;
-import org.restlet.resource.ResourceException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wicketstuff.rest.annotations.MethodMapping;
@@ -77,82 +86,81 @@ public class JobRestResource extends GsonRestResource {
 		if(Config.isXmlOnly()) {
 			
 			// hssp job submission is not allowed if hssp is turned off
-			throw new AbortWithHttpErrorCodeException(404);
+			throw new AbortWithHttpErrorCodeException(HttpURLConnection.HTTP_NOT_FOUND);
 		}
 		
 		// getPostParameters doesn't work for some reason
 		IRequestParameters p = RequestCycle.get().getRequest().getRequestParameters();
 
-	    StringValue pdbfile = p.getParameterValue("pdbfile");
-	    if(pdbfile.toString()==null) {
+	    StringValue pdbContents = p.getParameterValue("pdbfile");
+	    if(pdbContents.toString()==null) {
 	    	
 			log.error("pdbfile parameter not set");
 
-			throw new AbortWithHttpErrorCodeException(404);
+			throw new AbortWithHttpErrorCodeException(HttpURLConnection.HTTP_BAD_REQUEST);
 	    }
-		
-		ClientResource resource = new ClientResource(hsspRestURL+"/create/hssp/from_pdb/");
-		resource.setMethod(Method.POST);
-        resource.getReference().addQueryParameter("format", "json");
+	    
+    	CloseableHttpClient httpClient = HttpClientBuilder.create().build();
+    	
+    	try {
+    		JSONObject input = new JSONObject();
+    		input.put("pdb_content", pdbContents.toString());
+    		
+    	    HttpPost request = new HttpPost(hsspRestURL+"/create/hssp/from_pdb/");
+    	    StringEntity params = new StringEntity(input.toString());
+    	    request.addHeader("content-type", "application/x-www-form-urlencoded");
+    	    request.setEntity(params);
+    	    
+    	    HttpResponse response = httpClient.execute(request);
+    	    
+    	    HttpEntity entity = response.getEntity();
+    	    
+    	    if (response.getStatusLine().getStatusCode() !=  HttpURLConnection.HTTP_OK) {
+    	    	
+    	    	throw new Exception(response.getStatusLine().toString());
+    	    }
+    	    
+			StringWriter writer = new StringWriter();
+			IOUtils.copy( entity.getContent(), writer);
+			writer.close();
+			
+    	    httpClient.close();
 
-		try {
-	        JSONObject obj = new JSONObject();
-			obj.put("pdb_content",pdbfile.toString());
-			
-			StringRepresentation stringRep = new StringRepresentation(obj.toString());
-	        stringRep.setMediaType(MediaType.APPLICATION_JSON);
-
-	        resource.post(stringRep); 
-			
-		} catch (JSONException e) {
-			log.error("json exception");
-		}
-		
-		if (resource.getStatus().isSuccess()) {
-			
-			try {
-				return resource.get().getText();
-				
-			} catch (IOException e) {
-				
-				log.error("IOException");
-				throw new AbortWithHttpErrorCodeException(404);
-			}
-			
-	    } else {
+			JSONObject output=new JSONObject( writer.toString() );
+			return output.getString("id");
+    	    
+    	// handle response here...
+    	} catch (Exception e) {
 	    	
-			log.error("create/hssp/from_pdb: unsuccesful call");
-
-			throw new AbortWithHttpErrorCodeException(404);
-	    }
+	    	log.error(e.getMessage(),e);
+			throw new AbortWithHttpErrorCodeException(HttpURLConnection.HTTP_INTERNAL_ERROR);
+    	}
 	}
 	
 	@MethodMapping(value = "/status/{jobid}", httpMethod=HttpMethod.GET, produces = RestMimeTypes.TEXT_PLAIN)
 	public String status(String jobid) {
 
-		ClientResource resource = new ClientResource(hsspRestURL+"/job/hssp_from_pdb/"+jobid+"/status/");
-		resource.setMethod(Method.GET);
-		
 		if(Config.isXmlOnly()) {
 			
 			// hssp job submission is not allowed if hssp is turned off
-			throw new AbortWithHttpErrorCodeException(404);
+			throw new AbortWithHttpErrorCodeException(HttpURLConnection.HTTP_NOT_FOUND);
 		}
 		
 		try {
+			URL url = new URL(hsspRestURL+"/job/hssp_from_pdb/"+jobid+"/status/");
 			
-			JsonRepresentation represent = new JsonRepresentation(resource.get());
+			StringWriter writer = new StringWriter();
+			IOUtils.copy( url.openStream(), writer);
+			writer.close();
 			
-			JSONObject object = represent.getJsonObject();
-            if (object != null) {
-            	return object.getString("status");
-            }
-            else throw new AbortWithHttpErrorCodeException(404);
-
+			JSONObject output=new JSONObject( writer.toString() );
+			
+			return output.getString("status");
+			
 		} catch (Exception e) {
-			
-			log.error(e.getMessage(),e);
-			throw new AbortWithHttpErrorCodeException(404);
+	    	
+	    	log.error(e.getMessage(),e);
+			throw new AbortWithHttpErrorCodeException(HttpURLConnection.HTTP_INTERNAL_ERROR);
 		}
 	}
 	
@@ -161,28 +169,27 @@ public class JobRestResource extends GsonRestResource {
 		
 		File hsspFile = new File(Config.getHSSPCacheDir(),jobid+".hssp.bz2");
 		
-		ClientResource resource = new ClientResource(hsspRestURL+"/job/hssp_from_pdb/"+jobid+"/result/");
-		resource.setMethod(Method.GET);
-		
-		try{
+		try {
 			
 			if(!hsspFile.isFile()) {
+				
+				URL url = new URL(hsspRestURL+"/job/hssp_from_pdb/"+jobid+"/result/");
 			
-				OutputStream hsspOut = new BZip2CompressorOutputStream(new FileOutputStream(hsspFile));
-				resource.get().write(hsspOut);
-				hsspOut.close();
+				Writer writer = new OutputStreamWriter( new BZip2CompressorOutputStream(new FileOutputStream(hsspFile)));
+				IOUtils.copy( url.openStream(), writer);
+				writer.close();
 			}
 			
 			StringWriter hsspWriter = new StringWriter();
-			IOUtils.copy(new GZIPInputStream( new FileInputStream(hsspFile) ), hsspWriter, "UTF-8");
+			IOUtils.copy(new BZip2CompressorInputStream( new FileInputStream(hsspFile) ), hsspWriter, "UTF-8");
 			hsspWriter.close();
 			
 			return hsspWriter.toString();
 			
 		} catch (IOException e) {
 			
-			log.error("IOException");
-			throw new AbortWithHttpErrorCodeException(404);
+			log.error(e.getMessage(),e);
+			throw new AbortWithHttpErrorCodeException(HttpURLConnection.HTTP_INTERNAL_ERROR);
 		}
 	}
 		
@@ -225,14 +232,14 @@ public class JobRestResource extends GsonRestResource {
 				
 				log.error("no structure file for "+id);
 
-				throw new AbortWithHttpErrorCodeException(404);
+				throw new AbortWithHttpErrorCodeException(HttpURLConnection.HTTP_NOT_FOUND);
 			}
 			
 		} catch (Exception e) {
 			
 			log.error("structure "+id+": "+e.getMessage());
 			
-			throw new AbortWithHttpErrorCodeException(404);
+			throw new AbortWithHttpErrorCodeException(HttpURLConnection.HTTP_INTERNAL_ERROR);
 		}
 	}
 }
