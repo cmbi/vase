@@ -1,3 +1,18 @@
+/**
+ * Copyright 2014 CMBI (contact: <Coos.Baakman@radboudumc.nl>)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package nl.ru.cmbi.vase.web.page;
 
 import java.io.File;
@@ -68,37 +83,39 @@ public class AlignmentPage extends BasePage {
 	private URL getPDBURL(String structureID)
 		throws MalformedURLException {
 
-		File pdbFile = new File(Config.getHSSPCacheDir(), structureID+".pdb.gz");
-
-		if(pdbFile.isFile()) {
+		if(Config.hsspPdbCacheEnabled()) {
 			
-			return new URL( 
-				RequestCycle.get().getUrlRenderer().renderFullUrl(
-					Url.parse("../rest/structure/"+structureID)) );
+			File pdbFile = new File(Config.getHSSPCacheDir(), structureID+".pdb.gz");
+			if(pdbFile.isFile()) {
+				
+				return new URL( 
+					RequestCycle.get().getUrlRenderer().renderFullUrl(
+						Url.parse("../rest/structure/"+structureID)) );
+			}
 		}
 		else if(structureID.matches(StockholmParser.pdbAcPattern)) {
 			
 			return Utils.getRcsbURL(structureID);
 		}
-		else {
-			return null;
-		}
+		
+		return null;
 	}
 	private InputStream getStockholmInputStream(String structureID)
 		throws MalformedURLException, IOException {
 
-		// Some files that might be there or not:
-		File	hsspFile = new File(Config.getHSSPCacheDir(), structureID+".hssp.bz2");
-		
-		if(hsspFile.isFile()) {
+		if(Config.hsspPdbCacheEnabled()) {
 			
-			return new BZip2CompressorInputStream(
-				new FileInputStream(hsspFile) );
+			// Some files that might be there or not:
+			File hsspFile = new File(Config.getHSSPCacheDir(), structureID+".hssp.bz2");
+		
+			if(hsspFile.isFile()) {
+				
+				return new BZip2CompressorInputStream(
+					new FileInputStream(hsspFile) );
+			}
 		}
-		else {
-			return new BZip2CompressorInputStream( 
-				Utils.getStockholmURL(structureID).openStream() );
-		}
+		
+		return new BZip2CompressorInputStream( Utils.getStockholmURL(structureID).openStream() );
 	}
 
 	public AlignmentPage(final PageParameters parameters) {
