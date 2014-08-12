@@ -262,7 +262,7 @@ function updateJobListingRow(job) {
 		if(list.rows[i].id
 			&& list.rows[i].id==job.id) {
 			
-			if(job.status.toLowerCase()=="finished") {
+			if(job.status.toLowerCase()=="success") {
 
 				list.rows[i].cells[1].innerHTML="<a href='"+alignURL+"/"+job.id+"'>"+job.id+"</a>"
 			}

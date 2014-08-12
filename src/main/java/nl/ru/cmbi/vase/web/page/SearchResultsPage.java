@@ -102,21 +102,32 @@ public class SearchResultsPage extends BasePage {
 		if(xmlFile.isFile()) {
 			
 			results.add( new SearchResult (structureID) );
+		}
 			
-		} else { // treat it as a pdb id
+		try {
 			
-			try {
+			File hsspFile = new File(Config.getHSSPCacheDir(),structureID+".hssp.bz2");
+			if(hsspFile.isFile()) {
+				
+				for(Character chain : StockholmParser.listChainsInStockholm(new BZip2CompressorInputStream( new FileInputStream(hsspFile) ))) {
+					
+					results.add( new SearchResult(structureID,chain) );
+				}
+			}
+			
+			if(structureID.matches(StockholmParser.pdbAcPattern)) {
+			
 				URL stockholmURL = Utils.getStockholmURL(structureID);
 				
 				for(Character chain : StockholmParser.listChainsInStockholm(new BZip2CompressorInputStream( stockholmURL.openStream()))) {
 					
 					results.add( new SearchResult(structureID,chain) );
 				}
-				
-			} catch (Exception e) {
-				
-				log.error(e.getMessage(),e);
 			}
+			
+		} catch (Exception e) {
+			
+			log.error(e.getMessage(),e);
 		}
 		
 		return results;

@@ -37,10 +37,9 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.regex.Matcher;
 import java.util.zip.GZIPInputStream;
+import java.util.zip.GZIPOutputStream;
 
 import nl.ru.cmbi.vase.data.VASEDataObject;
-import nl.ru.cmbi.vase.job.HsspJob;
-import nl.ru.cmbi.vase.job.HsspQueue;
 import nl.ru.cmbi.vase.parse.StockholmParser;
 import nl.ru.cmbi.vase.parse.VASEXMLParser;
 import nl.ru.cmbi.vase.tools.util.Config;
@@ -70,6 +69,10 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.util.string.StringValue;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.restlet.data.Form;
+import org.restlet.representation.Representation;
+import org.restlet.resource.ClientResource;
+import org.restlet.resource.ResourceException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wicketstuff.rest.annotations.MethodMapping;
@@ -101,7 +104,7 @@ public class JobRestResource extends GsonRestResource {
 	@MethodMapping(value="/custom", httpMethod=HttpMethod.POST, produces = RestMimeTypes.TEXT_PLAIN)
 	public String custom() {
 		
-		if(Config.isXmlOnly() || !Config.hsspPdbCacheEnabled()) {
+		if(Config.isXmlOnly() || !Config.hsspPdbCacheIsSet()) {
 			
 			// hssp job submission is not allowed if hssp is turned off
 			throw new AbortWithHttpErrorCodeException(HttpURLConnection.HTTP_NOT_FOUND);
@@ -118,7 +121,41 @@ public class JobRestResource extends GsonRestResource {
 			throw new AbortWithHttpErrorCodeException(HttpURLConnection.HTTP_BAD_REQUEST);
 	    }
 	    
-    	CloseableHttpClient httpClient = HttpClientBuilder.create().build();
+	    Form form = new Form();
+	    form.add("pdb_content", pdbContents.toString());
+
+	    String url = hsspRestURL + "/create/hssp/from_pdb/";
+	    ClientResource resource = new ClientResource(url);
+
+	    Representation rep = null;
+	    try {
+	    	rep = resource.post(form);
+	      
+	      	String content = rep.getText();
+		    
+		    JSONObject output=new JSONObject( content );
+		    String jobID = output.getString("id");
+
+			File pdbFile = new File(Config.getHSSPCacheDir(),jobID+".pdb.gz");
+			
+			OutputStream pdbOut = new GZIPOutputStream(new FileOutputStream(pdbFile));
+		    IOUtils.write(pdbContents.toString(),pdbOut);
+		    pdbOut.close();
+		    
+		    return jobID;
+	      
+	    } catch (ResourceException e) {
+	    	log.error("HSSP REST service error: " + e.toString());
+	    	throw new AbortWithHttpErrorCodeException(HttpURLConnection.HTTP_INTERNAL_ERROR);
+	    } catch (JSONException e) {
+	    	log.error("json error: " + e.toString());
+	    	throw new AbortWithHttpErrorCodeException(HttpURLConnection.HTTP_INTERNAL_ERROR);
+		} catch (IOException e) {
+			log.error("io error: " + e.toString());
+			throw new AbortWithHttpErrorCodeException(HttpURLConnection.HTTP_INTERNAL_ERROR);
+		}
+	    
+    	/*CloseableHttpClient httpClient = HttpClientBuilder.create().build();
     	
     	try {
     		JSONObject input = new JSONObject();
@@ -154,13 +191,13 @@ public class JobRestResource extends GsonRestResource {
 	    	
 	    	log.error(e.getMessage(),e);
 			throw new AbortWithHttpErrorCodeException(HttpURLConnection.HTTP_INTERNAL_ERROR);
-    	}
+    	}*/
 	}
 	
 	@MethodMapping(value = "/status/{jobid}", httpMethod=HttpMethod.GET, produces = RestMimeTypes.TEXT_PLAIN)
 	public String status(String jobid) {
 
-		if( Config.isXmlOnly() || !Config.hsspPdbCacheEnabled()) {
+		if( Config.isXmlOnly() || !Config.hsspPdbCacheIsSet()) {
 			
 			// hssp job submission is not allowed if hssp is turned off
 			throw new AbortWithHttpErrorCodeException(HttpURLConnection.HTTP_NOT_FOUND);
@@ -184,35 +221,27 @@ public class JobRestResource extends GsonRestResource {
 		}
 	}
 	
-	@MethodMapping(value = "/hssp/{id}", httpMethod=HttpMethod.GET, produces = RestMimeTypes.TEXT_PLAIN)
-	public String hssp(String jobid) {
+	@MethodMapping(value = "/hsspresult/{id}", httpMethod=HttpMethod.GET, produces = RestMimeTypes.TEXT_PLAIN)
+	public String hssp(String id) {
 		
-		if( Config.isXmlOnly() || !Config.hsspPdbCacheEnabled() ) {
+		if( Config.isXmlOnly() ) {
 
 			// hssp job submission is not allowed if hssp is turned off
 			throw new AbortWithHttpErrorCodeException(HttpURLConnection.HTTP_NOT_FOUND);
 		}
 		
-		File hsspFile = new File(Config.getHSSPCacheDir(),jobid+".hssp.bz2");
-		
 		try {
+			URL url = new URL(hsspRestURL+"/job/hssp_from_pdb/"+id+"/result/");
 			
-			if(!hsspFile.isFile()) {
-				
-				URL url = new URL(hsspRestURL+"/job/hssp_from_pdb/"+jobid+"/result/");
+			Writer writer = new StringWriter();
+			IOUtils.copy( url.openStream(), writer);
+			writer.close();
 			
-				Writer writer = new OutputStreamWriter( new BZip2CompressorOutputStream(new FileOutputStream(hsspFile)));
-				IOUtils.copy( url.openStream(), writer);
-				writer.close();
-			}
+			JSONObject output=new JSONObject( writer.toString() );
 			
-			StringWriter hsspWriter = new StringWriter();
-			IOUtils.copy(new BZip2CompressorInputStream( new FileInputStream(hsspFile) ), hsspWriter, "UTF-8");
-			hsspWriter.close();
+			return output.getString("result");
 			
-			return hsspWriter.toString();
-			
-		} catch (IOException e) {
+		} catch (Exception e) {
 			
 			log.error(e.getMessage(),e);
 			throw new AbortWithHttpErrorCodeException(HttpURLConnection.HTTP_INTERNAL_ERROR);
@@ -223,12 +252,9 @@ public class JobRestResource extends GsonRestResource {
 	@MethodMapping(value = "/structure/{id}", httpMethod=HttpMethod.GET, produces = RestMimeTypes.TEXT_PLAIN)
 	public String structure(String id) {
 		
-		Matcher mpdb = StockholmParser.pPDBAC.matcher(id);
-		
-		File xmlFile = new File(Config.getCacheDir(),id+".xml.gz");
-		
 		try {
-
+			
+			Matcher mpdb = StockholmParser.pPDBAC.matcher(id);
 			if(mpdb.matches()) {
 				
 				URL url = Utils.getRcsbURL(mpdb.group(1));
@@ -239,13 +265,15 @@ public class JobRestResource extends GsonRestResource {
 				
 				return pdbWriter.toString();
 			}
-			else if(xmlFile.isFile()) {
+
+			File xmlFile = new File(Config.getCacheDir(),id+".xml.gz");
+			if(xmlFile.isFile()) {
 			
 				VASEDataObject data = VASEXMLParser.parse( new GZIPInputStream( new FileInputStream(xmlFile) ) );
 			
 				return data.getPdbContents();
 			}
-			else if(Config.hsspPdbCacheEnabled()) {
+			if(Config.hsspPdbCacheIsSet()) {
 				
 				File pdbFile = new File(Config.getHSSPCacheDir(),id+".pdb.gz");
 				
@@ -264,7 +292,7 @@ public class JobRestResource extends GsonRestResource {
 			
 		} catch (Exception e) {
 			
-			log.error("structure "+id+": "+e.getMessage());
+			log.error("structure "+id+": "+e.getMessage(),e);
 			
 			throw new AbortWithHttpErrorCodeException(HttpURLConnection.HTTP_INTERNAL_ERROR);
 		}

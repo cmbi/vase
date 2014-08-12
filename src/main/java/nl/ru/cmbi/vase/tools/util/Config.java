@@ -49,7 +49,7 @@ public class Config {
 		return Boolean.parseBoolean( properties.getProperty("xmlonly") );
 	}
 	
-	public static boolean hsspPdbCacheEnabled() {
+	public static boolean hsspPdbCacheIsSet() {
 		
 		return properties.getProperty("hsspcache")!=null;
 	}

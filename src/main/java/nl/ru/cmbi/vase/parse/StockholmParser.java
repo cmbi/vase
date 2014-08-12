@@ -63,13 +63,13 @@ public class StockholmParser {
 	
 	// Regular expressions for to recognize specific lines in the stockholm files:
 	public static final String
-		pdbIDPattern = "^#=GF CC PDBID\\s+[\\w\\-]+\\s*$",
-		chainPattern = "^#=GF ID\\s+[\\w]{4}\\/[A-Z0-9]\\s*$",
+		pdbIDLinePattern = "^#=GF CC PDBID\\s+[\\w\\-]+\\s*$",
+		chainLinePattern = "^#=GF ID\\s+([\\-_0-9a-zA-Z]*)\\/([A-Z0-9])\\s*$",
 		
-		dbRefPattern = "^#=GF CC DBREF\\s+[1-9][A-Z0-9]{3}\\s+([A-Z0-9])\\s+.*$",
-		equalchainsPattern = "^#=GF CC Chain ([A-Z]) is considered to be the same as ([A-Z](?:, [A-Z])*(?: and [A-Z])?)$",
+		dbRefLinePattern = "^#=GF CC DBREF\\s+[1-9][A-Z0-9]{3}\\s+([A-Z0-9])\\s+.*$",
+		equalchainsLinePattern = "^#=GF CC Chain ([A-Z]) is considered to be the same as ([A-Z](?:, [A-Z])*(?: and [A-Z])?)$",
 		
-		variabilityPattern = "^#=GF\\s+RI" +
+		variabilityLinePattern = "^#=GF\\s+RI" +
 			"\\s+([0-9]+)" + // SeqNo
 			"\\s+(\\-?[0-9]+[\\sA-Z])([A-Za-z0-9])" + // PDBNo CHAIN
 			"\\s+([A-Za-z])" + // AA
@@ -77,14 +77,14 @@ public class StockholmParser {
 			"\\s*([0-9]+)\\s*([0-9]+[A-Z]?)\\s+([0-9]+)\\s+" + // BP1 BP2  ACC
 		"([0-9]+)\\s+([0-9]+)\\s*$", // NOCC VAR
 	
-		profilePattern = "^#=GF\\s+PR" +
+		profileLinePattern = "^#=GF\\s+PR" +
 			"\\s+([0-9]+)" + // SeqNo
 			"\\s+(\\-?[0-9]+[\\sA-Z])([A-Za-z0-9])" + // PDBNo CHAIN
 			"\\s+((?:[0-9]+\\s+){20})" + // per amino acid score
 			"([0-9]+)\\s+([0-9]+)\\s+([0-9]+)\\s+" + // NOCC NDEL NINS 
 			"([0-9]+\\.[0-9]+)\\s+([0-9]+)\\s+([0-9]+\\.[0-9]+)\\s*$", // ENTROPY RELENT WEIGHT
 	
-		seqPattern = "^([\\w\\-\\/]*)\\s+([A-Z\\.]+)$",
+		seqLinePattern = "^([\\w\\-\\/]*)\\s+([A-Z\\.]+)$",
 		
 		pdbAcPattern = "^([0-9][0-9a-zA-Z]{3})(\\/[A-Z0-9a-z])?$",
 		
@@ -144,6 +144,11 @@ public class StockholmParser {
 		goThroughStockholm(stockholmIn,alignments,residueInfoSet,pdbID,chain);
 		
 		Map<Character,VASEDataObject> map = generateVaseObjects ( alignments, residueInfoSet, pdbID.toString(), pdbURL);
+		
+		if(!map.containsKey(chain)) {
+			
+			throw new Exception("Chain not parsed: "+chain+", alignments: "+alignments.getChainIDs()+", infos:"+residueInfoSet.listChainIDs());
+		}
 		
 		return map.get(chain);
 	}
@@ -205,29 +210,29 @@ public class StockholmParser {
 		
 		String pdbID = null;
 		char currentChain='A';
-		final Pattern	vp = Pattern.compile(variabilityPattern),
-						pp = Pattern.compile(profilePattern);
+		final Pattern	vp = Pattern.compile(variabilityLinePattern),
+						pp = Pattern.compile(profileLinePattern),
+						cp = Pattern.compile(chainLinePattern);
 
 		final BufferedReader reader = new BufferedReader(new InputStreamReader(stockholmIn));
 		String line;
 		while((line=reader.readLine())!=null) {
 
 			Matcher vm = vp.matcher(line),
-					pm = pp.matcher(line);
+					pm = pp.matcher(line),
+					cm = cp.matcher(line);
 			
 			if(line.trim().equals("//")) { // indicates the end of the current chain
 				
 				currentChain = ' ';
 			}
-			else if (line.matches(chainPattern)) {
+			else if (cm.matches()) {
 			
-				final String[] s = line.trim().split("\\s+");
-				final String id=s[s.length-1];
-				currentChain=id.charAt(5);
+				currentChain=cm.group(2).charAt(0);
 				
 				chains.add(currentChain);
 				
-			} else if (line.matches(dbRefPattern)) {
+			} else if (line.matches(dbRefLinePattern)) {
 				
 				// DBRefs don't indicate the current chain
 				continue;
@@ -244,7 +249,7 @@ public class StockholmParser {
 				
 				chains.add(currentChain);
 						
-			} else if (line.matches(equalchainsPattern)) {
+			} else if (line.matches(equalchainsLinePattern)) {
 
 				final String[] s = line.trim().split("\\s+");
 				final char sourceChain = s[3].charAt(0);
@@ -280,9 +285,10 @@ public class StockholmParser {
 		final BufferedReader reader = new BufferedReader(new InputStreamReader(stockholmIn));
 
 		char currentChain='A';
-		final Pattern	vp = Pattern.compile(variabilityPattern),
-						pp = Pattern.compile(profilePattern),
-						sp = Pattern.compile(seqPattern);
+		final Pattern	vp = Pattern.compile(variabilityLinePattern),
+						pp = Pattern.compile(profileLinePattern),
+						sp = Pattern.compile(seqLinePattern),
+						cp = Pattern.compile(chainLinePattern);
 
 		String line; int linenr=0;
 		while((line=reader.readLine())!=null) {
@@ -290,7 +296,8 @@ public class StockholmParser {
 
 			Matcher vm = vp.matcher(line),
 					pm = pp.matcher(line),
-					sm = sp.matcher(line);
+					sm = sp.matcher(line),
+					cm = cp.matcher(line);
 			
 			if(line.trim().equals("//")) { // indicates the end of the current chain
 				
@@ -301,17 +308,16 @@ public class StockholmParser {
 				
 				currentChain = ' ';
 			}
-			else if(line.matches(pdbIDPattern)) {
+			else if(line.matches(pdbIDLinePattern)) {
 				
 				final String[] s = line.trim().split("\\s+");
 				
 				pdbID.replace(0, pdbID.length(), s[s.length-1] );
 				
-			} else if (line.matches(chainPattern)) {
+			} else if (cm.matches()) {
 			
-				final String[] s = line.trim().split("\\s+");
-				final String id=s[s.length-1], ac=id.substring(0,4);
-				currentChain=id.charAt(5);
+				final String ac=cm.group(1);
+				currentChain=cm.group(2).charAt(0);
 	
 				if( !pdbID.toString().equalsIgnoreCase(ac)) {
 					throw new Exception("line "+linenr+": got id "+ac+", but expected: "+pdbID);
@@ -325,7 +331,7 @@ public class StockholmParser {
 				
 				alignments.addChain(currentChain);
 				
-			} else if (line.matches(dbRefPattern)) {
+			} else if (line.matches(dbRefLinePattern)) {
 
 				// DBRefs don't indicate the current chain
 				continue;
@@ -367,7 +373,7 @@ public class StockholmParser {
 				res.setRelent(relent);
 				res.setWeight(weight);
 				
-			} else if (line.matches(equalchainsPattern)) {
+			} else if (line.matches(equalchainsLinePattern)) {
 			// these lines define references of one chain to the other
 
 				final String[] s = line.trim().split("\\s+");

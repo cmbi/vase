@@ -16,7 +16,9 @@
 package nl.ru.cmbi.vase.web.page;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 import nl.ru.cmbi.vase.tools.util.Config;
 
@@ -30,8 +32,14 @@ public class XmlListingPage extends BasePage {
 	
 	public XmlListingPage() {
 		
-		add(new ListView<File>("alignments",
-				Arrays.asList( Config.getCacheDir().listFiles() )){
+		List<File> files = new ArrayList<File>();
+		if(Config.getCacheDir()!=null) {
+			
+			for(File file : Config.getCacheDir().listFiles())
+				files.add(file);
+		}
+		
+		add(new ListView<File>("alignments",files){
 
 			@Override
 			protected void populateItem(ListItem<File> item) {

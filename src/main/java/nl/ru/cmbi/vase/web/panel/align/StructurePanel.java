@@ -45,7 +45,7 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 public class StructurePanel extends Panel {
 	
-	public StructurePanel(String id, final String structurePath) {
+	public StructurePanel(String id, final String structurePath, final char chain) {
 		
 		super(id);
 		
@@ -66,7 +66,10 @@ public class StructurePanel extends Panel {
 				
 				getResponse().write("background white;");
 				getResponse().write("load "+structurePath+";");
+				
 				getResponse().write("select *;");
+				//getResponse().write("color atoms [160,200,255] structure;");
+				//getResponse().write("select :"+chain+";");
 				getResponse().write("color atoms lightgrey structure;");
 				
 				getResponse().write("\";\n");

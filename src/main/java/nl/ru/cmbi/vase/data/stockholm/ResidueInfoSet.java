@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,6 +43,11 @@ public class ResidueInfoSet implements Serializable {
 			addChain(chainID);
 		
 		residues.get(chainID).put(seqno, new ResidueInfo());
+	}
+	
+	public Set<Character> listChainIDs() {
+		
+		return residues.keySet();
 	}
 	
 	public Map<Integer,ResidueInfo> getChain(char chainID) {

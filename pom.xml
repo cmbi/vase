@@ -38,7 +38,7 @@
 		<jetty.version>9.0.5.v20130815</jetty.version>
 		<slf4j.version>1.7.5</slf4j.version>
 		<junit.version>4.11</junit.version>
-		<restlet.version>2.0.14</restlet.version>
+		<restlet.version>2.1.7</restlet.version>
 	</properties>
 	<dependencies>
 
@@ -101,6 +101,18 @@
 			<artifactId>wicketstuff-restannotations-json</artifactId>
 			<version>${wicket.version}</version>
 		</dependency>
+		
+		<!-- WICKET BOOTSTRAP -->
+		<dependency>
+		    <groupId>de.agilecoders.wicket</groupId>
+		    <artifactId>wicket-bootstrap-core</artifactId>
+		    <version>0.9.4</version>
+		</dependency>
+		<dependency>
+    		<groupId>de.agilecoders.wicket</groupId>
+    		<artifactId>wicket-bootstrap-extensions</artifactId>
+    		<version>0.9.4</version>
+		</dependency>
 
 		<!-- HSSP webservice -->
 		<dependency>
@@ -138,18 +150,8 @@
 			<artifactId>dom4j</artifactId>
 			<version>1.6.1</version>
 		</dependency>
-		<dependency>
-		    <groupId>de.agilecoders.wicket</groupId>
-		    <artifactId>wicket-bootstrap-core</artifactId>
-		    <version>0.9.4</version>
-		</dependency>
-		<dependency>
-    		<groupId>de.agilecoders.wicket</groupId>
-    		<artifactId>wicket-bootstrap-extensions</artifactId>
-    		<version>0.9.4</version>
-		</dependency>
 		
-		<!-- 
+		 <!-- RESTLET DEPENDENCIES -->
 		<dependency>
 	        <groupId>org.restlet.jee</groupId>
 	        <artifactId>org.restlet</artifactId>
@@ -160,7 +162,7 @@
 	        <artifactId>org.restlet.ext.json</artifactId>
 	        <version>${restlet.version}</version>
 		</dependency>
-		 -->
+		
 	</dependencies>
 	<build>
 		<resources>
@@ -292,11 +294,11 @@
 			</plugin>
 		</plugins>
 	</build>
-	<!--<repositories>
+	<repositories>
 	    <repository>
 	        <id>maven-restlet</id>
 	        <name>Public online Restlet repository</name>
 	        <url>http://maven.restlet.org</url>
 	    </repository>
-	</repositories>-->
+	</repositories>
 </project>

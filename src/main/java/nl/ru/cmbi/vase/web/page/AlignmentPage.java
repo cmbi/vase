@@ -17,8 +17,11 @@ package nl.ru.cmbi.vase.web.page;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.StringWriter;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -49,6 +52,8 @@ import nl.ru.cmbi.vase.web.panel.align.AlignmentTablePanel;
 import nl.ru.cmbi.vase.web.panel.align.StructurePanel;
 
 import org.apache.commons.compress.compressors.bzip2.BZip2CompressorInputStream;
+import org.apache.commons.compress.compressors.bzip2.BZip2CompressorOutputStream;
+import org.apache.commons.io.IOUtils;
 import org.apache.wicket.AttributeModifier;
 import org.apache.wicket.Component;
 import org.apache.wicket.RestartResponseAtInterceptPageException;
@@ -80,22 +85,27 @@ public class AlignmentPage extends BasePage {
 	private String structureID;
 	private Character chainID=null;
 	
+	private String getBaseUrlString() {
+		
+		return RequestCycle.get().getUrlRenderer().renderFullUrl(
+				Url.parse( 
+					RequestCycle.get().urlFor( this.getApplication().getHomePage(), null ) ) );
+	}
+	
 	private URL getPDBURL(String structureID)
 		throws MalformedURLException {
 
-		if(Config.hsspPdbCacheEnabled()) {
+		if(structureID.matches(StockholmParser.pdbAcPattern)) {
+			
+			return Utils.getRcsbURL(structureID);
+		}
+		if(Config.hsspPdbCacheIsSet()) {
 			
 			File pdbFile = new File(Config.getHSSPCacheDir(), structureID+".pdb.gz");
 			if(pdbFile.isFile()) {
 				
-				return new URL( 
-					RequestCycle.get().getUrlRenderer().renderFullUrl(
-						Url.parse("../rest/structure/"+structureID)) );
+				return new URL( getBaseUrlString() +"/rest/structure/"+structureID );
 			}
-		}
-		else if(structureID.matches(StockholmParser.pdbAcPattern)) {
-			
-			return Utils.getRcsbURL(structureID);
 		}
 		
 		return null;
@@ -103,7 +113,12 @@ public class AlignmentPage extends BasePage {
 	private InputStream getStockholmInputStream(String structureID)
 		throws MalformedURLException, IOException {
 
-		if(Config.hsspPdbCacheEnabled()) {
+		if(structureID.matches(StockholmParser.pdbAcPattern)) {
+			
+			return new BZip2CompressorInputStream( Utils.getStockholmURL(structureID).openStream() );
+		}
+		
+		if(Config.hsspPdbCacheIsSet()) {
 			
 			// Some files that might be there or not:
 			File hsspFile = new File(Config.getHSSPCacheDir(), structureID+".hssp.bz2");
@@ -112,10 +127,27 @@ public class AlignmentPage extends BasePage {
 				
 				return new BZip2CompressorInputStream(
 					new FileInputStream(hsspFile) );
+				
+			} else {
+				
+				URL url = new URL( getBaseUrlString() + "/rest/hsspresult/"+structureID );
+				
+				// Get the string:
+				StringWriter sw = new StringWriter();
+				IOUtils.copy(url.openStream(), sw);
+				sw.close();
+
+				// Write it to the cache:
+				OutputStream fileOut = new BZip2CompressorOutputStream(new FileOutputStream(hsspFile));
+				IOUtils.write(sw.toString(), fileOut);
+				fileOut.close();
+				
+				// Return it:
+				return IOUtils.toInputStream(sw.toString());
 			}
 		}
 		
-		return new BZip2CompressorInputStream( Utils.getStockholmURL(structureID).openStream() );
+		return null;
 	}
 
 	public AlignmentPage(final PageParameters parameters) {
@@ -154,10 +186,21 @@ public class AlignmentPage extends BasePage {
 					}
 					
 					URL pdbURL = getPDBURL(structureID);
+					if(pdbURL==null) {
+
+						throw new RestartResponseAtInterceptPageException(
+							new ErrorPage("Unable to resolve PDB URL for: "+structureID));
+					}
+					
+					InputStream stockholmInputStream = getStockholmInputStream(structureID);
+					if(stockholmInputStream==null) {
+						
+						throw new RestartResponseAtInterceptPageException(
+								new ErrorPage("No alignment data for: "+structureID));
+					}
 					
 					Set<Character> stockholmChainIDs =
-						StockholmParser.listChainsInStockholm( 
-							getStockholmInputStream(structureID) );
+						StockholmParser.listChainsInStockholm( stockholmInputStream );
 										
 					if ( chainID==null ) {
 						
@@ -250,7 +293,7 @@ public class AlignmentPage extends BasePage {
 			structurePath = data.getPdbURL().toString();
 		}
 		
-		add(new StructurePanel("structure",structurePath));
+		add(new StructurePanel("structure",structurePath,data.getAlignment().getChainID()));
 	}
 	
 	private List<String> tabids = new ArrayList<String>();

@@ -15,7 +15,6 @@
  */
 package nl.ru.cmbi.vase.web;
 
-import nl.ru.cmbi.vase.job.HsspQueue;
 import nl.ru.cmbi.vase.tools.util.Config;
 import nl.ru.cmbi.vase.web.page.AboutPage;
 import nl.ru.cmbi.vase.web.page.AlignmentPage;
@@ -59,13 +58,6 @@ public class WicketApplication extends WebApplication
 			return XmlListingPage.class;
 		else
 			return HomePage.class;
-	}
-	
-	private HsspQueue hsspQueue = new HsspQueue(Integer.parseInt(Config.properties.getProperty("hsspthreads")));
-	
-	public HsspQueue getHsspQueue() {
-		
-		return hsspQueue;
 	}
 	
 	private ResourceReference restReference = new ResourceReference("restReference") {
