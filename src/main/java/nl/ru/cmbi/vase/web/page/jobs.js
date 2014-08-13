@@ -48,7 +48,7 @@ function deleteCookie(cname) {
 
 function initJob( jobid ) {
 	
-	var job = { id:jobid, status:'new' };
+	var job = { id:jobid, status:'NEW' };
 	
 	return job;
 }
