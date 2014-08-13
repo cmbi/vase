@@ -104,7 +104,7 @@ public class JobRestResource extends GsonRestResource {
 	@MethodMapping(value="/custom", httpMethod=HttpMethod.POST, produces = RestMimeTypes.TEXT_PLAIN)
 	public String custom() {
 		
-		if(Config.isXmlOnly() || !Config.hsspPdbCacheIsSet()) {
+		if(Config.isXmlOnly() || !Config.hsspPdbCacheEnabled()) {
 			
 			// hssp job submission is not allowed if hssp is turned off
 			throw new AbortWithHttpErrorCodeException(HttpURLConnection.HTTP_NOT_FOUND);
@@ -197,7 +197,7 @@ public class JobRestResource extends GsonRestResource {
 	@MethodMapping(value = "/status/{jobid}", httpMethod=HttpMethod.GET, produces = RestMimeTypes.TEXT_PLAIN)
 	public String status(String jobid) {
 
-		if( Config.isXmlOnly() || !Config.hsspPdbCacheIsSet()) {
+		if( Config.isXmlOnly() || !Config.hsspPdbCacheEnabled()) {
 			
 			// hssp job submission is not allowed if hssp is turned off
 			throw new AbortWithHttpErrorCodeException(HttpURLConnection.HTTP_NOT_FOUND);
@@ -273,7 +273,7 @@ public class JobRestResource extends GsonRestResource {
 			
 				return data.getPdbContents();
 			}
-			if(Config.hsspPdbCacheIsSet()) {
+			if(Config.hsspPdbCacheEnabled()) {
 				
 				File pdbFile = new File(Config.getHSSPCacheDir(),id+".pdb.gz");
 				
