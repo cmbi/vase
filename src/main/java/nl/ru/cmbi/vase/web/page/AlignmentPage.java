@@ -99,7 +99,7 @@ public class AlignmentPage extends BasePage {
 			
 			return Utils.getRcsbURL(structureID);
 		}
-		if(Config.hsspPdbCacheIsSet()) {
+		if(Config.hsspPdbCacheEnabled()) {
 			
 			File pdbFile = new File(Config.getHSSPCacheDir(), structureID+".pdb.gz");
 			if(pdbFile.isFile()) {
@@ -118,7 +118,7 @@ public class AlignmentPage extends BasePage {
 			return new BZip2CompressorInputStream( Utils.getStockholmURL(structureID).openStream() );
 		}
 		
-		if(Config.hsspPdbCacheIsSet()) {
+		if(Config.hsspPdbCacheEnabled()) {
 			
 			// Some files that might be there or not:
 			File hsspFile = new File(Config.getHSSPCacheDir(), structureID+".hssp.bz2");

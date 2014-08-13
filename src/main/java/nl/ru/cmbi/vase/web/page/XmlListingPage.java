@@ -33,7 +33,7 @@ public class XmlListingPage extends BasePage {
 	public XmlListingPage() {
 		
 		List<File> files = new ArrayList<File>();
-		if(Config.getCacheDir()!=null) {
+		if(Config.cacheEnabled()) {
 			
 			for(File file : Config.getCacheDir().listFiles())
 				files.add(file);

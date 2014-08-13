@@ -31,6 +31,11 @@ public class Config {
 		return new File(path);
 	}
 	
+	public static boolean cacheEnabled() {
+		
+		return properties.getProperty("cache")!=null && getCacheDir().isDirectory();
+	}
+	
 	private static Properties getProperties() {
 		
 		Properties p = new Properties();
@@ -49,9 +54,9 @@ public class Config {
 		return Boolean.parseBoolean( properties.getProperty("xmlonly") );
 	}
 	
-	public static boolean hsspPdbCacheIsSet() {
+	public static boolean hsspPdbCacheEnabled() {
 		
-		return properties.getProperty("hsspcache")!=null;
+		return properties.getProperty("hsspcache")!=null && getHSSPCacheDir().isDirectory();
 	}
 
 	public static File getHSSPCacheDir() {
