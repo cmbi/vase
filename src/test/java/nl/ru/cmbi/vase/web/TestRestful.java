@@ -79,7 +79,7 @@ public class TestRestful
 		
 		assertTrue( id!=null && !id.isEmpty() );
 		
-		List<String> expectedStati = Arrays.asList(new String[]{"QUEUED","RUNNING","FINISHED"});
+		List<String> expectedStati = Arrays.asList(new String[]{"PENDING","STARTED","SUCCESS"}); // celery
 		
 		while ( true ) {
 			
@@ -92,11 +92,11 @@ public class TestRestful
 			
 			assertTrue( expectedStati.contains(status) );
 			
-			if(status.equals("FINISHED")) {
+			if(status.equals("SUCCESS")) {
 				break;
 			}
 			
-			Thread.sleep(60000);
+			Thread.sleep(30000);
 		} 
     }
 }
