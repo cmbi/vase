@@ -127,27 +127,12 @@ public class AlignmentPage extends BasePage {
 				
 				return new BZip2CompressorInputStream(
 					new FileInputStream(hsspFile) );
-				
-			} else {
-				
-				URL url = new URL( getBaseUrlString() + "/rest/hsspresult/"+structureID );
-				
-				// Get the string:
-				StringWriter sw = new StringWriter();
-				IOUtils.copy(url.openStream(), sw);
-				sw.close();
-
-				// Write it to the cache:
-				OutputStream fileOut = new BZip2CompressorOutputStream(new FileOutputStream(hsspFile));
-				IOUtils.write(sw.toString(), fileOut);
-				fileOut.close();
-				
-				// Return it:
-				return IOUtils.toInputStream(sw.toString());
 			}
 		}
 		
-		return null;
+
+		URL url = new URL( getBaseUrlString() + "/rest/hsspresult/"+structureID );
+		return url.openStream();
 	}
 
 	public AlignmentPage(final PageParameters parameters) {
