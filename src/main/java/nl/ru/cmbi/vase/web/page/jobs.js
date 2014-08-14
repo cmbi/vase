@@ -163,6 +163,11 @@ function pollJobs() {
 						  
 						  jobs[i].status = data;
 						  
+						  if( data.toUpperCase() == "FAILURE") {
+							  
+							  jobs[i].status = "FAILURE (not yet possible to retrieve a reason)" ;
+						  }
+						  
 						  updateJobListingRow(jobs[i]);
 					  }
 				  }
@@ -262,7 +267,7 @@ function updateJobListingRow(job) {
 		if(list.rows[i].id
 			&& list.rows[i].id==job.id) {
 			
-			if(job.status.toLowerCase()=="success") {
+			if(job.status.toUpperCase()=="SUCCESS") {
 
 				list.rows[i].cells[1].innerHTML="<a href='"+alignURL+"/"+job.id+"'>"+job.id+"</a>"
 			}
