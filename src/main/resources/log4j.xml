@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE log4j:configuration PUBLIC "-//LOGGER" "http://logging.apache.org/log4j/1.2/apidocs/org/apache/log4j/xml/doc-files/log4j.dtd">
+<log4j:configuration>
+  <!-- direct log messages rolling file appender logs/vase.log -->
+  <appender name="FileOut" class="org.apache.log4j.RollingFileAppender">
+    <param name="file" value="logs/vase.log" />
+    <param name="MaxFileSize" value="500KB"/>
+    <param name="MaxBackupIndex" value="5"/>
+    <layout class="org.apache.log4j.PatternLayout">
+      <param name="ConversionPattern" value="%-5p %d{ISO8601} %t %c{1}:%L - %m%n" />
+    </layout>
+  </appender>
+  
+  <!-- direct log messages below info threshold to stdout -->
+  <appender name="ConsoleOut" class="org.apache.log4j.ConsoleAppender">
+    <param name="Target" value="System.out" />
+    <layout class="org.apache.log4j.PatternLayout">
+      <param name="ConversionPattern" value="%-5p %d{ISO8601} %t %c{1}:%L - %m%n" />
+    </layout>
+    <filter class="org.apache.log4j.varia.LevelRangeFilter">
+      <param name="LevelMin" value="trace" />
+      <param name="LevelMax" value="info" />
+    </filter>
+  </appender>
+
+  <!-- direct log messages above warn threshold to stderr -->
+  <appender name="ConsoleErr" class="org.apache.log4j.ConsoleAppender">
+    <param name="Target" value="System.err" />
+    <layout class="org.apache.log4j.PatternLayout">
+      <param name="ConversionPattern" value="%-5p %d{ISO8601} %t %c{1}:%L - %m%n" />
+    </layout>
+    <filter class="org.apache.log4j.varia.LevelRangeFilter">
+      <param name="LevelMin" value="warn" />
+    </filter>
+  </appender>
+
+  <!-- set our code to debug 'temporarily' -->
+  <logger name="nl">
+    <level value="${log.level}" />
+  </logger>
+
+  <logger name="org.apache.wicket">
+    <level value="info" />
+  </logger>
+
+  <!-- set log levels - for more verbose logging change 'info' to 'debug' -->
+  <root>
+    <priority value="info" />
+    <appender-ref ref="FileOut" />
+    <appender-ref ref="ConsoleOut" />
+    <appender-ref ref="ConsoleErr" />
+    <appender-ref ref="ErrorEmailAppender" />
+  </root>
+</log4j:configuration>
