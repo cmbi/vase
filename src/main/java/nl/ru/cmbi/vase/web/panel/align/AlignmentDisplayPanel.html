@@ -1,0 +1,100 @@
+<!--
+
+    Copyright 2014 CMBI (contact: <Coos.Baakman@radboudumc.nl>)
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+
+-->
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+</head>
+<body id="body">
+<wicket:panel>
+  
+<script type="text/javascript">
+
+function onScrollAlignment(alignment) {
+
+  var header = document.getElementById ("alignment-header");
+  header.scrollLeft = alignment.scrollLeft;
+  
+  var labels = document.getElementById ("alignment-labels");
+  labels.scrollTop = alignment.scrollTop;
+}
+
+    $(document).ready(function(){
+        $(".columnheader").tooltip();
+    });
+
+</script>
+<style>
+.alignment-content-height {
+	height:375px
+}
+</style>
+<div class="align-monospace">
+  <div style="float: left;">
+    <div>
+      <span id="nothing">&nbsp;</span>
+    </div>
+    <div id="alignment-labels" style="overflow-y: hidden; overflow-x: auto;" class="alignment-content-height">  
+      <!--
+      Here, some extra space needs to be occupied inside the scrolled area.
+      It must be larger than the scrolled area in the alignment-contents.
+      We realize this, by wrapping it in a padded div element.
+      -->
+		<div wicket:id="labels">
+			<wicket:container wicket:id="label"></wicket:container>
+		</div>
+		
+		<!-- space occupier for scrolling -->
+		<span>&nbsp;</span>
+    </div>
+  </div>
+  <div>
+    <div id="alignment-header" style="overflow-x: hidden;overflow-y:hidden">
+      <!--
+        Here, some extra space needs to be occupied inside the scrolled area.
+        It must be larger than the scrolled area in the alignment-contents.
+        We realize this by wrapping it in a padded div element.
+        -->
+        
+		<div style="white-space:nowrap;">
+		  <span wicket:id="positions"><a href="#" wicket:id="position" class="" /></span>
+		  
+		  <!-- space occupier for scrolling -->
+		  <span>&nbsp;</span>
+		</div>
+        
+    </div>
+    <div id="alignment-contents" style="overflow:scroll;" class="alignment-content-height" onscroll="onScrollAlignment(this);">
+      <div wicket:id="seqs">
+        <div style="white-space: nowrap;"> 
+          <span class="alignedseq" wicket:id="seq" />
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</wicket:panel>
+
+<wicket:fragment  wicket:id="labelfragment">
+	<a href="#" wicket:id="ref">
+		<span wicket:id="label" />
+	</a>
+</wicket:fragment>
+
+</body>
+</html>

@@ -1,0 +1,81 @@
+<!--
+
+    Copyright 2014 CMBI (contact: <Coos.Baakman@radboudumc.nl>)
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+
+-->
+<!DOCTYPE html>
+<html lang="en">
+<body onresize="setAlignmentPageSizes();">
+
+<wicket:extend>
+
+  <script type="text/javascript" src="align.js"></script>
+  <script type="text/javascript" wicket:id="js-definitions"></script>
+
+  <div class="panel panel-default">
+    <div class="panel-heading" wicket:id="alignment-header" >Alignment</div>
+    <div class="panel-body">
+      <div wicket:id="alignment" />
+    </div>
+  </div>
+
+  <div id='row-bottom' class="row equal">
+    <div id='col-data' style='padding-left:15px;'>
+      <div class="panel panel-default">
+        <div class="panel-heading">Data</div>
+        <div class="panel-body">
+          <div id="tab-header">
+            <ul class="nav nav-tabs" role="tablist">
+              <li wicket:id="tabs"></li>
+              <li style="float:right">
+                <a href="#" onclick="unHighlightAll();">Clear Selection</a>
+              </li>
+            </ul>
+          </div>
+          <div>
+			<div id='data-table' wicket:id="data-table"/>
+			<div wicket:id="plots">
+	          <div wicket:id="plot" style="display:none;overflow:auto"/>
+          	</div>
+		  </div>
+        </div>
+      </div>
+    </div>
+    <div id='col-structure' style='padding-right:15px;position:absolute;right:0'>
+      <div class="panel panel-default">
+        <div class="panel-heading">Structure</div>
+        <div class="panel-body">
+          <!-- the structure panel must stay visible, otherwise it fails -->
+          <div id="structure" wicket:id="structure"/>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <script type="text/javascript">
+  	setAlignmentPageSizes();
+  	
+  	window.onresize = setAlignmentPageSizes ;
+  </script>
+
+  <wicket:fragment wicket:id="tab-fragment">
+	<a href="#" wicket:id="tab-link">
+	  <span class="tab-header-text" wicket:id="tab-title" />
+	</a>
+  </wicket:fragment>
+
+</wicket:extend>
+</body>
+</html>

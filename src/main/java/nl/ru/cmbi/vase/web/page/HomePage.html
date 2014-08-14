@@ -1,0 +1,50 @@
+<!--
+
+    Copyright 2014 CMBI (contact: <Coos.Baakman@radboudumc.nl>)
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+
+-->
+<!DOCTYPE html>
+<html xmlns:wicket="http://wicket.apache.org">
+<body>
+<wicket:extend>
+		
+<div class="row">
+	<div class="col-md-8">
+		<div class="panel panel-default">
+			<div class="panel-heading">Welcome to the tool for Visualization of Alignments, Structure and Entropy (VASE)</div>
+			<div class="panel-body">
+<p>
+VASE is a web-tool for visualizing alignments on a protein structure.
+
+It allows you to enter the ID of a protein structure in PDB format for which VASE
+will generate an interface. VASE will show a set of homologous sequences, aligned
+to the sequence of your structure, along with entropy/variability data and a
+3D interface. Here's an example:
+<a href="#" wicket:id="example-link" onclick="window.open(this.href); return false;" ><span wicket:id="example-id"></span></a>
+</p>
+<p>
+VASE can work with official PDB entries, as well as custom structures.
+To use your own structure, submit the contents of the PDB file in the
+<a wicket:id="input-link" href="#">input page</a>
+and wait for the job to finish. When the alignment is done, a link to it will appear.	
+</p>
+		  	</div>
+		</div>
+	</div>
+</div>
+
+</wicket:extend>
+</body>
+</html>
