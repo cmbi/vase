@@ -371,6 +371,8 @@ public class AlignmentPage extends BasePage {
 			
 			getResponse().write(String.format("var baseURL='%s';\n", urlString));
 			
+			getResponse().write("var pdbResiduePrefix=\""+AlignmentDisplayPanel.pdbResiduePrefix+"\";\n");
+			
 			getResponse().write("var pPDBresclass=/"
 					+ AlignmentDisplayPanel.pdbResiduePrefix+"([^\\s]+)/;\n");
 			

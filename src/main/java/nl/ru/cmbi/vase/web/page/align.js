@@ -312,7 +312,7 @@ function updateJmol(classname) {
 	if (columnElement.hasClass(alignment_highlighted_classname)) {
 		var color = 'red';
 	} else {
-		var color = 'lightgrey';
+		var color = jmolSelectableAtomColor;
 	}
 
 	var m = pPDBresclass.exec(columnClass);
@@ -392,7 +392,7 @@ function unHighlightAll() {
 	$('.'+alignment_highlighted_classname).removeClass(alignment_highlighted_classname);
     
 	clearPlotsHighlighting();
-    Jmol.script(jmolApplet0, 'select *; color atoms lightgrey structure;');
+    Jmol.script(jmolApplet0, jmolClearColors);
     updateSequenceHighlighting();
 }
 

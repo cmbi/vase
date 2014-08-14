@@ -36,9 +36,12 @@
 
 	    b=b.replace(/\..*$/,'');
 	    
-	    var classname="pdbres" + b;
+	    if(b.indexOf(":"+jmolSelectableChain)!=-1) {
 	    
-	    toggleColumn(classname);
+	    	var classname=pdbResiduePrefix + b;
+	    
+	    	toggleColumn(classname);
+	    }
 	}
 	
 	var size=screen.height / 3.0;

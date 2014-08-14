@@ -62,17 +62,25 @@ public class StructurePanel extends Panel {
 				
 				JavaScriptUtils.writeOpenTag(getResponse());
 				
+				getResponse().write("var jmolSelectableChain=\""+chain+"\";\n");
+				
+				getResponse().write("var jmolSelectableAtomColor=\"[126, 193, 255]\";\n");
+				
+				getResponse().write("var jmolClearColors=\"");
+				
+				getResponse().write("select :"+chain+" and Protein;");
+				getResponse().write("color atoms \"+ jmolSelectableAtomColor +\" structure;");
+				
+				getResponse().write("\";\n");
+				
 				getResponse().write("var jmolInit=\"");
 				
 				getResponse().write("background white;");
 				getResponse().write("load "+structurePath+";");
-				
 				getResponse().write("select *;");
-				//getResponse().write("color atoms [160,200,255] structure;");
-				//getResponse().write("select :"+chain+";");
 				getResponse().write("color atoms lightgrey structure;");
 				
-				getResponse().write("\";\n");
+				getResponse().write("\" + jmolClearColors;\n");
 
 				JavaScriptUtils.writeCloseTag(getResponse());
 			}
