@@ -19,6 +19,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import nl.ru.cmbi.vase.data.TableData;
+import nl.ru.cmbi.vase.data.VASEDataObject;
 import nl.ru.cmbi.vase.data.stockholm.Alignment;
 import nl.ru.cmbi.vase.data.stockholm.ResidueInfoSet;
 import nl.ru.cmbi.vase.tools.util.Utils;
@@ -42,10 +44,14 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class StructurePanel extends Panel {
 	
-	public StructurePanel(String id, final String structurePath, final char chain) {
+	Logger log = LoggerFactory.getLogger(StructurePanel.class);
+	
+	public StructurePanel(String id, final String structurePath, final VASEDataObject data) {
 		
 		super(id);
 		
@@ -55,6 +61,8 @@ public class StructurePanel extends Panel {
 		//applet.add(new AttributeModifier("codebase",urlString));
 		//add(applet);
 		
+		final boolean oneChain = Character.isLetter(data.getAlignment().getChainID()) || Character.isDigit(data.getAlignment().getChainID());
+		
 		Component script = new Component("init-script"){
 
 			@Override
@@ -62,14 +70,28 @@ public class StructurePanel extends Panel {
 				
 				JavaScriptUtils.writeOpenTag(getResponse());
 				
-				getResponse().write("var jmolSelectableChain=\""+chain+"\";\n");
-				
 				getResponse().write("var jmolSelectableAtomColor=\"[126, 193, 255]\";\n");
 				
 				getResponse().write("var jmolClearColors=\"");
 				
-				getResponse().write("select :"+chain+" and Protein;");
-				getResponse().write("color atoms \"+ jmolSelectableAtomColor +\" structure;");
+				if(oneChain) {
+				
+					getResponse().write("select :"+data.getAlignment().getChainID()+" and Protein;");
+					getResponse().write("color \"+ jmolSelectableAtomColor +\";");
+				}
+				else {
+					
+					for(Object res : data.getTable().getColumnValues(TableData.pdbResidueID)) {
+						
+						String resString = res.toString().trim();
+						if (resString.isEmpty()) {
+							
+							continue;
+						}
+						
+						getResponse().write( "select " + resString + "; color \"+ jmolSelectableAtomColor +\";");
+					}
+				}
 				
 				getResponse().write("\";\n");
 				

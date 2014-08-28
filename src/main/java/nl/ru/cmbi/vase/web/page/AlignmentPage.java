@@ -286,7 +286,7 @@ public class AlignmentPage extends BasePage {
 			structurePath = data.getPdbURL().toString();
 		}
 		
-		add(new StructurePanel("structure",structurePath,data.getAlignment().getChainID()));
+		add(new StructurePanel("structure",structurePath,data));
 	}
 	
 	private List<String> tabids = new ArrayList<String>();

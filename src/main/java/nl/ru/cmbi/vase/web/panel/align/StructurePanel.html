@@ -36,12 +36,9 @@
 
 	    b=b.replace(/\..*$/,'');
 	    
-	    if(b.indexOf(":"+jmolSelectableChain)!=-1) {
+	    var classname=pdbResiduePrefix + b;
 	    
-	    	var classname=pdbResiduePrefix + b;
-	    
-	    	toggleColumn(classname);
-	    }
+	    toggleColumn(classname);
 	}
 	
 	var size=screen.height / 3.0;
