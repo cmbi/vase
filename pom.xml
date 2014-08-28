@@ -16,7 +16,7 @@
 	<groupId>nl.ru.cmbi</groupId>
 	<artifactId>vase</artifactId>
 	<packaging>war</packaging>
-	<version>1.0.0</version>
+	<version>1.0.1</version>
 	<!-- TODO project name -->
 	<name>Visualization of Alignment, Structure and Entropy</name>
 	<description></description>

@@ -35,8 +35,11 @@ public class XmlListingPage extends BasePage {
 		List<File> files = new ArrayList<File>();
 		if(Config.cacheEnabled()) {
 			
-			for(File file : Config.getCacheDir().listFiles())
+			for(File file : Config.getCacheDir().listFiles()) {
+				
+				if(file.getName().endsWith(".xml") || file.getName().endsWith(".xml.gz"))
 				files.add(file);
+			}
 		}
 		
 		add(new ListView<File>("alignments",files){

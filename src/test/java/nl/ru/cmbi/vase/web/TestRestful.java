@@ -25,6 +25,7 @@ import java.net.URL;
 import java.util.Arrays;
 import java.util.List;
 
+import nl.ru.cmbi.vase.tools.util.Config;
 import nl.ru.cmbi.vase.web.WicketApplication;
 import nl.ru.cmbi.vase.web.page.HomePage;
 import nl.ru.cmbi.vase.web.rest.JobRestResource;
@@ -58,6 +59,9 @@ public class TestRestful
     
     @Test
     public void testCustom() throws IOException, InterruptedException {
+    	
+    	if(Config.isXmlOnly())
+    		return;
     	
     	URL url = new URL("http://www.rcsb.org/pdb/files/1CRN.pdb");
     	StringWriter writer = new StringWriter();

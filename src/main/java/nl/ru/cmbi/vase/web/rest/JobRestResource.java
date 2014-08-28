@@ -99,6 +99,8 @@ public class JobRestResource extends GsonRestResource {
 		
 		if(Config.isXmlOnly() || !Config.hsspPdbCacheEnabled()) {
 			
+			log.warn("rest/custom was requested, but not enabled");
+			
 			// hssp job submission is not allowed if hssp is turned off
 			throw new AbortWithHttpErrorCodeException(HttpURLConnection.HTTP_NOT_FOUND);
 		}
@@ -191,6 +193,8 @@ public class JobRestResource extends GsonRestResource {
 
 		if( Config.isXmlOnly() || !Config.hsspPdbCacheEnabled()) {
 			
+			log.warn("rest/status was requested, but not enabled");
+			
 			// hssp job submission is not allowed if hssp is turned off
 			throw new AbortWithHttpErrorCodeException(HttpURLConnection.HTTP_NOT_FOUND);
 		}
@@ -217,6 +221,8 @@ public class JobRestResource extends GsonRestResource {
 	public String hsspResult(String id) {
 		
 		if( Config.isXmlOnly() ) {
+			
+			log.warn("rest/hsspresult was requested, but not enabled");
 
 			// hssp job submission is not allowed if hssp is turned off
 			throw new AbortWithHttpErrorCodeException(HttpURLConnection.HTTP_NOT_FOUND);
