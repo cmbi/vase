@@ -154,8 +154,16 @@ public class AlignmentPage extends BasePage {
 			}
 
 			try {	
-				File xmlFile = new File(Config.getCacheDir(), structureID+".xml.gz");
+				File	xmlFile = new File(Config.getCacheDir(), structureID+".xml"),
+						gzXmlFile = new File(Config.getCacheDir(), structureID+".xml.gz");
 				if(xmlFile.isFile()) {
+					
+					VASEDataObject data = 
+						VASEXMLParser.parse( new FileInputStream(xmlFile) );
+					
+					this.initPageWith( data );
+				}
+				else if(gzXmlFile.isFile()) {
 					
 					VASEDataObject data = 
 						VASEXMLParser.parse( new GZIPInputStream( new FileInputStream(xmlFile) ) );
