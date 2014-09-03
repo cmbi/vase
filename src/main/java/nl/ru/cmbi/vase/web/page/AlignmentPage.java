@@ -362,7 +362,7 @@ public class AlignmentPage extends BasePage {
 				Url.parse( 
 					RequestCycle.get().urlFor( this.getApplication().getHomePage(), null ) ) );
 			
-			getResponse().write(String.format("var baseURL='%s';\n", urlString));
+			//getResponse().write(String.format("var baseURL='%s';\n", urlString));
 			
 			getResponse().write("var pdbResiduePrefix=\""+AlignmentDisplayPanel.pdbResiduePrefix+"\";\n");
 			

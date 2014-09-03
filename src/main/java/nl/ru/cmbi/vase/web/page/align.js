@@ -17,6 +17,10 @@ var data_cell_classname = "data_table_cell",
 	data_row_classname  = "data_table_row",
 	data_toggle_image_classname = "data_table_column_image",
 	toggle_classname = "toggled";
+	
+	
+var clientURL = document.location.href , 
+    baseURL = clientURL.substring(0,clientURL.lastIndexOf("/align/"));
 
 
 // Because JQuery doesn't work on all tag types/class names,
