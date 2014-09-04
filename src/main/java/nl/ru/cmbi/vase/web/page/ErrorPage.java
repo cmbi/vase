@@ -18,6 +18,8 @@ package nl.ru.cmbi.vase.web.page;
 import org.apache.wicket.markup.html.WebPage;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
+import org.apache.wicket.request.mapper.parameter.PageParameters;
+import org.apache.wicket.util.string.StringValue;
 
 public class ErrorPage extends BasePage {
 
@@ -25,6 +27,25 @@ public class ErrorPage extends BasePage {
 	
 		setPageTitle("ERROR");
 		add(new Label("message",message));
+		
+		add(new BookmarkablePageLink("home",this.getApplication().getHomePage()));
+	}
+	
+	public ErrorPage(PageParameters params) {
+		
+		String message="";
+		StringValue messageValue = params.get("message");
+		if(messageValue!=null && !messageValue.isNull()) {
+			
+			message = messageValue.toString();
+			
+			message = org.apache.wicket.util.string.Strings.escapeMarkup(message).toString();
+			
+			message = message.replaceAll("[\n\r]", "<br/>");
+		}
+	
+		setPageTitle("ERROR");
+		add(new Label("message",message).setEscapeModelStrings(false));
 		
 		add(new BookmarkablePageLink("home",this.getApplication().getHomePage()));
 	}

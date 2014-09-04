@@ -18,6 +18,7 @@ package nl.ru.cmbi.vase.web;
 import nl.ru.cmbi.vase.tools.util.Config;
 import nl.ru.cmbi.vase.web.page.AboutPage;
 import nl.ru.cmbi.vase.web.page.AlignmentPage;
+import nl.ru.cmbi.vase.web.page.ErrorPage;
 import nl.ru.cmbi.vase.web.page.HomePage;
 import nl.ru.cmbi.vase.web.page.XmlListingPage;
 import nl.ru.cmbi.vase.web.page.InputPage;
@@ -89,6 +90,7 @@ public class WicketApplication extends WebApplication
 		// alignmentPage can take either one, or two parameters,
 		// depending on the number of chains in the structure
 		mountPage("/align", AlignmentPage.class);
+		mountPage("/error", ErrorPage.class);
 		
 		if(!Config.isXmlOnly()) {
 		

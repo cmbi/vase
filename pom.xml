@@ -16,7 +16,7 @@
 	<groupId>nl.ru.cmbi</groupId>
 	<artifactId>vase</artifactId>
 	<packaging>war</packaging>
-	<version>1.0.4</version>
+	<version>1.0.5</version>
 	<name>Visualization of Alignment, Structure and Entropy</name>
 	<description></description>
 	<!-- <organization> <name>company name</name> <url>company url</url> </organization> -->
@@ -106,13 +106,6 @@
     		<groupId>de.agilecoders.wicket</groupId>
     		<artifactId>wicket-bootstrap-extensions</artifactId>
     		<version>0.9.4</version>
-		</dependency>
-
-		<!-- HSSP webservice -->
-		<dependency>
-			<groupId>nl.ru.cmbi.hssp</groupId>
-			<artifactId>hssp-ws-client</artifactId>
-			<version>1.0.1-SNAPSHOT</version>
 		</dependency>
 
 		<!-- LOGGING DEPENDENCIES - LOG4J -->
