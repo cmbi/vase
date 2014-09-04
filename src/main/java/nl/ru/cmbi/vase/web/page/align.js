@@ -22,6 +22,14 @@ var data_cell_classname = "data_table_cell",
 var clientURL = document.location.href , 
     baseURL = clientURL.substring(0,clientURL.lastIndexOf("/align/"));
 
+if( !Modernizr.flexbox || !Modernizr.inlinesvg ) {
+	
+	msg = "Your browser doesn\'t support all features required by VASE.\n"
+	msg +="Please upgrade your browser. If that doesn't solve the problem, try using a different browser.";
+	
+	window.location=baseURL+'/error?message='+encodeURIComponent(msg);
+}
+
 
 // Because JQuery doesn't work on all tag types/class names,
 // some custom functions are required to perform JQuery-like actions.
