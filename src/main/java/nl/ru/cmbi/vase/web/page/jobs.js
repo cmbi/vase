@@ -13,8 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-var restURL = baseURL + "/rest",
-	alignURL = baseURL + "/align";
+ 
+var clientURL = document.location.href , 
+    baseURL = clientURL.substring(0,clientURL.lastIndexOf("/input")),
+    
+    restURL = baseURL + "/rest",
+	  alignURL = baseURL + "/align";
+	  
+console.log(window.location.host);
 
 function endswith(string,ending) {
 	

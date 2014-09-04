@@ -28,7 +28,7 @@ public class Utils {
 	
 	public static URL getStockholmURL( String pdbid ) throws MalformedURLException {
 		
-		return new URL(String.format("%s/%s.hssp.bz2",stockholmLocationURL, pdbid));
+		return new URL(String.format("%s/%s.hssp.bz2",stockholmLocationURL, pdbid.toLowerCase()));
 	}
 	
 	public static URL getRcsbURL( String pdbid ) throws MalformedURLException {
