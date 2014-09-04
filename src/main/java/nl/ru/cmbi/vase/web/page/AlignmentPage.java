@@ -44,12 +44,14 @@ import nl.ru.cmbi.vase.data.stockholm.ResidueInfoSet;
 import nl.ru.cmbi.vase.parse.StockholmParser;
 import nl.ru.cmbi.vase.parse.VASEXMLParser;
 import nl.ru.cmbi.vase.tools.util.Config;
+import nl.ru.cmbi.vase.tools.util.DataProvider;
 import nl.ru.cmbi.vase.tools.util.Utils;
 import nl.ru.cmbi.vase.web.WicketApplication;
 import nl.ru.cmbi.vase.web.panel.align.AlignmentDisplayPanel;
 import nl.ru.cmbi.vase.web.panel.align.AlignmentLinkedPlotPanel;
 import nl.ru.cmbi.vase.web.panel.align.AlignmentTablePanel;
 import nl.ru.cmbi.vase.web.panel.align.StructurePanel;
+import nl.ru.cmbi.vase.web.rest.JobRestResource;
 
 import org.apache.commons.compress.compressors.bzip2.BZip2CompressorInputStream;
 import org.apache.commons.compress.compressors.bzip2.BZip2CompressorOutputStream;
@@ -85,26 +87,24 @@ public class AlignmentPage extends BasePage {
 	private String structureID;
 	private Character chainID=null;
 	
-	private String getBaseUrlString() {
-		
-		return RequestCycle.get().getUrlRenderer().renderFullUrl(
-				Url.parse( 
-					RequestCycle.get().urlFor( this.getApplication().getHomePage(), null ) ) );
-	}
-	
-	private URL getPDBURL(String structureID)
+	private DataProvider getPDBData(String structureID)
 		throws MalformedURLException {
 
 		if(structureID.matches(StockholmParser.pdbAcPattern)) {
 			
-			return Utils.getRcsbURL(structureID);
+			return new DataProvider( Utils.getRcsbURL(structureID) );
 		}
 		if(Config.hsspPdbCacheEnabled()) {
 			
 			File pdbFile = new File(Config.getHSSPCacheDir(), structureID+".pdb.gz");
 			if(pdbFile.isFile()) {
 				
-				return new URL( getBaseUrlString() +"/rest/structure/"+structureID );
+				return new DataProvider(pdbFile,DataProvider.CompressionType.GZ);
+			}
+			pdbFile = new File(Config.getHSSPCacheDir(), structureID+".pdb");
+			if(pdbFile.isFile()) {
+				
+				return new DataProvider(pdbFile);
 			}
 		}
 		
@@ -128,11 +128,19 @@ public class AlignmentPage extends BasePage {
 				return new BZip2CompressorInputStream(
 					new FileInputStream(hsspFile) );
 			}
+			
+			// Maybe not jet retrieved, try getting it now:
+			
+			JobRestResource rest = (JobRestResource)((WicketApplication)getApplication()).getRestReference().getResource();
+			String hssp = rest.hsspResult(structureID);
+			OutputStream hsspOut = new BZip2CompressorOutputStream(new FileOutputStream(hsspFile));
+			IOUtils.write(hssp, hsspOut);
+			hsspOut.close();
+		
+			return IOUtils.toInputStream(hssp);
 		}
 		
-
-		URL url = new URL( getBaseUrlString() + "/rest/hsspresult/"+structureID );
-		return url.openStream();
+		return null;
 	}
 
 	public AlignmentPage(final PageParameters parameters) {
@@ -178,11 +186,10 @@ public class AlignmentPage extends BasePage {
 							new ErrorPage( "VASE is running in xml-only mode, so only xml-entries can be accessed. (see homepage)") );
 					}
 					
-					URL pdbURL = getPDBURL(structureID);
-					if(pdbURL==null) {
-
+					DataProvider pdbData = getPDBData(structureID);
+					if(pdbData==null) {
 						throw new RestartResponseAtInterceptPageException(
-							new ErrorPage("Unable to resolve PDB URL for: "+structureID));
+							new ErrorPage("Unknown structure: "+structureID));
 					}
 					
 					InputStream stockholmInputStream = getStockholmInputStream(structureID);
@@ -194,6 +201,7 @@ public class AlignmentPage extends BasePage {
 					
 					Set<Character> stockholmChainIDs =
 						StockholmParser.listChainsInStockholm( stockholmInputStream );
+					stockholmInputStream = null; // can't be used twice
 										
 					if ( chainID==null ) {
 						
@@ -221,7 +229,7 @@ public class AlignmentPage extends BasePage {
 					}
 					
 					VASEDataObject data =
-						StockholmParser.parseStockHolm ( getStockholmInputStream(structureID), pdbURL, chainID );
+						StockholmParser.parseStockHolm ( getStockholmInputStream(structureID), pdbData, chainID );
 					
 					this.initPageWith( data );
 				}
@@ -279,7 +287,7 @@ public class AlignmentPage extends BasePage {
 		
 		add(tabs);
 		
-		String structurePath = RequestCycle.get().getUrlRenderer().renderFullUrl(Url.parse("../rest/structure/"+structureID));
+		String structurePath = "rest/structure/"+structureID;
 				
 		if(data.getPdbURL()!=null) { // might not be set if it's an xml file with inline pdb
 			
@@ -357,10 +365,6 @@ public class AlignmentPage extends BasePage {
 				getResponse().write(String.format("\'%s\',", tabid));
 			}
 			getResponse().write("];\n");
-			
-			String urlString = RequestCycle.get().getUrlRenderer().renderFullUrl(
-				Url.parse( 
-					RequestCycle.get().urlFor( this.getApplication().getHomePage(), null ) ) );
 			
 			//getResponse().write(String.format("var baseURL='%s';\n", urlString));
 			

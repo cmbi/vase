@@ -15,6 +15,7 @@
  */
 package nl.ru.cmbi.vase.web.panel.align;
 
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -45,17 +46,9 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 public class StructurePanel extends Panel {
 	
-	public StructurePanel(String id, final String structurePath, final char chain) {
-		
-		super(id);
-		
-		String urlString = RequestCycle.get().urlFor(HomePage.class, new PageParameters()).toString();
-		
-		//WebMarkupContainer applet = new WebMarkupContainer("applet");
-		//applet.add(new AttributeModifier("codebase",urlString));
-		//add(applet);
-		
-		Component script = new Component("init-script"){
+	Component getScript(String id, final String structurePath, final char chain) {
+
+		return new Component( id ) {
 
 			@Override
 			protected void onRender() {
@@ -73,10 +66,20 @@ public class StructurePanel extends Panel {
 				
 				getResponse().write("\";\n");
 				
+				// The url for the structure file depends on whether it's on this server or on rcsb
+				getResponse().write("var structurePath=");
+				if(structurePath.startsWith("http://")) {
+					getResponse().write("\""+structurePath+"\"");
+				}
+				else {
+					getResponse().write("baseURL+\"/"+structurePath+"\"");
+				}
+				getResponse().write(";\n");
+				
 				getResponse().write("var jmolInit=\"");
 				
 				getResponse().write("background white;");
-				getResponse().write("load "+structurePath+";");
+				getResponse().write("load \"+structurePath+\";");
 				getResponse().write("select *;");
 				getResponse().write("color atoms lightgrey structure;");
 				
@@ -85,6 +88,12 @@ public class StructurePanel extends Panel {
 				JavaScriptUtils.writeCloseTag(getResponse());
 			}
 		};
-		add(script);
+	}
+	
+	public StructurePanel(String id, final String structurePath, final char chain) {
+		
+		super(id);
+		
+		add( getScript("init-script", structurePath, chain) );
 	}
 }

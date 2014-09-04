@@ -46,6 +46,7 @@ import nl.ru.cmbi.vase.data.stockholm.ResidueInfo;
 import nl.ru.cmbi.vase.data.stockholm.ResidueInfoSet;
 import nl.ru.cmbi.vase.data.VASEDataObject;
 import nl.ru.cmbi.vase.tools.util.AminoAcid;
+import nl.ru.cmbi.vase.tools.util.DataProvider;
 
 import org.apache.commons.compress.compressors.bzip2.BZip2CompressorInputStream;
 import org.apache.commons.io.IOUtils;
@@ -118,7 +119,7 @@ public class StockholmParser {
 		}
 	}
 	
-	public static Map<Character,VASEDataObject> parseStockHolm(InputStream stockholmIn, URL pdbURL)
+	public static Map<Character,VASEDataObject> parseStockHolm(InputStream stockholmIn, DataProvider pdbData)
 		throws Exception {
 		
 		AlignmentSet alignments = new AlignmentSet();
@@ -127,14 +128,14 @@ public class StockholmParser {
 		
 		goThroughStockholm(stockholmIn,alignments,residueInfoSet,pdbID,'*');
 		
-		return generateVaseObjects ( alignments, residueInfoSet, pdbID.toString(), pdbURL);
+		return generateVaseObjects ( alignments, residueInfoSet, pdbID.toString(), pdbData);
 	}	
 	
 	/**
 	 * Fast alternative to parsing the entire file
 	 * @param chain the requested chain in the stockholm file
 	 */
-	public static VASEDataObject parseStockHolm(InputStream stockholmIn, URL pdbURL, char chain)
+	public static VASEDataObject parseStockHolm(InputStream stockholmIn, DataProvider pdbData, char chain)
 		throws Exception {
 		
 		AlignmentSet alignments = new AlignmentSet();
@@ -143,7 +144,7 @@ public class StockholmParser {
 		
 		goThroughStockholm(stockholmIn,alignments,residueInfoSet,pdbID,chain);
 		
-		Map<Character,VASEDataObject> map = generateVaseObjects ( alignments, residueInfoSet, pdbID.toString(), pdbURL);
+		Map<Character,VASEDataObject> map = generateVaseObjects ( alignments, residueInfoSet, pdbID.toString(), pdbData);
 		
 		if(!map.containsKey(chain)) {
 			
@@ -157,21 +158,31 @@ public class StockholmParser {
 			AlignmentSet alignments,
 			ResidueInfoSet residueInfoSet,
 			String pdbID,
-			URL pdbURL) throws Exception {
+			DataProvider pdbData) throws Exception {
 
 		Map<Character,VASEDataObject> map = new HashMap<Character,VASEDataObject>();
 		for(char chainID : alignments.getChainIDs()) {
 			
 			Alignment alignment = alignments.getAlignment(chainID);
 			
-			InputStream pdbIn = pdbURL.openStream();
+			InputStream pdbIn = pdbData.getInputstream();
 			Map<Character,Map<String,PDBResidueInfo>> pdbResidues = PDBParser.parseResidues(pdbIn);
 			pdbIn.close();
 			
-			VASEDataObject data = new VASEDataObject(
+			VASEDataObject data;
+			if(pdbData.getURL()!=null) {
+				
+				data = new VASEDataObject(
 					alignment, 
 					getTable(alignments,pdbResidues,residueInfoSet,chainID),
-					pdbURL);
+					pdbData.getURL());
+				
+			} else {
+				data = new VASEDataObject(
+					alignment, 
+					getTable(alignments,pdbResidues,residueInfoSet,chainID),
+					pdbData.getContents());
+			}
 
 			data.setTitle( String.format("Alignment of %s chain %c", pdbID, chainID) );
 						
