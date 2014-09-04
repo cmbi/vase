@@ -16,7 +16,10 @@
 package nl.ru.cmbi.vase.web;
 
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.io.IOException;
 import java.io.StringWriter;
@@ -32,6 +35,7 @@ import nl.ru.cmbi.vase.web.rest.JobRestResource;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.wicket.protocol.http.mock.MockHttpServletRequest;
+import org.apache.wicket.request.http.flow.AbortWithHttpErrorCodeException;
 import org.apache.wicket.util.tester.WicketTester;
 import org.junit.Before;
 import org.junit.Test;
@@ -63,11 +67,13 @@ public class TestRestful
     	if(Config.isXmlOnly())
     		return;
     	
+		// Submit a pdb and wait for SUCCESS status
+    	
     	URL url = new URL("http://www.rcsb.org/pdb/files/1CRN.pdb");
     	StringWriter writer = new StringWriter();
     	IOUtils.copy(url.openStream(), writer);
     	String pdb = writer.toString();
-		
+	
 		MockHttpServletRequest mockRequest = new MockHttpServletRequest(
 			tester.getApplication(), tester.getHttpSession(),
 			tester.getServletContext());
@@ -77,30 +83,50 @@ public class TestRestful
 
 		tester.setRequest(mockRequest);
 		tester.executeUrl("rest/custom");
+		assertEquals(200,tester.getLastResponse().getStatus());
 
-		String	status = "",
-				id = tester.getLastResponseAsString().replaceAll("^\"", "").replaceAll("\"$", "");
+		String	jobStatus = "",
+				hsspR="",
+				pdbR="",
+				jobID = tester.getLastResponseAsString();
 		
-		assertTrue( id!=null && !id.isEmpty() );
+		assertTrue( jobID!=null && !jobID.isEmpty() );
 		
 		List<String> expectedStati = Arrays.asList(new String[]{"PENDING","STARTED","SUCCESS"}); // celery
 		
 		while ( true ) {
 			
 			tester.getRequest().setMethod("GET");
-			tester.executeUrl("rest/status/"+id);
+			tester.executeUrl("rest/status/"+jobID);
+			assertEquals(200,tester.getLastResponse().getStatus());
 			
-			status = tester.getLastResponseAsString().replaceAll("^\"", "").replaceAll("\"$", "");
+			jobStatus = tester.getLastResponseAsString();
 			
-			log.info("status=\""+status+"\"");
+			log.info("status="+jobStatus+"");
 			
-			assertTrue( expectedStati.contains(status) );
+			assertTrue( expectedStati.contains(jobStatus) );
 			
-			if(status.equals("SUCCESS")) {
+			if(jobStatus.equals("SUCCESS")) {
 				break;
 			}
 			
 			Thread.sleep(30000);
-		} 
+		}
+		
+		// Test hssp output
+		
+		tester.getRequest().setMethod("GET");
+		tester.executeUrl("rest/hsspresult/"+jobID);
+		assertEquals(200,tester.getLastResponse().getStatus());
+		hsspR = tester.getLastResponseAsString();
+		assertFalse(hsspR.isEmpty());
+		
+		// The pdb returned by the rest must be the input pdb
+		
+		tester.getRequest().setMethod("GET");
+		tester.executeUrl("rest/structure/"+jobID);
+		assertEquals(200,tester.getLastResponse().getStatus());
+		pdbR = tester.getLastResponseAsString();
+		assertEquals(pdb,pdbR);
     }
 }
