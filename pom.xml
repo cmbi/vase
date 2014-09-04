@@ -108,13 +108,6 @@
     		<version>0.9.4</version>
 		</dependency>
 
-		<!-- HSSP webservice -->
-		<dependency>
-			<groupId>nl.ru.cmbi.hssp</groupId>
-			<artifactId>hssp-ws-client</artifactId>
-			<version>1.0.1-SNAPSHOT</version>
-		</dependency>
-
 		<!-- LOGGING DEPENDENCIES - LOG4J -->
 		<dependency>
 			<groupId>org.slf4j</groupId>

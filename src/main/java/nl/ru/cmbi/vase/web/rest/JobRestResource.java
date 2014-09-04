@@ -81,7 +81,7 @@ public class JobRestResource extends GsonRestResource {
 	
 	//private HsspQueue queue;
 	
-	private String hsspRestURL = "http://cmbi23.cmbi.ru.nl:8013/api";
+	private String hsspRestURL = "http://www.cmbi.ru.nl/xssp/api";
 
 	public JobRestResource(WicketApplication application) {
 		

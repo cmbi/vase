@@ -14,8 +14,3 @@ If you only want VASE to display the content of a series of VASE-format xml file
 # Build & Install
 
 VASE requires maven 2 to compile. (http://maven.apache.org/) You can build the war file by running "mvn package" from the root directory. Then deploy it.
-
-# Dependencies
-
-Besides maven, VASE also depends on CMBI's hsspsoap webservice client. (https://github.com/cmbi/hssp-ws-client) You can install it using maven.
-
