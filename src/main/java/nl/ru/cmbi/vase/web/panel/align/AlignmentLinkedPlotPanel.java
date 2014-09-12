@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import nl.ru.cmbi.vase.analysis.MutationDataObject;
@@ -78,7 +79,7 @@ public class AlignmentLinkedPlotPanel extends ScatterPlotPanel {
 	}
 	
 	public static final double
-		plotImageWidth = 800,
+		plotImageWidth = 400,
 		plotImageHeight=400;
 	
 	private static ScatterPlotOptions getOptions( AlignmentDisplayPanel alignmentPanel,PlotDescription pd, TableData tableData) {
@@ -112,6 +113,28 @@ public class AlignmentLinkedPlotPanel extends ScatterPlotPanel {
 		options.setMaxX(Utils.max(xValues).doubleValue() * 1.1); 
 		options.setMinY(smallestY * 1.1);
 		options.setMaxY(Utils.max(yValues).doubleValue() * 1.1);
+		
+
+		if(pd.getCurve().equals("ev-curve") ) {
+			
+			// Add Entropy variability curve ( y=log(x) )
+			List<Number>	xs=new ArrayList<Number>(),
+							ys=new ArrayList<Number>();
+			
+			double y;
+			for(double x=1.0; x<options.getMaxX(); x+=0.1) {
+				
+				y=Math.log(x);
+				
+				xs.add(x); ys.add(y);
+				
+				if(y>options.getMaxY()) {
+					options.setMaxY(y);
+				}
+			}
+			options.setCurveXs(xs);
+			options.setCurveYs(ys);
+		}
 				
 		options.setXStepSize(determineStepSize(options.getMinX(),options.getMaxX()));
 		options.setYStepSize(determineStepSize(options.getMinY(),options.getMaxY()));
@@ -151,9 +174,9 @@ public class AlignmentLinkedPlotPanel extends ScatterPlotPanel {
 				
 		if(tableData.columnIsOfType(xColumnInfo.getId(),ColumnDataType.INTEGER))
 		
-			return String.format("%d", (int)x);
+			return String.format(Locale.ENGLISH, "%d", (int)x);
 		else
-			return String.format("%.1f", x);
+			return String.format(Locale.ENGLISH, "%.1f", x);
 	}
 	
 	protected String yScaleRepresentation(double y) {
@@ -163,9 +186,9 @@ public class AlignmentLinkedPlotPanel extends ScatterPlotPanel {
 		
 		if(tableData.columnIsOfType(yColumnInfo.getId(),ColumnDataType.INTEGER))
 		
-			return String.format("%d", (int)y);
+			return String.format(Locale.ENGLISH, "%d", (int)y);
 		else
-			return String.format("%.1f", y);
+			return String.format(Locale.ENGLISH, "%.1f", y);
 	}
 	
 	protected void onDotCreate(DotComponent dot) {

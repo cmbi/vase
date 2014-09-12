@@ -33,7 +33,12 @@ public class ScatterPlotOptions implements Serializable {
 		xStepSize, yStepSize; // the step sizes on the scales.
 	
 	private List<? extends Number> // The values themselves :
+	
 		xValues = new ArrayList<Double>(),
-		yValues = new ArrayList<Double>();
+		yValues = new ArrayList<Double>(),
+		
+		// Values for a curve
+		CurveXs = new ArrayList<Double>(),
+		CurveYs = new ArrayList<Double>();
 
 }

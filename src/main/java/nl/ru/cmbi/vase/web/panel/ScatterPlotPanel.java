@@ -155,6 +155,21 @@ public class ScatterPlotPanel extends Panel {
 		yTitle.add(new AttributeModifier("transform",String.format(Locale.ENGLISH, "translate(%.1f %.1f) rotate(-90)",pixOriginXPos - pixTitleSpacing, pixOriginYPos - pixTitleSpacing)));
 		transformGroup.add(yTitle);
 
+		Component curve = new Label("curve");
+		
+		String curveD="M";
+		for(int i=0; i<options.getCurveXs().size(); i++) {
+			
+			double x=options.getCurveXs().get(i).doubleValue(), y=options.getCurveYs().get(i).doubleValue();
+			
+			curveD += String.format(Locale.ENGLISH, " %f,%f",
+					x * pixXScaling + pixOriginXPos,
+					pixOriginYPos - y * pixYScaling
+				);
+		}
+		curve.add(new AttributeModifier("d",curveD));
+		transformGroup.add(curve);
+
 		ListView<Integer> dots = new ListView<Integer>("dots",Utils.listRange(0, options.getXValues().size())) {
 
 			@Override

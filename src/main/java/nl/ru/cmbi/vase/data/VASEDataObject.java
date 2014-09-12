@@ -39,7 +39,9 @@ public class VASEDataObject {
 		
 		String	xAxisColumnID,
 				yAxisColumnID,
-				plotTitle;
+				plotTitle,
+				
+				curve="";
 	}
 	
 	@Setter(AccessLevel.NONE)

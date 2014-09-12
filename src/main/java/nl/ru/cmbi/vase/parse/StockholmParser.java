@@ -198,6 +198,7 @@ public class StockholmParser {
 			pd.setPlotTitle("Entropy vs. Variability");
 			pd.setXAxisColumnID("variability");
 			pd.setYAxisColumnID("entropy");
+			pd.setCurve("ev-curve");
 			data.getPlots().add(pd);
 
 			pd = new VASEDataObject.PlotDescription();
