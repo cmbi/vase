@@ -79,7 +79,7 @@ public class AlignmentLinkedPlotPanel extends ScatterPlotPanel {
 	}
 	
 	public static final double
-		plotImageWidth = 400,
+		plotImageWidth = 800,
 		plotImageHeight=400;
 	
 	private static ScatterPlotOptions getOptions( AlignmentDisplayPanel alignmentPanel,PlotDescription pd, TableData tableData) {
@@ -134,6 +134,8 @@ public class AlignmentLinkedPlotPanel extends ScatterPlotPanel {
 			}
 			options.setCurveXs(xs);
 			options.setCurveYs(ys);
+			
+			options.setCurveTitle("E = log( V )");
 		}
 				
 		options.setXStepSize(determineStepSize(options.getMinX(),options.getMaxX()));

@@ -24,7 +24,7 @@ import lombok.Data;
 @Data
 public class ScatterPlotOptions implements Serializable {
 	
-	private String xAxisTitle="",  yAxisTitle="";
+	private String xAxisTitle="",  yAxisTitle="", curveTitle="";
 	
 	private double imagePixWidth, imagePixHeight, //The size of the image in pixels
 	

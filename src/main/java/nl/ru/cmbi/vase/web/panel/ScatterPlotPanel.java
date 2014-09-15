@@ -155,20 +155,34 @@ public class ScatterPlotPanel extends Panel {
 		yTitle.add(new AttributeModifier("transform",String.format(Locale.ENGLISH, "translate(%.1f %.1f) rotate(-90)",pixOriginXPos - pixTitleSpacing, pixOriginYPos - pixTitleSpacing)));
 		transformGroup.add(yTitle);
 
-		Component curve = new Label("curve");
+		Component	curve = new Label("curve"),
+					curveText = new Label("curve-text",options.getCurveTitle());
 		
 		String curveD="M";
+		double ctx=0.0, cty=0.0;
+		int ci = options.getCurveXs().size()/2;
 		for(int i=0; i<options.getCurveXs().size(); i++) {
 			
-			double x=options.getCurveXs().get(i).doubleValue(), y=options.getCurveYs().get(i).doubleValue();
+			double	x=options.getCurveXs().get(i).doubleValue(),
+					y=options.getCurveYs().get(i).doubleValue();
 			
 			curveD += String.format(Locale.ENGLISH, " %f,%f",
 					x * pixXScaling + pixOriginXPos,
 					pixOriginYPos - y * pixYScaling
 				);
+			
+			if(i==ci) {
+			
+				ctx = x * pixXScaling + pixOriginXPos;
+				cty = pixOriginYPos - y * pixYScaling - 30.0;
+			}
 		}
 		curve.add(new AttributeModifier("d",curveD));
 		transformGroup.add(curve);
+		
+		curveText.add(new AttributeModifier("x",String.format(Locale.ENGLISH, "%f",ctx)));
+		curveText.add(new AttributeModifier("y",String.format(Locale.ENGLISH, "%f",cty)));
+		transformGroup.add(curveText);
 
 		ListView<Integer> dots = new ListView<Integer>("dots",Utils.listRange(0, options.getXValues().size())) {
 
