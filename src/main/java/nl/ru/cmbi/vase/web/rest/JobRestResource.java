@@ -16,6 +16,7 @@
 package nl.ru.cmbi.vase.web.rest;
 
 import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -33,6 +34,7 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.ProtocolException;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Executor;
@@ -53,6 +55,17 @@ import nl.ru.cmbi.vase.web.page.AlignmentPage;
 import org.apache.commons.compress.compressors.bzip2.BZip2CompressorInputStream;
 import org.apache.commons.compress.compressors.bzip2.BZip2CompressorOutputStream;
 import org.apache.commons.io.IOUtils;
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.ContentType;
+import org.apache.http.entity.mime.MultipartEntity;
+import org.apache.http.entity.mime.MultipartEntityBuilder;
+import org.apache.http.entity.mime.content.FileBody;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.impl.client.HttpClients;
 import org.apache.wicket.injection.Injector;
 import org.apache.wicket.request.IRequestParameters;
 import org.apache.wicket.request.Url;
@@ -63,7 +76,10 @@ import org.apache.wicket.util.string.StringValue;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.restlet.data.Form;
+import org.restlet.data.MediaType;
+import org.restlet.representation.FileRepresentation;
 import org.restlet.representation.Representation;
+import org.restlet.representation.StringRepresentation;
 import org.restlet.resource.ClientResource;
 import org.restlet.resource.ResourceException;
 import org.slf4j.Logger;
@@ -81,7 +97,7 @@ public class JobRestResource extends GsonRestResource {
 	
 	//private HsspQueue queue;
 	
-	private static String hsspRestURL = "http://www.cmbi.ru.nl/xssp/api";
+	private static String hsspRestURL = "http://127.0.0.1:5000/api";//"http://www.cmbi.ru.nl/xssp/api";
 
 	public JobRestResource(WicketApplication application) {
 		
@@ -108,40 +124,47 @@ public class JobRestResource extends GsonRestResource {
 		// getPostParameters doesn't work for some reason
 		IRequestParameters p = RequestCycle.get().getRequest().getRequestParameters();
 
-	    StringValue pdbContents = p.getParameterValue("pdbfile");
+	    final StringValue pdbContents = p.getParameterValue("pdbfile");
 	    if(pdbContents.toString()==null) {
 	    	
 			log.error("pdbfile parameter not set");
 
 			throw new AbortWithHttpErrorCodeException(HttpURLConnection.HTTP_BAD_REQUEST);
 	    }
-	    
-	    Form form = new Form();
-	    form.add("data", pdbContents.toString());
 
 	    String url = hsspRestURL + "/create/pdb_file/hssp_stockholm/";
-	    ClientResource resource = new ClientResource(url);
+	    
+	    CloseableHttpClient httpClient = HttpClients.createDefault();
+	    HttpPost uploadFile = new HttpPost(url);
 
-	    Representation rep = null;
+	    MultipartEntityBuilder builder = MultipartEntityBuilder.create();
+	    builder.addBinaryBody("file_", pdbContents.toString().getBytes(), ContentType.TEXT_PLAIN, "custom.pdb");
+	    HttpEntity multipart = builder.build();
+
+	    uploadFile.setEntity(multipart);
+
 	    try {
-	    	rep = resource.post(form);
-	      
-	      	String content = rep.getText();
+		    HttpResponse response = httpClient.execute(uploadFile);
+		    if(response.getStatusLine().getStatusCode() %200 > 100) {
+		    	
+		    	throw new Exception("response is "+response.getStatusLine().getStatusCode()+"("+response.getStatusLine().getReasonPhrase() + ")");
+		    }
+		    String content = IOUtils.toString( response.getEntity().getContent() );
 		    
-		    JSONObject output=new JSONObject( content );
+		    JSONObject output = new JSONObject( content );
 		    String jobID = output.getString("id");
 
-			File pdbFile = new File(Config.getHSSPCacheDir(),jobID+".pdb.gz");
+			File pdbFile = new File(Config.getHSSPCacheDir(), jobID+".pdb.gz");
 			
 			OutputStream pdbOut = new GZIPOutputStream(new FileOutputStream(pdbFile));
-		    IOUtils.write(pdbContents.toString(),pdbOut);
+		    IOUtils.write( pdbContents.toString(), pdbOut );
 		    pdbOut.close();
-		    
+
 		    return jobID;
 	      
 	    } catch (Exception e) {
 	    	
-			log.error("io error: " + e.toString());
+			log.error("error: " + e.toString());
 			throw new AbortWithHttpErrorCodeException(HttpURLConnection.HTTP_INTERNAL_ERROR);
 		}
 	}
