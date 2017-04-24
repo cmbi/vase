@@ -269,6 +269,7 @@
 			      <exclude>**/*.txt</exclude>
 			      <exclude>**/*.xml</exclude>
 			      <exclude>src/main/webapp/jsmol/**/*</exclude>
+                  <exclude>src/main/webapp/modernizr.custom.js</exclude>
 			    </excludes>
 			  </configuration>
 			  <executions>

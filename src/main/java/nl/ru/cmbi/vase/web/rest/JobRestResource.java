@@ -96,12 +96,15 @@ public class JobRestResource extends GsonRestResource {
 
 	@MethodMapping(value="/custom", httpMethod=HttpMethod.POST, produces = RestMimeTypes.TEXT_PLAIN)
 	public String custom() {
-		
-		if(Config.isXmlOnly() || !Config.hsspPdbCacheEnabled()) {
+
+        if(Config.isXmlOnly()) {
+            log.warn("rest/custom was requested, but xml-only is set");
+
+            throw new AbortWithHttpErrorCodeException(HttpURLConnection.HTTP_NOT_FOUND);
+        }
+        else if(!Config.hsspPdbCacheEnabled()) {
+			log.warn("rest/custom was requested, but pdb cache is not enabled");
 			
-			log.warn("rest/custom was requested, but not enabled");
-			
-			// hssp job submission is not allowed if hssp is turned off
 			throw new AbortWithHttpErrorCodeException(HttpURLConnection.HTTP_NOT_FOUND);
 		}
 		
@@ -119,7 +122,7 @@ public class JobRestResource extends GsonRestResource {
 	    Form form = new Form();
 	    form.add("pdb_content", pdbContents.toString());
 
-	    String url = hsspRestURL + "/create/hssp/from_pdb/";
+	    String url = hsspRestURL + "/create/pdb_file/hssp_stockholm/";
 	    ClientResource resource = new ClientResource(url);
 
 	    Representation rep = null;
