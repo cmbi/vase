@@ -31,4 +31,4 @@ RUN /bin/bash -c /usr/local/bin/mvn-entrypoint.sh
 COPY . /src/src/app
 RUN mvn package -e
 
-RUN cp target/vase-1.0.5.war /usr/local/tomcat/webapps/vase-1.0.5.war
+RUN cp target/vase-*.war /usr/local/tomcat/webapps/vase.war
