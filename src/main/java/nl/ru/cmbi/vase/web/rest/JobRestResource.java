@@ -63,6 +63,8 @@ import org.apache.wicket.util.string.StringValue;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.restlet.data.Form;
+import org.restlet.data.MediaType;
+import org.restlet.representation.FileRepresentation;
 import org.restlet.representation.Representation;
 import org.restlet.resource.ClientResource;
 import org.restlet.resource.ResourceException;
@@ -118,23 +120,24 @@ public class JobRestResource extends GsonRestResource {
 
 			throw new AbortWithHttpErrorCodeException(HttpURLConnection.HTTP_BAD_REQUEST);
 	    }
-	    
 	    Form form = new Form();
-	    form.add("pdb_content", pdbContents.toString());
+	    form.add("data", pdbContents.toString());
+	    
+	    // FileRepresentation repFile = new FileRepresentation(pdbContents.toString(), MediaType.TEXT_PLAIN);
 
 	    String url = hsspRestURL + "/create/pdb_file/hssp_stockholm/";
 	    ClientResource resource = new ClientResource(url);
 
-	    Representation rep = null;
+	    Representation repResponse = null;
 	    try {
-	    	rep = resource.post(form);
+	    	repResponse = resource.post(form);
 	      
-	      	String content = rep.getText();
+	      	String content = repResponse.getText();
 		    
 		    JSONObject output=new JSONObject( content );
 		    String jobID = output.getString("id");
 
-			File pdbFile = new File(Config.getHSSPCacheDir(),jobID+".pdb.gz");
+			File pdbFile = new File(Config.getHSSPCacheDir(),jobID + ".pdb.gz");
 			
 			OutputStream pdbOut = new GZIPOutputStream(new FileOutputStream(pdbFile));
 		    IOUtils.write(pdbContents.toString(),pdbOut);
@@ -147,48 +150,6 @@ public class JobRestResource extends GsonRestResource {
 			log.error("io error: " + e.toString());
 			throw new AbortWithHttpErrorCodeException(HttpURLConnection.HTTP_INTERNAL_ERROR);
 		}
-	    
-    	/*CloseableHttpClient httpClient = HttpClientBuilder.create().build();
-    	
-    	try {
-    		
-    		List<NameValuePair> input = new ArrayList<NameValuePair>();    		
-    		input.add(new BasicNameValuePair("pdb_content", pdbContents.toString()));
-    		
-    	    HttpPost request = new HttpPost(hsspRestURL+"/create/hssp/from_pdb/");
-    	    request.setEntity(new UrlEncodedFormEntity(input));
-    	    
-    	    HttpResponse response = httpClient.execute(request);
-    	    
-    	    HttpEntity outputEntity = response.getEntity();
-    	    
-    	    if (response.getStatusLine().getStatusCode() / 100 != 2) { // 2xx means successful
-    	    	
-    	    	throw new Exception(response.getStatusLine().toString());
-    	    }
-    	    
-			StringWriter writer = new StringWriter();
-			IOUtils.copy( outputEntity.getContent(), writer);
-			writer.close();
-			
-    	    httpClient.close();
-
-			JSONObject output=new JSONObject( writer.toString() );
-			String jobID = output.getString("id");
-			
-			File pdbFile = new File(Config.getHSSPCacheDir(),jobID+".pdb.gz");
-			
-			OutputStream pdbOut = new GZIPOutputStream(new FileOutputStream(pdbFile));
-		    IOUtils.write(pdbContents.toString(),pdbOut);
-		    pdbOut.close();
-		    
-		    return jobID;
-    	    
-    	} catch (Exception e) {
-	    	
-	    	log.error(e.getMessage(),e);
-			throw new AbortWithHttpErrorCodeException(HttpURLConnection.HTTP_INTERNAL_ERROR);
-    	}*/
 	}
 	
 	@MethodMapping(value = "/status/{jobid}", httpMethod=HttpMethod.GET, produces = RestMimeTypes.TEXT_PLAIN)
@@ -203,7 +164,7 @@ public class JobRestResource extends GsonRestResource {
 		}
 		
 		try {
-			URL url = new URL(hsspRestURL+"/job/hssp_from_pdb/"+jobid+"/status/");
+			URL url = new URL(hsspRestURL + "/status/pdb_file/hssp_stockholm/" + jobid+ "/");
 			
 			StringWriter writer = new StringWriter();
 			IOUtils.copy( url.openStream(), writer);
@@ -231,7 +192,7 @@ public class JobRestResource extends GsonRestResource {
 			throw new AbortWithHttpErrorCodeException(HttpURLConnection.HTTP_NOT_FOUND);
 		}
 
-		File hsspFile = new File(Config.getHSSPCacheDir(), id+".hssp.bz2");
+		File hsspFile = new File(Config.getHSSPCacheDir(), id + ".hssp.bz2");
 		
 		String jobStatus = this.status(id);
 		
@@ -248,7 +209,7 @@ public class JobRestResource extends GsonRestResource {
 				return sw.toString();
 			}
 			
-			URL url = new URL(hsspRestURL+"/job/hssp_from_pdb/"+id+"/result/");
+			URL url = new URL(hsspRestURL + "/result/pdb_file/hssp_stockholm/" + id + "/");
 			
 			Writer writer = new StringWriter();
 			IOUtils.copy( url.openStream(), writer);
