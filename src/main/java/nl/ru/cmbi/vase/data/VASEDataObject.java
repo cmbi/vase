@@ -49,10 +49,7 @@ public class VASEDataObject {
 	private TableData table;
 
 	@Setter(AccessLevel.NONE)
-	private String pdbContents = "";
-	
-	@Setter(AccessLevel.NONE)
-	private URL pdbURL = null;
+	private String pdbID = "";
 
 	@Setter(AccessLevel.NONE)
 	private List<PlotDescription> plots = new ArrayList<PlotDescription>();
@@ -62,18 +59,10 @@ public class VASEDataObject {
 
 
 	public VASEDataObject(Alignment alignment, 
-			TableData tableData, String pdbContents) {
+			TableData tableData, String pdbID) {
 		
-		this.alignment=alignment;
-		this.table=tableData;
-		this.pdbContents=pdbContents;
-	}
-	
-	public VASEDataObject(Alignment alignment, 
-			TableData tableData, URL pdbURL) {
-		
-		this.alignment=alignment;
-		this.table=tableData;
-		this.pdbURL = pdbURL;
+		this.alignment = alignment;
+		this.table = tableData;
+		this.pdbID = pdbID;
 	}
 }

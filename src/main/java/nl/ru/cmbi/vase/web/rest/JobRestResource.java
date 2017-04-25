@@ -62,8 +62,14 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.util.string.StringValue;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.restlet.data.Disposition;
 import org.restlet.data.Form;
+import org.restlet.data.MediaType;
+import org.restlet.ext.html.FormData;
+import org.restlet.ext.html.FormDataSet;
+import org.restlet.representation.FileRepresentation;
 import org.restlet.representation.Representation;
+import org.restlet.representation.StringRepresentation;
 import org.restlet.resource.ClientResource;
 import org.restlet.resource.ResourceException;
 import org.slf4j.Logger;
@@ -79,29 +85,22 @@ public class JobRestResource extends GsonRestResource {
 	
 	private static final Logger log = LoggerFactory.getLogger(JobRestResource.class);
 	
-	//private HsspQueue queue;
-	
 	private String hsspRestURL = "http://www.cmbi.ru.nl/xssp/api";
 
 	public JobRestResource(WicketApplication application) {
-		
-		/*if(Config.isXmlOnly()) {
-			
-			queue = null ;
-		}
-		else {
-			queue = application.getHsspQueue();
-		}*/
 	}
 
 	@MethodMapping(value="/custom", httpMethod=HttpMethod.POST, produces = RestMimeTypes.TEXT_PLAIN)
 	public String custom() {
-		
-		if(Config.isXmlOnly() || !Config.hsspPdbCacheEnabled()) {
+
+        if(Config.isXmlOnly()) {
+            log.warn("rest/custom was requested, but xml-only is set");
+
+            throw new AbortWithHttpErrorCodeException(HttpURLConnection.HTTP_NOT_FOUND);
+        }
+        else if(!Config.hsspPdbCacheEnabled()) {
+			log.warn("rest/custom was requested, but pdb cache is not enabled");
 			
-			log.warn("rest/custom was requested, but not enabled");
-			
-			// hssp job submission is not allowed if hssp is turned off
 			throw new AbortWithHttpErrorCodeException(HttpURLConnection.HTTP_NOT_FOUND);
 		}
 		
@@ -116,76 +115,40 @@ public class JobRestResource extends GsonRestResource {
 			throw new AbortWithHttpErrorCodeException(HttpURLConnection.HTTP_BAD_REQUEST);
 	    }
 	    
-	    Form form = new Form();
-	    form.add("pdb_content", pdbContents.toString());
+	    StringRepresentation entity = new StringRepresentation(pdbContents.toString(), MediaType.TEXT_PLAIN);
+        Disposition disposition = new Disposition();
+        disposition.setFilename("custom.pdb");
+        entity.setDisposition(disposition);
+        
+	    FormDataSet fds = new FormDataSet();
+	    fds.setMultipart(true);
+	    fds.getEntries().add(new FormData("file_", entity));
 
-	    String url = hsspRestURL + "/create/hssp/from_pdb/";
+	    String url = hsspRestURL + "/create/pdb_file/hssp_stockholm/";
 	    ClientResource resource = new ClientResource(url);
 
-	    Representation rep = null;
+	    Representation repResponse = null;
 	    try {
-	    	rep = resource.post(form);
+	    	repResponse = resource.post(fds);
 	      
-	      	String content = rep.getText();
+	      	String content = repResponse.getText();
 		    
 		    JSONObject output=new JSONObject( content );
 		    String jobID = output.getString("id");
 
-			File pdbFile = new File(Config.getHSSPCacheDir(),jobID+".pdb.gz");
+			File pdbFile = new File(Config.getHSSPCacheDir(), jobID + ".pdb.gz");
 			
 			OutputStream pdbOut = new GZIPOutputStream(new FileOutputStream(pdbFile));
 		    IOUtils.write(pdbContents.toString(),pdbOut);
 		    pdbOut.close();
 		    
 		    return jobID;
-	      
-	    } catch (Exception e) {
+	    }
+	    catch (Exception e) {
 	    	
 			log.error("io error: " + e.toString());
 			throw new AbortWithHttpErrorCodeException(HttpURLConnection.HTTP_INTERNAL_ERROR);
 		}
-	    
-    	/*CloseableHttpClient httpClient = HttpClientBuilder.create().build();
-    	
-    	try {
-    		
-    		List<NameValuePair> input = new ArrayList<NameValuePair>();    		
-    		input.add(new BasicNameValuePair("pdb_content", pdbContents.toString()));
-    		
-    	    HttpPost request = new HttpPost(hsspRestURL+"/create/hssp/from_pdb/");
-    	    request.setEntity(new UrlEncodedFormEntity(input));
-    	    
-    	    HttpResponse response = httpClient.execute(request);
-    	    
-    	    HttpEntity outputEntity = response.getEntity();
-    	    
-    	    if (response.getStatusLine().getStatusCode() / 100 != 2) { // 2xx means successful
-    	    	
-    	    	throw new Exception(response.getStatusLine().toString());
-    	    }
-    	    
-			StringWriter writer = new StringWriter();
-			IOUtils.copy( outputEntity.getContent(), writer);
-			writer.close();
-			
-    	    httpClient.close();
-
-			JSONObject output=new JSONObject( writer.toString() );
-			String jobID = output.getString("id");
-			
-			File pdbFile = new File(Config.getHSSPCacheDir(),jobID+".pdb.gz");
-			
-			OutputStream pdbOut = new GZIPOutputStream(new FileOutputStream(pdbFile));
-		    IOUtils.write(pdbContents.toString(),pdbOut);
-		    pdbOut.close();
-		    
-		    return jobID;
-    	    
-    	} catch (Exception e) {
-	    	
-	    	log.error(e.getMessage(),e);
-			throw new AbortWithHttpErrorCodeException(HttpURLConnection.HTTP_INTERNAL_ERROR);
-    	}*/
 	}
 	
 	@MethodMapping(value = "/status/{jobid}", httpMethod=HttpMethod.GET, produces = RestMimeTypes.TEXT_PLAIN)
@@ -200,7 +163,7 @@ public class JobRestResource extends GsonRestResource {
 		}
 		
 		try {
-			URL url = new URL(hsspRestURL+"/job/hssp_from_pdb/"+jobid+"/status/");
+			URL url = new URL(hsspRestURL + "/status/pdb_file/hssp_stockholm/" + jobid+ "/");
 			
 			StringWriter writer = new StringWriter();
 			IOUtils.copy( url.openStream(), writer);
@@ -228,7 +191,7 @@ public class JobRestResource extends GsonRestResource {
 			throw new AbortWithHttpErrorCodeException(HttpURLConnection.HTTP_NOT_FOUND);
 		}
 
-		File hsspFile = new File(Config.getHSSPCacheDir(), id+".hssp.bz2");
+		File hsspFile = new File(Config.getHSSPCacheDir(), id + ".hssp.bz2");
 		
 		String jobStatus = this.status(id);
 		
@@ -245,7 +208,7 @@ public class JobRestResource extends GsonRestResource {
 				return sw.toString();
 			}
 			
-			URL url = new URL(hsspRestURL+"/job/hssp_from_pdb/"+id+"/result/");
+			URL url = new URL(hsspRestURL + "/result/pdb_file/hssp_stockholm/" + id + "/");
 			
 			Writer writer = new StringWriter();
 			IOUtils.copy( url.openStream(), writer);
@@ -296,7 +259,7 @@ public class JobRestResource extends GsonRestResource {
 			
 				VASEDataObject data = VASEXMLParser.parse( new GZIPInputStream( new FileInputStream(xmlFile) ) );
 			
-				return data.getPdbContents();
+				return Utils.getPdbContents(data.getPdbID());
 			}
 			if(Config.hsspPdbCacheEnabled()) {
 				

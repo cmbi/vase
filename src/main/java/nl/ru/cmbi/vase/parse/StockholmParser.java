@@ -118,32 +118,30 @@ public class StockholmParser {
 		}
 	}
 	
-	public static Map<Character,VASEDataObject> parseStockHolm(InputStream stockholmIn, URL pdbURL)
+	public static Map<Character,VASEDataObject> parseStockHolm(InputStream stockholmIn, InputStream pdbIn, String pdbID)
 		throws Exception {
 		
 		AlignmentSet alignments = new AlignmentSet();
 		ResidueInfoSet residueInfoSet = new ResidueInfoSet();
-		StringBuilder pdbID = new StringBuilder("");
 		
-		goThroughStockholm(stockholmIn,alignments,residueInfoSet,pdbID,'*');
+		goThroughStockholm(stockholmIn,alignments,residueInfoSet,'*');
 		
-		return generateVaseObjects ( alignments, residueInfoSet, pdbID.toString(), pdbURL);
+		return generateVaseObjects (alignments, residueInfoSet, pdbID, pdbIn);
 	}	
 	
 	/**
 	 * Fast alternative to parsing the entire file
 	 * @param chain the requested chain in the stockholm file
 	 */
-	public static VASEDataObject parseStockHolm(InputStream stockholmIn, URL pdbURL, char chain)
+	public static VASEDataObject parseStockHolm(InputStream stockholmIn, InputStream pdbIn, String pdbID, char chain)
 		throws Exception {
 		
 		AlignmentSet alignments = new AlignmentSet();
 		ResidueInfoSet residueInfoSet = new ResidueInfoSet();
-		StringBuilder pdbID = new StringBuilder("");
 		
-		goThroughStockholm(stockholmIn,alignments,residueInfoSet,pdbID,chain);
+		goThroughStockholm(stockholmIn,alignments,residueInfoSet,chain);
 		
-		Map<Character,VASEDataObject> map = generateVaseObjects ( alignments, residueInfoSet, pdbID.toString(), pdbURL);
+		Map<Character,VASEDataObject> map = generateVaseObjects(alignments, residueInfoSet, pdbID, pdbIn);
 		
 		if(!map.containsKey(chain)) {
 			
@@ -157,21 +155,22 @@ public class StockholmParser {
 			AlignmentSet alignments,
 			ResidueInfoSet residueInfoSet,
 			String pdbID,
-			URL pdbURL) throws Exception {
+			InputStream pdbIn) throws Exception {
+		
+		log.info("generating vase object with " + pdbIn);
 
 		Map<Character,VASEDataObject> map = new HashMap<Character,VASEDataObject>();
 		for(char chainID : alignments.getChainIDs()) {
 			
 			Alignment alignment = alignments.getAlignment(chainID);
 			
-			InputStream pdbIn = pdbURL.openStream();
 			Map<Character,Map<String,PDBResidueInfo>> pdbResidues = PDBParser.parseResidues(pdbIn);
 			pdbIn.close();
 			
 			VASEDataObject data = new VASEDataObject(
 					alignment, 
-					getTable(alignments,pdbResidues,residueInfoSet,chainID),
-					pdbURL);
+					getTable(alignments, pdbResidues, residueInfoSet, chainID),
+					pdbID);
 
 			data.setTitle( String.format("Alignment of %s chain %c", pdbID, chainID) );
 						
@@ -275,10 +274,11 @@ public class StockholmParser {
 			
 				final AlignmentSet alignments, // output
 				final ResidueInfoSet residueInfoSet, // output
-				final StringBuilder pdbID, // output
 				char requestedChain // '*' for all chains
 				
 				) throws Exception {
+		
+		final StringBuilder pdbID = new StringBuilder();
 		
 		final boolean takeAllChains = ( requestedChain == '*' );
 		

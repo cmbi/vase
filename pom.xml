@@ -37,7 +37,7 @@
 		<jetty.version>9.0.5.v20130815</jetty.version>
 		<slf4j.version>1.7.5</slf4j.version>
 		<junit.version>4.11</junit.version>
-		<restlet.version>2.1.7</restlet.version>
+		<restlet.version>2.3.9</restlet.version>
 	</properties>
 	<dependencies>
 
@@ -149,7 +149,11 @@
 	        <artifactId>org.restlet.ext.json</artifactId>
 	        <version>${restlet.version}</version>
 		</dependency>
-		
+		<dependency>
+		    <groupId>org.restlet.jse</groupId>
+		    <artifactId>org.restlet.ext.html</artifactId>
+		    <version>${restlet.version}</version>
+		</dependency>
 	</dependencies>
 	<build>
 		<resources>
@@ -269,6 +273,7 @@
 			      <exclude>**/*.txt</exclude>
 			      <exclude>**/*.xml</exclude>
 			      <exclude>src/main/webapp/jsmol/**/*</exclude>
+                  <exclude>src/main/webapp/modernizr.custom.js</exclude>
 			    </excludes>
 			  </configuration>
 			  <executions>
