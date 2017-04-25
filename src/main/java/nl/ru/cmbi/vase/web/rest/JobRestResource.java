@@ -62,10 +62,14 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.util.string.StringValue;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.restlet.data.Disposition;
 import org.restlet.data.Form;
 import org.restlet.data.MediaType;
+import org.restlet.ext.html.FormData;
+import org.restlet.ext.html.FormDataSet;
 import org.restlet.representation.FileRepresentation;
 import org.restlet.representation.Representation;
+import org.restlet.representation.StringRepresentation;
 import org.restlet.resource.ClientResource;
 import org.restlet.resource.ResourceException;
 import org.slf4j.Logger;
@@ -120,32 +124,37 @@ public class JobRestResource extends GsonRestResource {
 
 			throw new AbortWithHttpErrorCodeException(HttpURLConnection.HTTP_BAD_REQUEST);
 	    }
-	    Form form = new Form();
-	    form.add("data", pdbContents.toString());
 	    
-	    // FileRepresentation repFile = new FileRepresentation(pdbContents.toString(), MediaType.TEXT_PLAIN);
+	    StringRepresentation entity = new StringRepresentation(pdbContents.toString(), MediaType.TEXT_PLAIN);
+        Disposition disposition = new Disposition();
+        disposition.setFilename("custom.pdb");
+        entity.setDisposition(disposition);
+        
+	    FormDataSet fds = new FormDataSet();
+	    fds.setMultipart(true);
+	    fds.getEntries().add(new FormData("file_", entity));
 
 	    String url = hsspRestURL + "/create/pdb_file/hssp_stockholm/";
 	    ClientResource resource = new ClientResource(url);
 
 	    Representation repResponse = null;
 	    try {
-	    	repResponse = resource.post(form);
+	    	repResponse = resource.post(fds);
 	      
 	      	String content = repResponse.getText();
 		    
 		    JSONObject output=new JSONObject( content );
 		    String jobID = output.getString("id");
 
-			File pdbFile = new File(Config.getHSSPCacheDir(),jobID + ".pdb.gz");
+			File pdbFile = new File(Config.getHSSPCacheDir(), jobID + ".pdb.gz");
 			
 			OutputStream pdbOut = new GZIPOutputStream(new FileOutputStream(pdbFile));
 		    IOUtils.write(pdbContents.toString(),pdbOut);
 		    pdbOut.close();
 		    
 		    return jobID;
-	      
-	    } catch (Exception e) {
+	    }
+	    catch (Exception e) {
 	    	
 			log.error("io error: " + e.toString());
 			throw new AbortWithHttpErrorCodeException(HttpURLConnection.HTTP_INTERNAL_ERROR);
