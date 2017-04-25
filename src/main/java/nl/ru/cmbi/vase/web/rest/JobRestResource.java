@@ -85,19 +85,9 @@ public class JobRestResource extends GsonRestResource {
 	
 	private static final Logger log = LoggerFactory.getLogger(JobRestResource.class);
 	
-	//private HsspQueue queue;
-	
 	private String hsspRestURL = "http://www.cmbi.ru.nl/xssp/api";
 
 	public JobRestResource(WicketApplication application) {
-		
-		/*if(Config.isXmlOnly()) {
-			
-			queue = null ;
-		}
-		else {
-			queue = application.getHsspQueue();
-		}*/
 	}
 
 	@MethodMapping(value="/custom", httpMethod=HttpMethod.POST, produces = RestMimeTypes.TEXT_PLAIN)
@@ -269,7 +259,7 @@ public class JobRestResource extends GsonRestResource {
 			
 				VASEDataObject data = VASEXMLParser.parse( new GZIPInputStream( new FileInputStream(xmlFile) ) );
 			
-				return data.getPdbContents();
+				return Utils.getPdbContents(data.getPdbID());
 			}
 			if(Config.hsspPdbCacheEnabled()) {
 				

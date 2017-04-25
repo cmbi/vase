@@ -189,10 +189,7 @@ public class VASEXMLParser {
 				new String( fastaStream.toByteArray(),StandardCharsets.UTF_8 ) ) );
 
 		Element pdb = root.addElement("pdb");
-		if(data.getPdbURL()!=null)
-			pdb.addAttribute("url", data.getPdbURL().toString());
-		else
-			pdb.add( df.createCDATA ( data.getPdbContents() ) );
+		pdb.addAttribute("pdbid", data.getPdbID());
 		
 		table2xml(data.getTable(), root);
 		
@@ -232,11 +229,7 @@ public class VASEXMLParser {
 		
 		TableData tableData = parseTable(root, alignment.countColumns() );
 		
-		VASEDataObject data;
-		if(pdb.attribute("url")!=null)
-			data = new VASEDataObject(alignment,tableData,new URL(pdb.attributeValue("url")));
-		else
-			data = new VASEDataObject(alignment,tableData,pdb.getText());
+		VASEDataObject data = new VASEDataObject(alignment, tableData, pdb.attributeValue("pdbid"));
 		
 		Element title = root.element("title");
 		if(title!=null) {

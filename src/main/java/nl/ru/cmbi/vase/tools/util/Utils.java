@@ -15,12 +15,33 @@
  */
 package nl.ru.cmbi.vase.tools.util;
 
+import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.compress.compressors.bzip2.BZip2CompressorInputStream;
+import org.apache.commons.compress.compressors.gzip.GzipCompressorInputStream;
+import org.apache.wicket.request.Url;
+import org.apache.wicket.request.cycle.RequestCycle;
+import org.mortbay.log.Log;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import nl.ru.cmbi.vase.parse.StockholmParser;
+import nl.ru.cmbi.vase.web.WicketApplication;
+import nl.ru.cmbi.vase.web.rest.JobRestResource;
+
 public class Utils {
+	
+	static Logger log = LoggerFactory.getLogger(Utils.class);
 	
 	public static final String stockholmLocationURL = "ftp://ftp.cmbi.ru.nl/pub/molbio/data/hssp3",
 								rcsbLocationURL = "http://www.rcsb.org/pdb/files";
@@ -68,5 +89,94 @@ public class Utils {
 			is.add(i);
 		}
 		return is;
+	}
+
+	
+	private static String getBaseUrlString() {
+
+		WicketApplication vase = (WicketApplication)WicketApplication.get();
+		
+		String url = RequestCycle.get().getUrlRenderer().renderFullUrl(
+				Url.parse( 
+					RequestCycle.get().urlFor(vase.getHomePage(), null ) ) );
+		return url;
+	}
+	
+	private static JobRestResource getRest() {
+		WicketApplication vase = (WicketApplication)WicketApplication.get();
+		
+		return (JobRestResource)vase.getRestReference().getResource();
+	}
+	
+	public static URL getPDBURL(String structureID)
+		throws MalformedURLException {
+
+		if(structureID.matches(StockholmParser.pdbAcPattern)) {
+			
+			return getRcsbURL(structureID);
+		}
+		if(Config.hsspPdbCacheEnabled()) {
+
+			File pdbFile = new File(Config.getHSSPCacheDir(), structureID + ".pdb.gz");
+			if(pdbFile.isFile()) {
+				return new URL( getBaseUrlString() +"/rest/structure/" + structureID );
+			}
+		}
+		return null;
+	}
+	public static InputStream getStockholmInputStream(String structureID)
+		throws MalformedURLException, IOException {
+
+		if(structureID.matches(StockholmParser.pdbAcPattern)) {
+			
+			return new BZip2CompressorInputStream(getStockholmURL(structureID).openStream());
+		}
+		
+		if(Config.hsspPdbCacheEnabled()) {
+			
+			// Some files that might be there or not:
+			File hsspFile = new File(Config.getHSSPCacheDir(), structureID + ".hssp.bz2");
+		
+			if(hsspFile.isFile()) {
+				
+				return new BZip2CompressorInputStream(
+					new FileInputStream(hsspFile) );
+			}
+		}
+		return new ByteArrayInputStream(getRest().hsspResult(structureID).getBytes());
+	}
+	public static InputStream getPdbInputStream(String structureID)
+			throws MalformedURLException, IOException {
+
+			if(structureID.matches(StockholmParser.pdbAcPattern)) {
+				
+				return getRcsbURL(structureID).openStream();
+			}
+			
+			if(Config.hsspPdbCacheEnabled()) {
+				
+				// Some files that might be there or not:
+				File pdbFile = new File(Config.getHSSPCacheDir(), structureID + ".pdb.gz");
+			
+				if(pdbFile.isFile()) {
+					
+					return new GzipCompressorInputStream(
+						new FileInputStream(pdbFile) );
+				}
+			}
+			return new ByteArrayInputStream(getRest().structure(structureID).getBytes());
+		}
+
+	public static String getPdbContents(String structureID) throws IOException {
+		StringBuffer buf = new StringBuffer();
+		BufferedReader reader = new BufferedReader(new InputStreamReader(getPdbInputStream(structureID)));
+		String line;
+		while ((line = reader.readLine()) != null)
+		{
+			buf.append(line + "\n");
+		}
+		reader.close();
+		
+		return buf.toString();
 	}
 }
