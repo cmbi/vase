@@ -174,6 +174,8 @@ public class AlignmentPage extends BasePage {
 							new ErrorPage("No such chain in " + structureID + ": " + chainID));
 					}
 					
+					stockholmInputStream = Utils.getStockholmInputStream(structureID);
+					
 					VASEDataObject data =
 						StockholmParser.parseStockHolm(stockholmInputStream, pdbIn, structureID, chainID);
 					if (data == null)
