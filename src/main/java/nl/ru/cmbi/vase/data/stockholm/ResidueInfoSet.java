@@ -21,6 +21,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,11 +34,12 @@ public class ResidueInfoSet implements Serializable {
 	
 	public void addChain(char chainID) {
 		
+		// IMPORTANT: need a sorted set of keys in this map:
 		if(!residues.containsKey(chainID))
-			residues.put(chainID, new HashMap<Integer,ResidueInfo>());
+			residues.put(chainID, new TreeMap<Integer, ResidueInfo>());
 	}
 	
-	public void addResidue(char chainID,int seqno) {
+	public void addResidue(char chainID, int seqno) {
 
 		if(!residues.containsKey(chainID))
 			addChain(chainID);
@@ -50,14 +52,6 @@ public class ResidueInfoSet implements Serializable {
 		return residues.keySet();
 	}
 	
-	public Map<Integer,ResidueInfo> getChain(char chainID) {
-		
-		if(!residues.containsKey(chainID))
-			addChain(chainID);
-		
-		return residues.get(chainID);
-	}
-	
 	public ResidueInfo getResidue(char chainID, int seqno) {
 
 		if(!residues.containsKey(chainID))
@@ -67,6 +61,16 @@ public class ResidueInfoSet implements Serializable {
 			addResidue(chainID,seqno);
 		
 		return residues.get(chainID).get(seqno);
+	}
+
+	public ResidueInfo getResidueFromOrder(char chainID, int residueInfoIndex) {
+		
+		Integer keys[] = new Integer[]{};
+		keys = residues.get(chainID).keySet().toArray(keys);
+		
+		int key = keys[residueInfoIndex];
+		
+		return residues.get(chainID).get(key);
 	}
 
 	public void addChainReference(char sourceChain, char destChain) {
