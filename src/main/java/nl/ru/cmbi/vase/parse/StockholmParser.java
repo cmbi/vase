@@ -419,17 +419,17 @@ public class StockholmParser {
 	}
 	
 	private static ResidueInfo getResidueInfoFor(
-			Alignment alignment, 
-			Map<Integer, ResidueInfo> residueInfoMap, int columnIndex) {
+			Alignment alignment, char chainID,
+			ResidueInfoSet residueInfoSet, int columnIndex) {
 		
 		String alignedPDBSeq = getAlignedPDBSeq(alignment);
 		
 		char aa = alignedPDBSeq.charAt(columnIndex);
 		if(Character.isLetter(aa)) {
 
-			int seqno = 1 + alignedPDBSeq.substring(0,columnIndex).replace(".", "").length();
+			int residueInfoIndex = alignedPDBSeq.substring(0, columnIndex).replace(".", "").length();
 			
-			return residueInfoMap.get(seqno);
+			return residueInfoSet.getResidueFromOrder(chainID, residueInfoIndex);
 		}
 		else return null; // If it's a gap
 	}
@@ -451,11 +451,11 @@ public class StockholmParser {
 								pdbResInfo.getChain() );
 	}
 	
-	private static String getPDBRepresentation(Alignment alignment, 
-			Map<Integer, ResidueInfo> residueInfoMap, List<PDBResidueInfo> pdbResidues, int columnIndex) {
+	private static String getPDBRepresentation(Alignment alignment, char chainID,
+			ResidueInfoSet residueInfoSet, List<PDBResidueInfo> pdbResidues, int columnIndex) {
 
 		String alignedPDBSeq = getAlignedPDBSeq(alignment);
-		ResidueInfo res = getResidueInfoFor(alignment,residueInfoMap,columnIndex);
+		ResidueInfo res = getResidueInfoFor(alignment, chainID, residueInfoSet, columnIndex);
 		if(res!=null) {
 			
 			String pdbno = res.getPdbNumber();
@@ -511,22 +511,21 @@ public class StockholmParser {
 		columns.add(colWeight);
 		
 		TableData table = new TableData(columns);
-		Map<Integer,ResidueInfo> chainResInfos = residueInfos.getChain(chainID);
 		
 		for(int i=0; i<alignment.countColumns(); i++) {
 			
-			ResidueInfo resInfo = getResidueInfoFor(alignment,chainResInfos,i);
+			ResidueInfo resInfo = getResidueInfoFor(alignment, chainID, residueInfos, i);
 			
 			List<String> values = new ArrayList<String>(columns.size());
 			
-			table.setValue(colResidueNumber.getId(), i, new Integer(i+1));
+			table.setValue(colResidueNumber.getId(), i, new Integer(i + 1));
 			table.setValue(colEntropy.getId(), i, new Double(mutationData.getEntropyScores().get(i)));
 			table.setValue(colVariability.getId(), i, new Integer(mutationData.getVariabilityScores().get(i)));
 						
-			if(resInfo!=null) {
+			if(resInfo != null) {
 				
 				PDBResidueInfo pdbResInfo = pdbResidues.get(chainID).get(resInfo.getPdbNumber());
-				if(pdbResInfo!=null) {
+				if(pdbResInfo != null) {
 					
 					table.setValue(colPDBResidue.getId(), i, getPDBRepresentation(pdbResInfo));
 				}
