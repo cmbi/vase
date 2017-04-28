@@ -254,7 +254,7 @@ public class JobRestResource extends GsonRestResource {
 				return pdbWriter.toString();
 			}
 
-			File xmlFile = new File(Config.getCacheDir(),id+".xml.gz");
+			File xmlFile = new File(Config.getCacheDir(), id + ".xml.gz");
 			if(xmlFile.isFile()) {
 			
 				VASEDataObject data = VASEXMLParser.parse( new GZIPInputStream( new FileInputStream(xmlFile) ) );

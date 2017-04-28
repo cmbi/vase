@@ -94,15 +94,18 @@ public class WicketApplication extends WebApplication
 		
 		if(!Config.isXmlOnly()) {
 		
-			mountPage("/input", InputPage.class);
+			if (Config.hsspPdbCacheEnabled())
+				mountPage("/input", InputPage.class);
+			
 			mountPage("/about", AboutPage.class);
 			mountPage("/search/${structureID}", SearchResultsPage.class);
 		}
 		
-		mountResource("/rest", this.restReference);
+		if (Config.hsspPdbCacheEnabled())
+			mountResource("/rest", this.restReference);
 
-		mountResource("/jobs.js",	new PackageResourceReference(AlignmentPage.class, "jobs.js"		));
-		mountResource("/align.js",	new PackageResourceReference(AlignmentPage.class, "align.js"	));
-		mountResource("/align.css",	new PackageResourceReference(AlignmentPage.class, "align.css"	));
+		mountResource("/jobs.js", new PackageResourceReference(AlignmentPage.class, "jobs.js"		));
+		mountResource("/align.js", new PackageResourceReference(AlignmentPage.class, "align.js"	));
+		mountResource("/align.css", new PackageResourceReference(AlignmentPage.class, "align.css"	));
 	}
 }
