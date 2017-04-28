@@ -22,6 +22,7 @@ import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.WebPage;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
+import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.request.cycle.RequestCycle;
@@ -45,6 +46,10 @@ public class BasePage extends WebPage {
 		}
 		
 		navBar.add(new BookmarkablePageLink("home-link",HomePage.class));
+		
+		Link inputLink = new BookmarkablePageLink("input-link", InputPage.class);
+		inputLink.setVisible(Config.hsspPdbCacheEnabled());
+		navBar.add(inputLink);
 		add(navBar);
 		
 		add(new Label("page-title",new PropertyModel<String>(this,"pageTitle")));
