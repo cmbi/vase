@@ -239,9 +239,7 @@ public class JobRestResource extends GsonRestResource {
 	
 	@MethodMapping(value = "/structure/{id}", httpMethod=HttpMethod.GET, produces = RestMimeTypes.TEXT_PLAIN)
 	public String structure(String id) {
-		
 		try {
-			
 			Matcher mpdb = StockholmParser.pPDBAC.matcher(id);
 			if(mpdb.matches()) {
 				

@@ -44,17 +44,17 @@ public class Utils {
 	static Logger log = LoggerFactory.getLogger(Utils.class);
 	
 	public static final String stockholmLocationURL = "ftp://ftp.cmbi.ru.nl/pub/molbio/data/hssp3",
-								rcsbLocationURL = "https://files.rcsb.org/view";
+							   rcsbLocationURL = "https://files.rcsb.org/view";
 	
 	
-	public static URL getStockholmURL( String pdbid ) throws MalformedURLException {
+	public static URL getStockholmURL(String pdbid) throws MalformedURLException {
 		
-		return new URL(String.format("%s/%s.hssp.bz2",stockholmLocationURL, pdbid.toLowerCase()));
+		return new URL(String.format("%s/%s.hssp.bz2", stockholmLocationURL, pdbid.toLowerCase()));
 	}
 	
-	public static URL getRcsbURL( String pdbid ) throws MalformedURLException {
+	public static URL getRcsbURL(String pdbid) throws MalformedURLException {
 		
-		return new URL(String.format("%s/%s.pdb",rcsbLocationURL, pdbid));
+		return new URL(String.format("%s/%s.pdb", rcsbLocationURL, pdbid));
 	}
 	
 	public static <T extends Number> T max(List<T> numbers) {
@@ -90,17 +90,6 @@ public class Utils {
 		}
 		return is;
 	}
-
-	
-	private static String getBaseUrlString() {
-
-		WicketApplication vase = (WicketApplication)WicketApplication.get();
-		
-		String url = RequestCycle.get().getUrlRenderer().renderFullUrl(
-				Url.parse( 
-					RequestCycle.get().urlFor(vase.getHomePage(), null ) ) );
-		return url;
-	}
 	
 	private static JobRestResource getRest() {
 		WicketApplication vase = (WicketApplication)WicketApplication.get();
@@ -108,14 +97,17 @@ public class Utils {
 		return (JobRestResource)vase.getRestReference().getResource();
 	}
 	
-	public static URL getPDBURL(String structureID)
-		throws MalformedURLException {
+	public static String getPDBPath(String structureID) {
 
 		/*
 		 * The rcsb website doesn't host the pdb files over http, so
 		 * for jsmol to work, VASE must provide the file itself.
 		 */
-		return new URL(getBaseUrlString() +"/rest/structure/" + structureID);
+		WicketApplication vase = (WicketApplication)WicketApplication.get();
+		
+		String path = vase.getServletContext().getContextPath();
+		
+		return path + "/rest/structure/" + structureID;
 	}
 	public static InputStream getStockholmInputStream(String structureID)
 		throws MalformedURLException, IOException {

@@ -237,14 +237,7 @@ public class AlignmentPage extends BasePage {
 		
 		add(tabs);
 		
-		String structurePath = null;
-		try {
-			structurePath = Utils.getPDBURL(data.getPdbID()).toString();
-		} catch (MalformedURLException e) {
-			log.error(e.getMessage(), e);
-		}
-		if (structurePath == null)
-			log.error("structure path is null");
+		String structurePath = Utils.getPDBPath(data.getPdbID());
 		
 		add(new StructurePanel("structure", structurePath, data));
 	}
