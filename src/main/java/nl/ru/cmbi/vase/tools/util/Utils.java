@@ -44,7 +44,7 @@ public class Utils {
 	static Logger log = LoggerFactory.getLogger(Utils.class);
 	
 	public static final String stockholmLocationURL = "ftp://ftp.cmbi.ru.nl/pub/molbio/data/hssp3",
-								rcsbLocationURL = "http://www.rcsb.org/pdb/files";
+								rcsbLocationURL = "https://files.rcsb.org/view";
 	
 	
 	public static URL getStockholmURL( String pdbid ) throws MalformedURLException {
@@ -111,18 +111,11 @@ public class Utils {
 	public static URL getPDBURL(String structureID)
 		throws MalformedURLException {
 
-		if(structureID.matches(StockholmParser.pdbAcPattern)) {
-			
-			return getRcsbURL(structureID);
-		}
-		if(Config.hsspPdbCacheEnabled()) {
-
-			File pdbFile = new File(Config.getHSSPCacheDir(), structureID + ".pdb.gz");
-			if(pdbFile.isFile()) {
-				return new URL( getBaseUrlString() +"/rest/structure/" + structureID );
-			}
-		}
-		return null;
+		/*
+		 * The rcsb website doesn't host the pdb files over http, so
+		 * for jsmol to work, VASE must provide the file itself.
+		 */
+		return new URL(getBaseUrlString() +"/rest/structure/" + structureID);
 	}
 	public static InputStream getStockholmInputStream(String structureID)
 		throws MalformedURLException, IOException {
