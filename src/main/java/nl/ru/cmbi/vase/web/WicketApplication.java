@@ -101,8 +101,7 @@ public class WicketApplication extends WebApplication
 			mountPage("/search/${structureID}", SearchResultsPage.class);
 		}
 		
-		if (Config.hsspPdbCacheEnabled())
-			mountResource("/rest", this.restReference);
+		mountResource("/rest", this.restReference);
 
 		mountResource("/jobs.js", new PackageResourceReference(AlignmentPage.class, "jobs.js"		));
 		mountResource("/align.js", new PackageResourceReference(AlignmentPage.class, "align.js"	));
