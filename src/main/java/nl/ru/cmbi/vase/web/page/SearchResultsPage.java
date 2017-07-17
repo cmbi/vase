@@ -106,7 +106,7 @@ public class SearchResultsPage extends BasePage {
 			
 		try {
 			
-			File hsspFile = new File(Config.getHSSPCacheDir(),structureID+".hssp.bz2");
+			File hsspFile = new File(Config.getHSSPCacheDir(), structureID+".hssp.bz2");
 			if(hsspFile.isFile()) {
 				
 				for(Character chain : StockholmParser.listChainsInStockholm(new BZip2CompressorInputStream( new FileInputStream(hsspFile) ))) {
@@ -116,10 +116,8 @@ public class SearchResultsPage extends BasePage {
 			}
 			
 			if(structureID.matches(StockholmParser.pdbAcPattern)) {
-			
-				URL stockholmURL = Utils.getStockholmURL(structureID);
 				
-				for(Character chain : StockholmParser.listChainsInStockholm(new BZip2CompressorInputStream( stockholmURL.openStream()))) {
+				for(Character chain : StockholmParser.listChainsInStockholm(Utils.getStockholmInputStream(structureID))) {
 					
 					results.add( new SearchResult(structureID,chain) );
 				}

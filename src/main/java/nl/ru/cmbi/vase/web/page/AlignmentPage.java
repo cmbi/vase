@@ -91,6 +91,8 @@ public class AlignmentPage extends BasePage {
 
 	public AlignmentPage(final PageParameters parameters) {
 		
+		log.info("start AlignmentPage with parameters " + parameters.toString());
+		
 		StringValue	structureIDString	= parameters.get(0),
 					chainIDString		= parameters.get(1);
 		
