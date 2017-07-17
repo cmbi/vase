@@ -114,7 +114,16 @@ public class Utils {
 
 		if(structureID.matches(StockholmParser.pdbAcPattern)) {
 			
-			return new BZip2CompressorInputStream(getStockholmURL(structureID).openStream());
+			if (Config.hasHsspMount())
+			{
+				File file = new File(Config.getHsspMountDir(), structureID + ".hssp.bz2");
+				
+				return new BZip2CompressorInputStream(new FileInputStream(file));
+			}
+			else
+			{				
+				return new BZip2CompressorInputStream(getStockholmURL(structureID).openStream());
+			}
 		}
 		
 		if(Config.hsspPdbCacheEnabled()) {
@@ -133,7 +142,9 @@ public class Utils {
 	public static InputStream getPdbInputStream(String structureID)
 			throws MalformedURLException, IOException {
 
-			if(structureID.matches(StockholmParser.pdbAcPattern)) {
+			if(structureID.matches(StockholmParser.pdbAcPattern))
+			{
+				log.info("returning inputstream from " + getRcsbURL(structureID).toString());
 				
 				return getRcsbURL(structureID).openStream();
 			}

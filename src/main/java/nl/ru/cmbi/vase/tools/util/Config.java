@@ -19,7 +19,12 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Properties;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class Config {
+	
+	static Logger log = LoggerFactory.getLogger(Config.class);
 	
 	public final static Properties properties = getProperties();
 	
@@ -54,6 +59,19 @@ public class Config {
 		return Boolean.parseBoolean( properties.getProperty("xmlonly") );
 	}
 	
+	public static boolean hasHsspMount() {
+				
+		return properties.getProperty("hsspmount") != null && getHsspMountDir().isDirectory();
+	}
+	
+	public static File getHsspMountDir() {
+		String path = properties.getProperty("hsspmount");
+		if(path == null)
+			return null;
+		
+		return new File(path);
+	}
+	
 	public static boolean hsspPdbCacheEnabled() {
 		
 		return properties.getProperty("hsspcache")!=null && getHSSPCacheDir().isDirectory();
@@ -62,7 +80,8 @@ public class Config {
 	public static File getHSSPCacheDir() {
 
 		String path=properties.getProperty("hsspcache");
-		if(path==null) return null;
+		if(path==null)
+			return null;
 		
 		return new File(path);
 	}
