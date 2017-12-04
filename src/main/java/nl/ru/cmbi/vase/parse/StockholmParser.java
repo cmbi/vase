@@ -75,14 +75,14 @@ public class StockholmParser {
 			"\\s+([A-Za-z])" + // AA
 			"\\s+([A-Za-z0-9\\s\\-\\+\\>\\<]{9})" + // STRUCTURE
 			"\\s*([0-9]+)\\s*([0-9]+[A-Z]?)\\s+([0-9]+)\\s+" + // BP1 BP2  ACC
-		"([0-9]+)\\s+([0-9]+)\\s*$", // NOCC VAR
+		"([0-9]+)\\s+([0-9]+).*$", // NOCC VAR
 	
 		profileLinePattern = "^#=GF\\s+PR" +
 			"\\s+([0-9]+)" + // SeqNo
 			"\\s+(\\-?[0-9]+[\\sA-Z])([A-Za-z0-9])" + // PDBNo CHAIN
 			"\\s+((?:[0-9]+\\s+){20})" + // per amino acid score
 			"([0-9]+)\\s+([0-9]+)\\s+([0-9]+)\\s+" + // NOCC NDEL NINS 
-			"([0-9]+\\.[0-9]+)\\s+([0-9]+)\\s+([0-9]+\\.[0-9]+)\\s*$", // ENTROPY RELENT WEIGHT
+			"([0-9]+\\.[0-9]+)\\s+([0-9]+)\\s+([0-9]+\\.[0-9]+).*$", // ENTROPY RELENT WEIGHT
 	
 		seqLinePattern = "^([\\w\\-\\/]*)\\s+([A-Z\\.]+)$",
 		
