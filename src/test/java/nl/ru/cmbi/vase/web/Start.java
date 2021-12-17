@@ -18,10 +18,8 @@ package nl.ru.cmbi.vase.web;
 import java.awt.Desktop;
 import java.net.URI;
 
-import org.mortbay.jetty.Connector;
-import org.mortbay.jetty.Server;
-import org.mortbay.jetty.bio.SocketConnector;
-import org.mortbay.jetty.webapp.WebAppContext;
+import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.webapp.WebAppContext;
 
 /**
  * Separate startup class for people that want to run the examples directly. Use parameter
@@ -34,14 +32,8 @@ public class Start
 		// XXX DBMock.main(new String[0]);
 
 		// Setup server to host web app
-		Server server = new Server();
-		SocketConnector connector = new SocketConnector();
-
-		// Set some timeout options to make debugging easier.
-		connector.setMaxIdleTime(1000 * 60 * 60);
-		connector.setSoLingerTime(-1);
-		connector.setPort(8081);
-		server.setConnectors(new Connector[] { connector });
+		int port = 8081;
+		Server server = new Server(port);
 
 		WebAppContext bb = new WebAppContext();
 		bb.setServer(server);
@@ -53,7 +45,7 @@ public class Start
 		server.start();
 
 		// Launch browser
-		Desktop.getDesktop().browse(new URI("http://localhost:" + connector.getPort() + bb.getContextPath()));
+		Desktop.getDesktop().browse(new URI("http://localhost:" + port + bb.getContextPath()));
 
 		System.in.read();
 		System.out.println(">>> STOPPING EMBEDDED JETTY SERVER");
